@@ -1,10 +1,7 @@
 import Joi from "joi";
 
 export const createEventSchema = Joi.object({
-  campaignId: Joi.string().hex().length(24).required().messages({
-    "string.hex": "Invalid Campaign ID format",
-    "string.length": "Invalid Campaign ID length",
-  }),
+  // campaignId is removed from here because we safely grab it from the URL in the controller!
   title: Joi.string().min(5).max(100).required(),
   eventType: Joi.string().valid("Workshop", "Seminar", "Debate", "Awareness Drive").required(),
   eventDate: Joi.date().iso().greater("now").required().messages({
@@ -20,6 +17,6 @@ export const createEventSchema = Joi.object({
 
 // Update schema makes fields optional
 export const updateEventSchema = createEventSchema.fork(
-  ["campaignId", "title", "eventType", "eventDate", "location", "capacity", "speaker"],
+  ["title", "eventType", "eventDate", "location", "capacity", "speaker"],
   (schema) => schema.optional()
 );
