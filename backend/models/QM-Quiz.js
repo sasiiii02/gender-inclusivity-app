@@ -35,7 +35,7 @@ const quizSchema = new mongoose.Schema(
       maxlength: [10, "Passcode cannot exceed 10 characters"],
     },
     duration: {
-      type: Number, // in minutes
+      type: Number,
       required: [true, "Quiz duration is required"],
       min: [1, "Duration must be at least 1 minute"],
       max: [180, "Duration cannot exceed 180 minutes"],
@@ -122,20 +122,10 @@ const quizSchema = new mongoose.Schema(
   },
 );
 
-// Index for efficient queries
-quizSchema.index({ teacherId: 1, status: 1 });
+// Index definitions
 quizSchema.index({ quizLink: 1 }, { unique: true, sparse: true });
+quizSchema.index({ teacherId: 1, status: 1 });
 quizSchema.index({ passcode: 1 });
-
-// Pre-save middleware to generate quiz link
-quizSchema.pre("save", async function (next) {
-  if (!this.quizLink) {
-    // Generate unique quiz link using timestamp and random string
-    const randomStr = Math.random().toString(36).substring(2, 8);
-    this.quizLink = `quiz-${this._id}-${randomStr}`;
-  }
-  next();
-});
 
 const QMQuiz = mongoose.model("QMQuiz", quizSchema);
 export default QMQuiz;

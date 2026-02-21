@@ -4,30 +4,43 @@ import QMQuizSession from "../models/QM-QuizSession.js";
 import QRCode from "qrcode";
 
 // Create a new quiz
+// In QM-quizService.js - Modified createQuiz function
 export const createQuiz = async (quizData, teacherId) => {
   try {
+    console.log("Creating quiz with data:", { ...quizData, teacherId });
+
+    // Generate quiz link HERE instead of in middleware
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const quizLink = `quiz-${timestamp}-${randomStr}`;
+
     const quiz = new QMQuiz({
       ...quizData,
       teacherId,
+      quizLink, // Set it directly
     });
 
+    console.log("Quiz instance created with link:", quizLink);
     await quiz.save();
+    console.log("Quiz saved successfully, quizLink:", quiz.quizLink);
 
     // Generate QR code
     const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
     const quizUrl = `${baseUrl}/quiz/join/${quiz.quizLink}`;
+    console.log("Quiz URL for QR:", quizUrl);
 
     try {
       const qrCodeData = await QRCode.toDataURL(quizUrl);
       quiz.qrCode = qrCodeData;
       await quiz.save();
+      console.log("QR code generated and saved");
     } catch (qrError) {
       console.error("QR Code generation failed:", qrError);
-      // Continue even if QR generation fails
     }
 
     return quiz;
   } catch (error) {
+    console.error("Error in createQuiz service:", error);
     throw new Error(`Error creating quiz: ${error.message}`);
   }
 };

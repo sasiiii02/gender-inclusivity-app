@@ -1,26 +1,29 @@
-import QRCode from "qrcode";
-
-export const generateQuizQRCode = async (quizLink) => {
+// Create a new quiz
+export const createQuiz = async (quizData, teacherId) => {
   try {
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const quizUrl = `${baseUrl}/quiz/join/${quizLink}`;
-
-    const qrCodeDataUrl = await QRCode.toDataURL(quizUrl, {
-      width: 300,
-      margin: 2,
-      color: {
-        dark: "#000000",
-        light: "#ffffff",
-      },
+    const quiz = new QMQuiz({
+      ...quizData,
+      teacherId,
     });
 
-    return qrCodeDataUrl;
-  } catch (error) {
-    throw new Error(`QR Code generation failed: ${error.message}`);
-  }
-};
+    // Save first to generate _id and quizLink
+    await quiz.save();
 
-export const generateQuizLink = (quizId) => {
-  const randomStr = Math.random().toString(36).substring(2, 10);
-  return `quiz-${quizId}-${randomStr}`;
+    // Generate QR code after quiz is saved
+    const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const quizUrl = `${baseUrl}/quiz/join/${quiz.quizLink}`;
+
+    try {
+      const qrCodeData = await QRCode.toDataURL(quizUrl);
+      quiz.qrCode = qrCodeData;
+      await quiz.save(); // Second save is fine here
+    } catch (qrError) {
+      console.error("QR Code generation failed:", qrError);
+      // Continue even if QR generation fails
+    }
+
+    return quiz;
+  } catch (error) {
+    throw new Error(`Error creating quiz qr generator: ${error.message}`);
+  }
 };
