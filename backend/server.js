@@ -11,15 +11,18 @@ import eCampaignRoutes from "./routes/eCampaignRoutes.js";
 import eEventRoutes from "./routes/eEventRoutes.js";
 import eRegistrationRoutes from "./routes/eRegistrationRoutes.js";
 
+// Quiz routes
+import QMQuizRoutes from "./routes/QM-quizRoutes.js";
+import QMStudentQuizRoutes from "./routes/QM-studentQuizRoutes.js";
+
 dotenv.config();
 connectDb();
 
-const app= express();
+const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -28,6 +31,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/campaigns", eCampaignRoutes);
 app.use("/api/events", eEventRoutes);
 app.use("/api/registrations", eRegistrationRoutes);
+
+// Quiz routes
+app.use("/api/quizzes", QMQuizRoutes);
+app.use("/api/student/quiz", QMStudentQuizRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
@@ -39,7 +46,6 @@ app.get("/api/protected", protect, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
-    console.log(`Server running on port ${PORT}`);
-    
-})
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
