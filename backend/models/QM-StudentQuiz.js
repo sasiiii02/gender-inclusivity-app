@@ -111,14 +111,7 @@ studentQuizSchema.index(
   { unique: true },
 );
 
-// Pre-save middleware to calculate percentage
-studentQuizSchema.pre("save", function (next) {
-  if (this.totalMarksPossible > 0) {
-    this.percentage = (this.totalMarksObtained / this.totalMarksPossible) * 100;
-    this.percentage = Math.round(this.percentage * 100) / 100; // Round to 2 decimals
-  }
-  next();
-});
+// REMOVED: Pre-save middleware - logic moved to service
 
 const QMStudentQuiz = mongoose.model("QMStudentQuiz", studentQuizSchema);
 export default QMStudentQuiz;

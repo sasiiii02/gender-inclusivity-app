@@ -94,6 +94,9 @@ export const bulkQuestionsSchema = Joi.object({
 
 // Join quiz validation
 export const joinQuizSchema = Joi.object({
+  quizLink: Joi.string().required().messages({
+    "string.empty": "Quiz link is required",
+  }),
   passcode: Joi.string().required().messages({
     "string.empty": "Passcode is required",
   }),

@@ -3,6 +3,77 @@ import QMQuestion from "../models/QM-Question.js";
 import QMStudentQuiz from "../models/QM-StudentQuiz.js";
 import QMQuizSession from "../models/QM-QuizSession.js";
 
+// Helper function to calculate percentage
+const calculatePercentage = (obtained, possible) => {
+  if (possible <= 0) return 0;
+  const percentage = (obtained / possible) * 100;
+  return Math.round(percentage * 100) / 100; // Round to 2 decimals
+};
+
+// Helper function to recalculate student quiz totals
+const recalculateQuizTotals = (studentQuiz) => {
+  // Recalculate total marks obtained
+  studentQuiz.totalMarksObtained = studentQuiz.answers.reduce(
+    (sum, a) => sum + (a.marksObtained || 0),
+    0,
+  );
+
+  // Recalculate percentage
+  if (studentQuiz.totalMarksPossible > 0) {
+    studentQuiz.percentage = calculatePercentage(
+      studentQuiz.totalMarksObtained,
+      studentQuiz.totalMarksPossible,
+    );
+  }
+
+  return studentQuiz;
+};
+
+// Helper function to validate answer for question type
+const validateAnswerForQuestion = (
+  question,
+  selectedOption,
+  selectedOptions,
+) => {
+  if (
+    question.questionType === "mcq" ||
+    question.questionType === "true-false"
+  ) {
+    if (!selectedOption) {
+      throw new Error("Selected option is required for this question type");
+    }
+
+    // Verify that the selected option exists in the question options
+    const optionExists = question.options.some(
+      (opt) => opt.text === selectedOption,
+    );
+    if (!optionExists) {
+      throw new Error("Selected option is not valid for this question");
+    }
+  } else if (question.questionType === "multiple-answer") {
+    if (!selectedOptions || selectedOptions.length === 0) {
+      throw new Error("At least one selected option is required");
+    }
+
+    // Verify all selected options exist in question options
+    const allOptionsExist = selectedOptions.every((opt) =>
+      question.options.some((qOpt) => qOpt.text === opt),
+    );
+    if (!allOptionsExist) {
+      throw new Error("One or more selected options are not valid");
+    }
+  }
+};
+
+// Helper function to check quiz time expiry
+const checkQuizTimeExpiry = (studentQuiz) => {
+  if (studentQuiz.timeRemaining <= 0) {
+    studentQuiz.status = "timed-out";
+    return true;
+  }
+  return false;
+};
+
 // Join quiz (student)
 export const joinQuiz = async (
   quizLink,
@@ -65,6 +136,7 @@ export const joinQuiz = async (
       quizId: quiz._id,
       studentId,
       attemptNumber,
+      totalMarksPossible: quiz.totalMarks,
       timeRemaining: quiz.duration * 60, // Convert to seconds
       ipAddress,
       deviceInfo,
@@ -96,6 +168,12 @@ export const getStudentQuizQuestions = async (studentQuizId, studentId) => {
 
     if (!studentQuiz) {
       throw new Error("Quiz not found or not in progress");
+    }
+
+    // Check if quiz time expired
+    if (checkQuizTimeExpiry(studentQuiz)) {
+      await studentQuiz.save();
+      throw new Error("Quiz time expired");
     }
 
     const quiz = await QMQuiz.findById(studentQuiz.quizId);
@@ -156,8 +234,7 @@ export const submitAnswer = async (studentQuizId, studentId, answerData) => {
     }
 
     // Check if time expired
-    if (studentQuiz.timeRemaining <= 0) {
-      studentQuiz.status = "timed-out";
+    if (checkQuizTimeExpiry(studentQuiz)) {
       await studentQuiz.save();
       throw new Error("Quiz time expired");
     }
@@ -175,6 +252,9 @@ export const submitAnswer = async (studentQuizId, studentId, answerData) => {
     if (!question) {
       throw new Error("Question not found");
     }
+
+    // Validate answer based on question type
+    validateAnswerForQuestion(question, selectedOption, selectedOptions);
 
     // Check if already answered
     const existingAnswerIndex = studentQuiz.answers.findIndex(
@@ -203,7 +283,7 @@ export const submitAnswer = async (studentQuizId, studentId, answerData) => {
       const allCorrectSelected = correctOptions.every((opt) =>
         selectedSet.has(opt),
       );
-      const noWrongSelected = selectedOptions.every((opt) =>
+      const noWrongSelected = (selectedOptions || []).every((opt) =>
         correctSet.has(opt),
       );
 
@@ -232,12 +312,9 @@ export const submitAnswer = async (studentQuizId, studentId, answerData) => {
     // Update last active
     studentQuiz.lastActiveAt = new Date();
 
-    // Recalculate total marks
-    studentQuiz.totalMarksObtained = studentQuiz.answers.reduce(
-      (sum, a) => sum + (a.marksObtained || 0),
-      0,
-    );
+    // Recalculate totals using helper function
     studentQuiz.totalMarksPossible = studentQuiz.quizId.totalMarks;
+    recalculateQuizTotals(studentQuiz);
 
     await studentQuiz.save();
 
@@ -264,6 +341,9 @@ export const completeQuiz = async (studentQuizId, studentId) => {
     if (!studentQuiz) {
       throw new Error("Quiz not found or already completed");
     }
+
+    // Final recalculation before completing
+    recalculateQuizTotals(studentQuiz);
 
     // Get quiz pass marks
     const passMarks = studentQuiz.quizId.passMarks;
@@ -318,6 +398,25 @@ export const getStudentQuizHistory = async (studentId) => {
     return { history, stats };
   } catch (error) {
     throw new Error(`Error fetching history: ${error.message}`);
+  }
+};
+
+// Get student quiz result by ID
+export const getStudentQuizResult = async (studentQuizId, studentId) => {
+  try {
+    const result = await QMStudentQuiz.findOne({
+      _id: studentQuizId,
+      studentId,
+      status: "completed",
+    }).populate("quizId", "title subject grade passMarks totalMarks");
+
+    if (!result) {
+      throw new Error("Result not found");
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(`Error fetching result: ${error.message}`);
   }
 };
 
