@@ -32,3 +32,21 @@ export const createReportService = async(req)=>{
     return report;
 
 }
+
+
+export const getAllReportsService = async()=>{
+    const reports = await Report.find()
+    .populate("categoryId","name")
+    .populate("statusId","name")
+    .populate("reportedBy", "name email")
+    .sort({ createdAt: -1 });
+    return reports;
+}
+
+export const getMyReportsService = async(userId)=>{
+    const reports = await Report.find({reportedBy:userId})
+    .populate("categoryId","name")
+    .populate("statusId","name")
+    .sort({ createdAt: -1 });
+    return reports;
+}

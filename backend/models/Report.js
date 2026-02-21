@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
-
+import User from './User.js';
+import ReportCategory from './ReportCategory.js';
+import CaseStatus from './CaseStatus.js';
 
 const reportSchema = new mongoose.Schema(
     {

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const reportCategorySchema = new mongoose.Schema(
+const caseStatusSchema = new mongoose.Schema(
     {
         name:{
             type:String,
@@ -9,5 +9,5 @@ const reportCategorySchema = new mongoose.Schema(
     }
 )
 
-const CaseStatus = mongoose.model("CaseStatus",reportCategorySchema);
+const CaseStatus = mongoose.model("CaseStatus", caseStatusSchema);
 export default CaseStatus;
