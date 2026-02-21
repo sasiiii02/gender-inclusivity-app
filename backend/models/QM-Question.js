@@ -31,7 +31,7 @@ const questionSchema = new mongoose.Schema(
       },
     ],
     correctAnswer: {
-      type: String, // For backward compatibility
+      type: String, // For backward compatibility - will be set by service
     },
     marks: {
       type: Number,
@@ -79,17 +79,7 @@ const questionSchema = new mongoose.Schema(
 // Index for efficient queries
 questionSchema.index({ quizId: 1, orderIndex: 1 });
 
-// Pre-save middleware to maintain backward compatibility
-questionSchema.pre("save", function (next) {
-  // Set correctAnswer from options for backward compatibility
-  if (this.options && this.options.length > 0) {
-    const correctOption = this.options.find((opt) => opt.isCorrect);
-    if (correctOption) {
-      this.correctAnswer = correctOption.text;
-    }
-  }
-  next();
-});
+// REMOVED: Pre-save middleware - logic moved to service
 
 const QMQuestion = mongoose.model("QMQuestion", questionSchema);
 export default QMQuestion;
