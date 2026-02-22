@@ -50,3 +50,18 @@ export const getMyReportsService = async(userId)=>{
     .sort({ createdAt: -1 });
     return reports;
 }
+
+// Update Report Status
+export const updateReportStatusService = async (reportId, statusId) => {
+const report = await Report.findById(reportId);
+
+    if (!report) {
+    throw new Error("Report not found");
+    }
+
+    report.statusId = statusId;
+
+    await report.save();
+
+    return await report.populate("statusId", "name");
+};

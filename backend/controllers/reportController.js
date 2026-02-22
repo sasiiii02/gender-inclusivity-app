@@ -1,4 +1,4 @@
-import { createReportService, getAllReportsService, getMyReportsService, } from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService} from "../services/reportService.js";
 
 
 export const createReport = async (req,res) =>{
@@ -54,3 +54,27 @@ export const getMyReports = async(req,res) =>{
         })
     }
 }
+
+
+
+export const updateReportStatus = async (req, res) => {
+    try {
+    const { statusId } = req.body;
+
+    const updatedReport = await updateReportStatusService(
+        req.params.id,
+        statusId
+    );
+
+    res.status(200).json({
+        success:true,
+        message: "Report status updated successfully",
+        report: updatedReport,
+    });
+    } catch (error) {
+    res.status(500).json({
+        success:false,
+        message: error.message,
+    });
+  }
+};
