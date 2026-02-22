@@ -1,4 +1,4 @@
-import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService} from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService} from "../services/reportService.js";
 
 
 export const createReport = async (req,res) =>{
@@ -63,6 +63,7 @@ export const updateReportStatus = async (req, res) => {
 
     const updatedReport = await updateReportStatusService(
         req.params.id,
+        req.user._id,
         statusId
     );
 
@@ -126,6 +127,43 @@ export const getMyReportResponses = async (req, res) => {
     res.status(200).json({
       count: responses.length,
       responses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getReportTimeline = async (req, res) => {
+  try {
+    const timeline = await getReportTimelineService(
+      req.params.id,
+      req.user._id,
+      req.user.role === "admin"
+    );
+
+    res.status(200).json({
+      count: timeline.length,
+      timeline,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const closeReport = async (req, res) => {
+  try {
+    const report = await closeReportService(
+      req.params.id,
+      req.user._id
+    );
+
+    res.status(200).json({
+      message: "Report closed successfully",
+      report,
     });
   } catch (error) {
     res.status(500).json({

@@ -43,6 +43,17 @@ const reportSchema = new mongoose.Schema(
             ref:"CaseStatus",
             required:true
         },
+        isClosed: {
+            type: Boolean,
+            default: false,
+        },
+            closedAt: {
+            type: Date,
+        },
+        closedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     },
     {
         timestamps:true,

@@ -54,16 +54,25 @@ export const getMyReportsService = async(userId)=>{
 }
 
 // Update Report Status
-export const updateReportStatusService = async (reportId, statusId) => {
+export const updateReportStatusService = async (reportId, adminId,statusId) => {
 const report = await Report.findById(reportId);
 
     if (!report) {
     throw new Error("Report not found");
     }
+    if (report.isClosed) {
+    throw new Error("Cannot modify a closed report");
+}
 
     report.statusId = statusId;
 
     await report.save();
+    await ReportStatusHistory.create({
+    reportId,
+    statusId,
+    updatedBy: adminId,
+  });
+
 
     return await report.populate("statusId", "name");
 };
@@ -78,6 +87,9 @@ export const addReportResponseService = async (
   if (!report) {
     throw new Error("Report not found");
   }
+  if (report.isClosed) {
+  throw new Error("Cannot modify a closed report");
+}
 
   const response = await ReportResponse.create({
     reportId,
@@ -118,4 +130,78 @@ export const getResponsesByReportService = async (reportId, userId) => {
     return await ReportResponse.find({ reportId })
     .populate("respondedBy", "name email")
     .sort({ createdAt: 1 });
+};
+
+
+export const getReportTimelineService = async (reportId, userId, isAdmin) => {
+  const report = await Report.findById(reportId).populate(
+    "reportedBy",
+    "name"
+  );
+
+  if (!report) {
+    throw new Error("Report not found");
+  }
+
+  // 🔐 If not admin, verify ownership
+  if (!isAdmin && report.reportedBy._id.toString() !== userId.toString()) {
+    throw new Error("Not authorized to view this report timeline");
+  }
+
+  // 1️⃣ Report creation event
+  const creationEvent = {
+    type: "report_created",
+    message: "Report submitted",
+    user: report.reportedBy.name,
+    date: report.createdAt,
+  };
+
+  // 2️⃣ Status history
+  const statusHistory = await ReportStatusHistory.find({ reportId })
+    .populate("statusId", "name")
+    .populate("updatedBy", "name")
+    .sort({ createdAt: 1 });
+
+  const statusEvents = statusHistory.map((item) => ({
+    type: "status_update",
+    status: item.statusId.name,
+    updatedBy: item.updatedBy.name,
+    date: item.createdAt,
+  }));
+
+  // 3️⃣ Responses
+  const responses = await ReportResponse.find({ reportId })
+    .populate("respondedBy", "name")
+    .sort({ createdAt: 1 });
+
+  const responseEvents = responses.map((item) => ({
+    type: "response",
+    message: item.message,
+    respondedBy: item.respondedBy.name,
+    date: item.createdAt,
+  }));
+
+  // 🔥 Merge all events
+  const timeline = [creationEvent, ...statusEvents, ...responseEvents];
+
+  // Sort by date
+  timeline.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  return timeline;
+};
+
+export const closeReportService = async (reportId, adminId) => {
+  const report = await Report.findById(reportId);
+
+  if (!report) {
+    throw new Error("Report not found");
+  }
+
+  report.isClosed = true;
+  report.closedAt = new Date();
+  report.closedBy = adminId;
+
+  await report.save();
+
+  return report;
 };

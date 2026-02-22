@@ -1,6 +1,6 @@
 import express from "express";
 import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
-  getMyReportResponses } from "../controllers/reportController.js";
+  getMyReportResponses,getReportTimeline,closeReport } from "../controllers/reportController.js";
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -12,5 +12,7 @@ router.patch("/:id/status", protect, updateReportStatus);
 router.post("/:id/respond", protect, addReportResponse);
 router.get("/responses", protect, getAllResponses);
 router.get("/:id/responses", protect, getMyReportResponses);
+router.get("/:id/timeline", protect, getReportTimeline);
+router.patch("/:id/close", protect, closeReport);
 export default router
 
