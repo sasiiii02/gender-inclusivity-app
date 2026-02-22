@@ -1,5 +1,7 @@
 import Report from "../models/Report.js";
 import CaseStatus from "../models/CaseStatus.js";
+import ReportResponse from "../models/ReportResponse.js";
+import ReportStatusHistory from "../models/ReportStatusHistory.js";
 
 export const createReportService = async(req)=>{
     const {
@@ -64,4 +66,56 @@ const report = await Report.findById(reportId);
     await report.save();
 
     return await report.populate("statusId", "name");
+};
+
+export const addReportResponseService = async (
+    reportId,
+    adminId,
+    message
+) => {
+  const report = await Report.findById(reportId);
+
+  if (!report) {
+    throw new Error("Report not found");
+  }
+
+  const response = await ReportResponse.create({
+    reportId,
+    respondedBy: adminId,
+    message,
+  });
+
+  // Optionally update status automatically
+  report.statusId = report.statusId; // or set to resolved status id
+  await report.save();
+
+  return response;
+};
+
+//view all report responses
+
+export const getAllReportResponsesService = async()=>{
+    const response = await ReportResponse.find()
+    .populate("reportId", "title description")
+    .populate("respondedBy", "name email");
+    return response;
+}
+
+
+// Student - view responses for one of their reports
+export const getResponsesByReportService = async (reportId, userId) => {
+    const report = await Report.findById(reportId);
+
+    if (!report) {
+    throw new Error("Report not found");
+    }
+
+  // Security check
+    if (report.reportedBy.toString() !== userId.toString()) {
+    throw new Error("Not authorized to view these responses");
+    }
+
+    return await ReportResponse.find({ reportId })
+    .populate("respondedBy", "name email")
+    .sort({ createdAt: 1 });
 };

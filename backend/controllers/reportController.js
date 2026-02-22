@@ -1,4 +1,4 @@
-import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService} from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService} from "../services/reportService.js";
 
 
 export const createReport = async (req,res) =>{
@@ -75,6 +75,61 @@ export const updateReportStatus = async (req, res) => {
     res.status(500).json({
         success:false,
         message: error.message,
+    });
+  }
+};
+
+export const addReportResponse = async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    const response = await addReportResponseService(
+      req.params.id,
+      req.user._id,
+      message
+    );
+
+    res.status(201).json({
+      message: "Response added successfully",
+      response,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Admin - view all responses
+export const getAllResponses = async (req, res) => {
+  try {
+    const responses = await getAllReportResponsesService();
+
+    res.status(200).json({
+      count: responses.length,
+      responses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getMyReportResponses = async (req, res) => {
+  try {
+    const responses = await getResponsesByReportService(
+      req.params.id,
+      req.user._id
+    );
+
+    res.status(200).json({
+      count: responses.length,
+      responses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
