@@ -11,6 +11,11 @@ import eCampaignRoutes from "./routes/eCampaignRoutes.js";
 import eEventRoutes from "./routes/eEventRoutes.js";
 import eRegistrationRoutes from "./routes/eRegistrationRoutes.js";
 
+// Course, Lesson, and Enrollment routes
+import courseRoutes from "./routes/courseRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+
 dotenv.config();
 connectDb();
 
@@ -28,6 +33,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/campaigns", eCampaignRoutes);
 app.use("/api/events", eEventRoutes);
 app.use("/api/registrations", eRegistrationRoutes);
+
+// Course, Lesson, and Enrollment routes
+app.use("/api/courses", courseRoutes);
+app.use("/api/lessons", lessonRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
