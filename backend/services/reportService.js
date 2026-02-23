@@ -205,3 +205,63 @@ export const closeReportService = async (reportId, adminId) => {
 
   return report;
 };
+
+
+export const getReportStatsService = async () => {
+  const totalReports = await Report.countDocuments();
+
+  const closedReports = await Report.countDocuments({ isClosed: true });
+
+  const openReports = await Report.countDocuments({ isClosed: false });
+
+  const highPriorityReports = await Report.countDocuments({
+    priority: "High",
+  });
+
+  // Group by status
+  const reportsByStatus = await Report.aggregate([
+    {
+      $lookup: {
+        from: "casestatuses", // make sure this matches your collection name
+        localField: "statusId",
+        foreignField: "_id",
+        as: "status",
+      },
+    },
+    { $unwind: "$status" },
+    {
+      $group: {
+        _id: "$status.name",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  // Group by category
+  const reportsByCategory = await Report.aggregate([
+    {
+      $lookup: {
+        from: "reportcategories", // make sure correct collection name
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    { $unwind: "$category" },
+    {
+      $group: {
+        _id: "$category.name",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  return {
+    totalReports,
+    openReports,
+    closedReports,
+    highPriorityReports,
+    reportsByStatus,
+    reportsByCategory,
+  };
+};

@@ -1,4 +1,4 @@
-import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService} from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService} from "../services/reportService.js";
 
 
 export const createReport = async (req,res) =>{
@@ -165,6 +165,19 @@ export const closeReport = async (req, res) => {
       message: "Report closed successfully",
       report,
     });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+export const getReportStats = async (req, res) => {
+  try {
+    const stats = await getReportStatsService();
+
+    res.status(200).json(stats);
   } catch (error) {
     res.status(500).json({
       message: error.message,
