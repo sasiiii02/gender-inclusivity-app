@@ -50,6 +50,13 @@ router.put(
   courseController.updateCourse
 );
 
+router.patch(
+  "/:id",
+  protect,
+  authorize("teacher", "admin"),
+  courseController.updateCourse
+);
+
 router.delete(
   "/:id",
   protect,
