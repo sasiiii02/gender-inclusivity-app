@@ -33,4 +33,11 @@ router.put(
   enrollmentController.markCourseComplete
 );
 
+router.patch(
+  "/:id/complete",
+  protect,
+  authorize("student"),
+  enrollmentController.markCourseComplete
+);
+
 export default router;
