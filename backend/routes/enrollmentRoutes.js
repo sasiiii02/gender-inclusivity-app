@@ -12,6 +12,13 @@ router.get(
   enrollmentController.getMyEnrollments
 );
 
+router.patch(
+  "/:id",
+  protect,
+  authorize("student"),
+  enrollmentController.updateEnrollment
+);
+
 router.put(
   "/:id/progress",
   protect,

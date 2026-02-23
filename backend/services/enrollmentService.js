@@ -75,3 +75,17 @@ export const markCourseComplete = async (enrollmentId) => {
     { new: true, runValidators: true }
   );
 };
+
+// 5. Partial update (for PATCH) - progress and/or completion
+export const updateEnrollment = async (enrollmentId, updates) => {
+  const { progressPercentage, completed } = updates;
+
+  if (completed === true) {
+    return await markCourseComplete(enrollmentId);
+  }
+  if (progressPercentage !== undefined && progressPercentage !== null) {
+    return await updateProgress(enrollmentId, progressPercentage);
+  }
+
+  return await Enrollment.findById(enrollmentId);
+};

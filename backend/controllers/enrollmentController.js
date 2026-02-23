@@ -137,6 +137,64 @@ export const updateProgress = async (req, res) => {
   }
 };
 
+// @desc    Partially update an enrollment (progress and/or completion)
+// @route   PATCH /api/enrollments/:id
+// @access  Private (Student)
+export const updateEnrollment = async (req, res) => {
+  try {
+    const { progressPercentage, completed } = req.body;
+
+    if (progressPercentage === undefined && completed === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide at least one of: progressPercentage, completed",
+      });
+    }
+
+    const updatedEnrollment = await enrollmentService.updateEnrollment(
+      req.params.id,
+      { progressPercentage, completed }
+    );
+
+    if (!updatedEnrollment) {
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
+      });
+    }
+
+    if (updatedEnrollment.studentId.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own enrollments",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updatedEnrollment,
+      message: "Enrollment updated successfully",
+    });
+  } catch (error) {
+    if (error.message === "Progress percentage must be between 0 and 100") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid enrollment ID format",
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Mark a course as complete
 // @route   PUT /api/enrollments/:id/complete
 // @access  Private (Student)
