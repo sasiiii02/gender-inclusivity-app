@@ -12,6 +12,8 @@ import eEventRoutes from "./routes/eEventRoutes.js";
 import eRegistrationRoutes from "./routes/eRegistrationRoutes.js";
 
 import reportRoutes from "./routes/reportRoutes.js"; // Import the report routes
+import chatRoutes from "./routes/chatRoute.js"; // Import the chat routes
+import supportArticleRoutes from "./routes/supportArticleRoutes.js";
 
 dotenv.config();
 connectDb();
@@ -33,6 +35,9 @@ app.use("/api/registrations", eRegistrationRoutes);
 
 //report routes
 app.use("/api/reports", reportRoutes);
+app.use("/api/chat", chatRoutes);
+
+app.use("/api/support/articles", supportArticleRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
