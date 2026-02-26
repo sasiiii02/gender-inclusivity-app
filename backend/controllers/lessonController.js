@@ -122,6 +122,54 @@ export const updateLesson = async (req, res) => {
   }
 };
 
+// @desc    Partially update a lesson
+// @route   PATCH /api/lessons/:id
+// @access  Private (Teacher/Admin)
+export const patchLesson = async (req, res) => {
+  try {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        message: "Validation Error",
+      });
+    }
+
+    const updatedLesson = await lessonService.updateLesson(req.params.id, req.body);
+    if (!updatedLesson) {
+      return res.status(404).json({
+        message: "Lesson not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Lesson updated successfully",
+      lesson: {
+        _id: updatedLesson._id,
+        title: updatedLesson.title,
+        content: updatedLesson.content,
+      },
+    });
+  } catch (error) {
+    if (error.message === "Course not found") {
+      return res.status(404).json({
+        message: error.message,
+      });
+    }
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Validation Error",
+      });
+    }
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        message: "Invalid lesson ID format",
+      });
+    }
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Delete a lesson
 // @route   DELETE /api/lessons/:id
 // @access  Private (Admin/Teacher)

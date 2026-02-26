@@ -12,6 +12,13 @@ router.put(
   lessonController.updateLesson
 );
 
+router.patch(
+  "/:id",
+  protect,
+  authorize("teacher", "admin"),
+  lessonController.patchLesson
+);
+
 router.delete(
   "/:id",
   protect,
