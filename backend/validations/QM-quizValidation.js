@@ -117,3 +117,9 @@ export const submitAnswerSchema = Joi.object({
   }),
   timeSpent: Joi.number().min(0).optional(),
 });
+
+// AI Feedback validation
+export const aiFeedbackSchema = Joi.object({
+  explanationId: Joi.string().required(),
+  helpful: Joi.boolean().required(),
+});

@@ -16,6 +16,9 @@ import QMQuizRoutes from "./routes/QM-quizRoutes.js";
 import QMStudentQuizRoutes from "./routes/QM-studentQuizRoutes.js";
 import QMQuestion from "./models/QM-Question.js";
 
+// AI Explanation routes
+import QMAiRoutes from "./routes/QM-aiRoutes.js";
+
 dotenv.config();
 connectDb();
 
@@ -37,6 +40,9 @@ app.use("/api/registrations", eRegistrationRoutes);
 app.use("/api/quizzes", QMQuizRoutes);
 app.use("/api/student/quiz", QMStudentQuizRoutes);
 app.use("/api/questions", QMQuestion);
+
+// AI Explanation routes
+app.use("/api/ai", QMAiRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
