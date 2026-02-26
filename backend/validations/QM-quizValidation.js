@@ -118,8 +118,10 @@ export const submitAnswerSchema = Joi.object({
   timeSpent: Joi.number().min(0).optional(),
 });
 
-// AI Feedback validation
+// AI Feedback validation (already in your file, but here it is for completeness)
 export const aiFeedbackSchema = Joi.object({
-  explanationId: Joi.string().required(),
-  helpful: Joi.boolean().required(),
+  helpful: Joi.boolean().required().messages({
+    "boolean.base": "Helpful must be a boolean value",
+    "any.required": "Helpful field is required",
+  }),
 });

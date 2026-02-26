@@ -13,6 +13,10 @@ export const getQuestionExplanation = async (req, res) => {
     const { studentQuizId, questionId } = req.params;
     const studentId = req.user.id;
 
+    console.log(
+      `🔍 Getting explanation for question ${questionId} in quiz ${studentQuizId}`,
+    );
+
     // Check rate limit (optional)
     if (!checkRateLimit(studentId)) {
       return res.status(429).json({
@@ -29,12 +33,14 @@ export const getQuestionExplanation = async (req, res) => {
     });
 
     if (cachedExplanation) {
+      console.log("📦 Found cached explanation");
       return res.status(200).json({
         success: true,
         data: {
           explanation: cachedExplanation.explanation,
           questionId,
           cached: true,
+          source: cachedExplanation.source,
         },
       });
     }
@@ -88,6 +94,12 @@ export const getQuestionExplanation = async (req, res) => {
       studentAnswerObj.selectedOption ||
       (studentAnswerObj.selectedOptions || []).join(", ");
 
+    console.log("📝 Generating new explanation...");
+    console.log("   Question:", question.questionText.substring(0, 50) + "...");
+    console.log("   Student answer:", studentAnswer);
+    console.log("   Correct answer:", correctAnswer);
+    console.log("   Is correct:", studentAnswerObj.isCorrect);
+
     // Generate explanation
     const result = await aiService.generateAnswerExplanation({
       questionText: question.questionText,
@@ -98,7 +110,7 @@ export const getQuestionExplanation = async (req, res) => {
       isCorrect: studentAnswerObj.isCorrect,
     });
 
-    console.log("📝 Explanation source:", result.source); // This will tell you!
+    console.log("📝 Explanation source:", result.source);
     console.log(
       "📝 Explanation preview:",
       result.explanation.substring(0, 150),
@@ -112,8 +124,9 @@ export const getQuestionExplanation = async (req, res) => {
         explanation: result.explanation,
         studentId,
         quizId: studentQuiz.quizId._id,
-        source: result.source, // Add this field to your schema
+        source: result.source,
       });
+      console.log("💾 Explanation cached to database");
     }
 
     res.status(200).json({
@@ -124,11 +137,12 @@ export const getQuestionExplanation = async (req, res) => {
         isCorrect: studentAnswerObj.isCorrect,
         studentAnswer,
         correctAnswer,
+        source: result.source,
         cached: false,
       },
     });
   } catch (error) {
-    console.error("Explanation error:", error);
+    console.error("❌ Explanation error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -144,6 +158,10 @@ export const getAllExplanations = async (req, res) => {
     const { studentQuizId } = req.params;
     const studentId = req.user.id;
 
+    console.log(
+      `🔍 Generating all explanations for quiz attempt: ${studentQuizId}`,
+    );
+
     // Find student quiz
     const studentQuiz = await QMStudentQuiz.findOne({
       _id: studentQuizId,
@@ -158,13 +176,15 @@ export const getAllExplanations = async (req, res) => {
       });
     }
 
+    console.log(`📊 Quiz has ${studentQuiz.answers.length} answered questions`);
+
     // Check if explanations already exist
     const existingExplanations = await QMAIExplanation.find({
       studentQuizId,
     });
 
     if (existingExplanations.length === studentQuiz.answers.length) {
-      // All explanations exist - return them
+      console.log("📦 All explanations already exist in cache");
       return res.status(200).json({
         success: true,
         data: {
@@ -173,6 +193,10 @@ export const getAllExplanations = async (req, res) => {
         },
       });
     }
+
+    console.log(
+      `🆕 Generating ${studentQuiz.answers.length} new explanations...`,
+    );
 
     // Get all questions
     const questions = await QMQuestion.find({
@@ -201,19 +225,42 @@ export const getAllExplanations = async (req, res) => {
     const explanations =
       await aiService.generateBulkExplanations(questionsWithAnswers);
 
+    console.log(`✅ Received ${explanations.length} explanations`);
+
     // Save explanations to cache
     const savedExplanations = [];
     for (let i = 0; i < studentQuiz.answers.length; i++) {
       const answer = studentQuiz.answers[i];
+
+      // Check if explanation already exists for this question (avoid duplicates)
+      const existing = await QMAIExplanation.findOne({
+        studentQuizId,
+        questionId: answer.questionId,
+      });
+
+      if (existing) {
+        savedExplanations.push(existing);
+        continue;
+      }
+
       const explanation = await QMAIExplanation.create({
         studentQuizId,
         questionId: answer.questionId,
         explanation: explanations[i] || "Explanation not available",
         studentId,
         quizId: studentQuiz.quizId._id,
+        source:
+          explanations[i]?.includes("Great job") ||
+          explanations[i]?.includes("The correct answer")
+            ? "fallback"
+            : "ai",
       });
       savedExplanations.push(explanation);
     }
+
+    console.log(
+      `✅ Saved ${savedExplanations.length} explanations to database`,
+    );
 
     res.status(200).json({
       success: true,
@@ -223,6 +270,7 @@ export const getAllExplanations = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("❌ Error in getAllExplanations:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -238,16 +286,63 @@ export const getQuizExplanations = async (req, res) => {
     const { studentQuizId } = req.params;
     const studentId = req.user.id;
 
+    console.log(`🔍 Fetching all explanations for quiz: ${studentQuizId}`);
+
     const explanations = await QMAIExplanation.find({
       studentQuizId,
       studentId,
     }).populate("questionId", "questionText options");
+
+    console.log(`📦 Found ${explanations.length} explanations`);
 
     res.status(200).json({
       success: true,
       data: explanations,
     });
   } catch (error) {
+    console.error("❌ Error fetching explanations:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc    Provide feedback on explanation helpfulness
+// @route   POST /api/ai/feedback/:explanationId
+// @access  Private (Student)
+export const provideExplanationFeedback = async (req, res) => {
+  try {
+    const { explanationId } = req.params;
+    const { helpful } = req.body;
+    const studentId = req.user.id;
+
+    const explanation = await QMAIExplanation.findOne({
+      _id: explanationId,
+      studentId,
+    });
+
+    if (!explanation) {
+      return res.status(404).json({
+        success: false,
+        message: "Explanation not found",
+      });
+    }
+
+    explanation.feedback.helpful = helpful;
+    explanation.feedback.reportedAt = new Date();
+    await explanation.save();
+
+    console.log(
+      `📝 Feedback recorded for explanation ${explanationId}: ${helpful ? "helpful" : "not helpful"}`,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Feedback recorded successfully",
+    });
+  } catch (error) {
+    console.error("❌ Error recording feedback:", error);
     res.status(500).json({
       success: false,
       message: error.message,

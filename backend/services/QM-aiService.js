@@ -10,7 +10,7 @@ const getModel = () => {
     model: modelName,
     generationConfig: {
       temperature: parseFloat(process.env.GEMINI_TEMPERATURE || "0.7"),
-      maxOutputTokens: parseInt(process.env.GEMINI_MAX_TOKENS || "500"),
+      maxOutputTokens: parseInt(process.env.GEMINI_MAX_TOKENS || "10000"),
     },
   });
 };
@@ -79,22 +79,26 @@ export const generateAnswerExplanation = async ({
 
 /**
  * Generate explanations for ALL questions at once (batch)
- * FIXED VERSION with proper parsing
+ * IMPROVED VERSION with better handling and higher token limits
  */
 export const generateBulkExplanations = async (questionsWithAnswers) => {
   try {
     const model = getModel();
 
-    // Create a more structured prompt that asks for JSON format
+    console.log(
+      `📊 Generating bulk explanations for ${questionsWithAnswers.length} questions...`,
+    );
+
+    // Create a more structured prompt
     const prompt = `
 You are a helpful tutor. Please provide brief educational explanations for each of the following ${questionsWithAnswers.length} quiz questions.
 
-Return your response as a valid JSON array where each element is an object with a single field "explanation" containing the explanation for that question.
+IMPORTANT: Return ONLY a valid JSON array. No markdown, no code blocks, no additional text.
 
 Example format:
 [
-  {"explanation": "Explanation for question 1..."},
-  {"explanation": "Explanation for question 2..."}
+  {"explanation": "Explanation for question 1 here..."},
+  {"explanation": "Explanation for question 2 here..."}
 ]
 
 Here are the questions:
@@ -102,7 +106,8 @@ Here are the questions:
 ${questionsWithAnswers
   .map(
     (q, index) => `
-Question ${index + 1}: ${q.questionText}
+QUESTION ${index + 1}:
+Text: ${q.questionText}
 Student's Answer: ${q.studentAnswer}
 Correct Answer: ${q.correctAnswer}
 Result: ${q.isCorrect ? "CORRECT" : "INCORRECT"}
@@ -114,25 +119,79 @@ Provide helpful, concise explanations (2-3 sentences each). Focus on teaching th
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
 
-    // Try to extract JSON from the response
+    console.log("📥 Raw AI response length:", text.length);
+    console.log("📥 First 100 chars:", text.substring(0, 100));
+
+    // Clean the response - remove markdown code blocks if present
+    text = text
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
+
+    // Try to extract JSON array
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
-      const explanations = JSON.parse(jsonMatch[0]);
-      return explanations.map((e) => e.explanation);
+      try {
+        const explanations = JSON.parse(jsonMatch[0]);
+        console.log(
+          `✅ Successfully parsed ${explanations.length} explanations from JSON`,
+        );
+
+        // Validate we got the right number
+        if (explanations.length === questionsWithAnswers.length) {
+          return explanations.map((e) => e.explanation);
+        } else {
+          console.log(
+            `⚠️ Expected ${questionsWithAnswers.length} explanations, got ${explanations.length}`,
+          );
+        }
+      } catch (jsonError) {
+        console.log("⚠️ JSON parse error:", jsonError.message);
+        console.log("📄 Problematic JSON:", jsonMatch[0].substring(0, 200));
+      }
     }
 
-    // Fallback: If JSON parsing fails, return a generic explanation
-    console.log("Failed to parse AI response as JSON, using fallback");
+    // If JSON parsing fails, try to extract explanations from numbered list
+    const lines = text.split("\n");
+    const explanations = [];
+    let currentExplanation = "";
+
+    for (const line of lines) {
+      if (line.match(/^\d+\./) || line.match(/^Explanation \d+:/i)) {
+        if (currentExplanation) {
+          explanations.push(currentExplanation.trim());
+        }
+        currentExplanation = line.replace(
+          /^\d+\.\s*|^Explanation \d+:\s*/i,
+          "",
+        );
+      } else if (line.trim() && currentExplanation) {
+        currentExplanation += " " + line.trim();
+      }
+    }
+
+    if (currentExplanation) {
+      explanations.push(currentExplanation.trim());
+    }
+
+    if (explanations.length === questionsWithAnswers.length) {
+      console.log(
+        `✅ Extracted ${explanations.length} explanations from numbered list`,
+      );
+      return explanations;
+    }
+
+    // Final fallback
+    console.log("⚠️ Could not parse AI response, using fallback templates");
     return questionsWithAnswers.map((q) =>
       q.isCorrect
         ? `Great job! You correctly answered "${q.correctAnswer}". You've understood this concept well!`
         : `The correct answer is "${q.correctAnswer}". Take a moment to review why this is right.`,
     );
   } catch (error) {
-    console.error("Bulk generation error:", error);
-    // Return fallback explanations
+    console.error("❌ Bulk generation error:", error);
     return questionsWithAnswers.map((q) =>
       q.isCorrect
         ? `Correct! "${q.correctAnswer}" is right. Keep up the good work!`
