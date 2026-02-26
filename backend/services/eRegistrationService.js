@@ -142,3 +142,17 @@ export const markAttendance = async (registrationId, status) => {
   
   return registration;
 };
+
+// 6. Bulk Mark Attendance (Enterprise Feature)
+export const bulkMarkAttendance = async (registrationIds, status) => {
+  const validStatuses = ["Registered", "Attended", "Cancelled", "No-Show"];
+  if (!validStatuses.includes(status)) throw new Error("Invalid attendance status");
+
+  // updateMany is a highly efficient MongoDB command for bulk operations
+  const result = await ERegistration.updateMany(
+    { _id: { $in: registrationIds } },
+    { $set: { attendanceStatus: status } }
+  );
+
+  return result;
+};

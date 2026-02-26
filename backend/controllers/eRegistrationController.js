@@ -76,3 +76,20 @@ export const markAttendance = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Bulk update attendance status
+// @route   PATCH /api/registrations/bulk-attend
+// @access  Private (Teacher/Admin)
+export const bulkMarkAttendance = async (req, res) => {
+  try {
+    const { registrationIds, status } = req.body; // Expects an array of IDs
+    const result = await registrationService.bulkMarkAttendance(registrationIds, status);
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `Successfully updated ${result.modifiedCount} records to ${status}` 
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};

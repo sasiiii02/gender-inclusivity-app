@@ -8,6 +8,10 @@ const router = express.Router();
 
 // Public route to view feedback
 router.get("/events/:eventId", feedbackController.getEventFeedback);
+router.get("/events/:eventId/stats", feedbackController.getEventStats);
+
+// Protected routes
+router.get("/my-feedbacks", protect, feedbackController.getMyFeedback);
 
 // Protected route to submit feedback
 router.post(
@@ -16,5 +20,7 @@ router.post(
   validate(createFeedbackSchema),
   feedbackController.submitFeedback
 );
+
+router.delete("/:id", protect, feedbackController.deleteFeedback);
 
 export default router;

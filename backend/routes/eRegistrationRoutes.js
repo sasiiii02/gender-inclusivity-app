@@ -6,6 +6,14 @@ import { registerEventSchema } from "../validations/eRegistrationValidator.js";
 
 const router = express.Router();
 
+// Bulk attendance route
+router.patch(
+  "/bulk-attend",
+  protect,
+  authorize("admin", "teacher"),
+  registrationController.bulkMarkAttendance
+);
+
 // Student/Teacher routes
 router.post(
   "/events/:eventId/register",
