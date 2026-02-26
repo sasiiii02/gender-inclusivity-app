@@ -59,18 +59,28 @@ export const enrollInCourse = async (req, res) => {
 };
 
 // @desc    Get all enrollments for the current user
-// @route   GET /api/enrollments/my-enrollments
+// @route   GET /api/enrollments/my
 // @access  Private (Student)
 export const getMyEnrollments = async (req, res) => {
   try {
     const enrollments = await enrollmentService.getMyEnrollments(req.user.id);
-    res.status(200).json({ 
-      success: true, 
-      data: enrollments 
-    });
+
+    // Shape response to match Postman spec
+    const response = enrollments.map((enrollment) => ({
+      _id: enrollment._id,
+      course: enrollment.courseId
+        ? {
+            _id: enrollment.courseId._id,
+            title: enrollment.courseId.title,
+          }
+        : null,
+      progress: enrollment.progressPercentage,
+      completionStatus: enrollment.completionStatus,
+    }));
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ 
-      success: false, 
       message: error.message 
     });
   }

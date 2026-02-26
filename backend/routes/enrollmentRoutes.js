@@ -6,6 +6,14 @@ const router = express.Router();
 
 // Protected routes - Student only
 router.get(
+  "/my",
+  protect,
+  authorize("student"),
+  enrollmentController.getMyEnrollments
+);
+
+// Backwards-compatible alias
+router.get(
   "/my-enrollments",
   protect,
   authorize("student"),
