@@ -35,4 +35,12 @@ router.get(
   registrationController.getEventRegistrations
 );
 
+// Teacher/Admin route to mark attendance
+router.patch(
+  "/:id/attend",
+  protect,
+  authorize("admin", "teacher"),
+  registrationController.markAttendance
+);
+
 export default router;
