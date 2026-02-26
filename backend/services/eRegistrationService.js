@@ -123,3 +123,22 @@ export const cancelRegistration = async (registrationId, userId) => {
     throw error;
   }
 };
+
+// 5. Mark Attendance (PATCH)
+export const markAttendance = async (registrationId, status) => {
+  const validStatuses = ["Registered", "Attended", "Cancelled", "No-Show"];
+  
+  if (!validStatuses.includes(status)) {
+    throw new Error("Invalid attendance status");
+  }
+
+  const registration = await ERegistration.findByIdAndUpdate(
+    registrationId,
+    { attendanceStatus: status },
+    { new: true, runValidators: true }
+  );
+
+  if (!registration) throw new Error("Registration not found");
+  
+  return registration;
+};
