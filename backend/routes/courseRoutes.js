@@ -31,6 +31,14 @@ router.post(
   enrollmentController.enrollInCourse
 );
 
+// Get students enrolled in a course (Teacher/Admin)
+router.get(
+  "/:courseId/students",
+  protect,
+  authorize("teacher", "admin"),
+  enrollmentController.getStudentsByCourse
+);
+
 // Course CRUD routes
 router.get("/:id", protect, courseController.getCourseById);
 

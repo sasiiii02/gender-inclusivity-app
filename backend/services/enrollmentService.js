@@ -37,7 +37,16 @@ export const getMyEnrollments = async (studentId) => {
   return enrollments;
 };
 
-// 3. Update progress percentage
+// 3. Get all enrollments for a course (with student details)
+export const getEnrollmentsByCourse = async (courseId) => {
+  const enrollments = await Enrollment.find({ courseId })
+    .populate("studentId", "name email")
+    .sort({ enrollmentDate: -1 });
+
+  return enrollments;
+};
+
+// 4. Update progress percentage
 export const updateProgress = async (enrollmentId, progressPercentage) => {
   // Validate progress percentage is between 0 and 100
   if (progressPercentage < 0 || progressPercentage > 100) {
@@ -60,7 +69,7 @@ export const updateProgress = async (enrollmentId, progressPercentage) => {
   );
 };
 
-// 4. Mark course as complete
+// 5. Mark course as complete
 export const markCourseComplete = async (enrollmentId) => {
   const updateData = {
     completionStatus: "Completed",
@@ -76,7 +85,7 @@ export const markCourseComplete = async (enrollmentId) => {
   );
 };
 
-// 5. Partial update (for PATCH) - progress and/or completion
+// 6. Partial update (for PATCH) - progress and/or completion
 export const updateEnrollment = async (enrollmentId, updates) => {
   const { progressPercentage, completed } = updates;
 

@@ -58,6 +58,40 @@ export const enrollInCourse = async (req, res) => {
   }
 };
 
+// @desc    Get all students enrolled in a specific course
+// @route   GET /api/courses/:courseId/students
+// @access  Private (Teacher/Admin)
+export const getStudentsByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const enrollments = await enrollmentService.getEnrollmentsByCourse(courseId);
+
+    const response = enrollments.map((enrollment) => ({
+      _id: enrollment._id,
+      student: enrollment.studentId
+        ? {
+            _id: enrollment.studentId._id,
+            name: enrollment.studentId.name,
+            email: enrollment.studentId.email,
+          }
+        : null,
+      progress: enrollment.progressPercentage,
+      completionStatus: enrollment.completionStatus,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        message: "Invalid course ID format",
+      });
+    }
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Get all enrollments for the current user
 // @route   GET /api/enrollments/my
 // @access  Private (Student)
