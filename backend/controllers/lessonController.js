@@ -178,24 +178,20 @@ export const deleteLesson = async (req, res) => {
     const deletedLesson = await lessonService.deleteLesson(req.params.id);
     if (!deletedLesson) {
       return res.status(404).json({ 
-        success: false, 
         message: "Lesson not found" 
       });
     }
-    res.status(200).json({ 
-      success: true, 
-      message: "Lesson deleted successfully" 
+    res.status(200).json({
+      message: "Lesson deleted successfully",
     });
   } catch (error) {
     // Handle invalid ObjectId format
     if (error.name === "CastError") {
       return res.status(400).json({ 
-        success: false, 
         message: "Invalid lesson ID format" 
       });
     }
     res.status(500).json({ 
-      success: false, 
       message: error.message 
     });
   }
