@@ -10,6 +10,7 @@ import protect from "./middleware/authMiddleware.js";
 import eCampaignRoutes from "./routes/eCampaignRoutes.js";
 import eEventRoutes from "./routes/eEventRoutes.js";
 import eRegistrationRoutes from "./routes/eRegistrationRoutes.js";
+import eFeedbackRoutes from "./routes/eFeedbackRoutes.js";
 
 dotenv.config();
 connectDb();
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/campaigns", eCampaignRoutes);
 app.use("/api/events", eEventRoutes);
 app.use("/api/registrations", eRegistrationRoutes);
+app.use("/api/feedbacks", eFeedbackRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
