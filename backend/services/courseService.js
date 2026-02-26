@@ -56,7 +56,8 @@ export const getAllCourses = async (query) => {
 
 // 3. Get a single course by ID
 export const getCourseById = async (id) => {
-  return await Course.findById(id).populate("createdBy", "name email");
+  // Only return active courses for this endpoint (inactive courses are "blocked")
+  return await Course.findOne({ _id: id, status: "Active" });
 };
 
 // 4. Update a course

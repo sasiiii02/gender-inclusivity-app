@@ -52,31 +52,26 @@ export const getAllCourses = async (req, res) => {
 
 // @desc    Get single course by ID
 // @route   GET /api/courses/:id
-// @access  Public
+// @access  Private (Any authenticated user)
 export const getCourseById = async (req, res) => {
   try {
     const course = await courseService.getCourseById(req.params.id);
     if (!course) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Course not found" 
+      return res.status(404).json({
+        message: "Course not found",
       });
     }
-    res.status(200).json({ 
-      success: true, 
-      data: course 
-    });
+    // Match Postman spec: return the raw course object
+    res.status(200).json(course);
   } catch (error) {
     // Handle invalid ObjectId format
     if (error.name === "CastError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid course ID format" 
+      return res.status(400).json({
+        message: "Invalid course ID format",
       });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      message: error.message,
     });
   }
 };

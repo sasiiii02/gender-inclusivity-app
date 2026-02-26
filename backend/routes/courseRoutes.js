@@ -32,7 +32,7 @@ router.post(
 );
 
 // Course CRUD routes
-router.get("/:id", courseController.getCourseById);
+router.get("/:id", protect, courseController.getCourseById);
 
 // Protected routes - Teacher only for creating courses
 router.post(
