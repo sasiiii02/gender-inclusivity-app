@@ -27,6 +27,11 @@ import supportArticleRoutes from "./routes/supportArticleRoutes.js";
 import supportChatRoutes from "./routes/supportChatRoutes.js";
 
 
+// Course, Lesson, and Enrollment routes
+import courseRoutes from "./routes/courseRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+
 dotenv.config();
 connectDb();
 
@@ -57,6 +62,11 @@ app.use("/api/ai", QMAiRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/support/articles", supportArticleRoutes);
 app.use("/api/support", supportChatRoutes);
+
+// Course, Lesson, and Enrollment routes
+app.use("/api/courses", courseRoutes);
+app.use("/api/lessons", lessonRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
