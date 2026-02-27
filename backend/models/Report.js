@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import User from './User.js';
 import ReportCategory from './ReportCategory.js';
 import CaseStatus from './CaseStatus.js';
-
+// Schema for user reports
 const reportSchema = new mongoose.Schema(
     {
         title:{

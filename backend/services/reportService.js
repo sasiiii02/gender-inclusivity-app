@@ -3,6 +3,7 @@ import CaseStatus from "../models/CaseStatus.js";
 import ReportResponse from "../models/ReportResponse.js";
 import ReportStatusHistory from "../models/ReportStatusHistory.js";
 
+// Create a new report
 export const createReportService = async(req)=>{
     const {
         title,
@@ -35,7 +36,7 @@ export const createReportService = async(req)=>{
 
 }
 
-
+// Admin - view all reports
 export const getAllReportsService = async()=>{
     const reports = await Report.find()
     .populate("categoryId","name")
@@ -76,7 +77,7 @@ const report = await Report.findById(reportId);
 
     return await report.populate("statusId", "name");
 };
-
+// Add response to a report 
 export const addReportResponseService = async (
     reportId,
     adminId,
@@ -132,7 +133,7 @@ export const getResponsesByReportService = async (reportId, userId) => {
     .sort({ createdAt: 1 });
 };
 
-
+// Get report timeline (status changes + responses)
 export const getReportTimelineService = async (reportId, userId, isAdmin) => {
   const report = await Report.findById(reportId).populate(
     "reportedBy",
@@ -143,7 +144,7 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
     throw new Error("Report not found");
   }
 
-  // 🔐 If not admin, verify ownership
+  // If not admin, verify ownership
   if (!isAdmin && report.reportedBy._id.toString() !== userId.toString()) {
     throw new Error("Not authorized to view this report timeline");
   }
@@ -181,7 +182,7 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
     date: item.createdAt,
   }));
 
-  // 🔥 Merge all events
+  //  Merge all events
   const timeline = [creationEvent, ...statusEvents, ...responseEvents];
 
   // Sort by date
@@ -190,6 +191,7 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
   return timeline;
 };
 
+// Admin - close a report
 export const closeReportService = async (reportId, adminId) => {
   const report = await Report.findById(reportId);
 
@@ -206,7 +208,7 @@ export const closeReportService = async (reportId, adminId) => {
   return report;
 };
 
-
+// Admin - reopen a report
 export const getReportStatsService = async () => {
   const totalReports = await Report.countDocuments();
 

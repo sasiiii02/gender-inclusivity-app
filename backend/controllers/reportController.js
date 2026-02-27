@@ -1,6 +1,8 @@
 import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService} from "../services/reportService.js";
 
+// Controller for managing user reports and admin responses
 
+// Create a new report
 export const createReport = async (req,res) =>{
     try {
         const report = await createReportService(req);
@@ -18,7 +20,7 @@ export const createReport = async (req,res) =>{
         
     }
 }
-
+// Admin - view all reports
 export const getAllReports = async(req,res)=>{
     try {
         const reports = await getAllReportsService();
@@ -37,7 +39,7 @@ export const getAllReports = async(req,res)=>{
         })
     }
 }
-
+// User - view my reports
 export const getMyReports = async(req,res) =>{
     try {
         const reports = await getMyReportsService(req.user._id);
@@ -56,7 +58,7 @@ export const getMyReports = async(req,res) =>{
 }
 
 
-
+// Admin - update report status
 export const updateReportStatus = async (req, res) => {
     try {
     const { statusId } = req.body;
@@ -79,7 +81,7 @@ export const updateReportStatus = async (req, res) => {
     });
   }
 };
-
+// Admin - add response to a report
 export const addReportResponse = async (req, res) => {
   try {
     const { message } = req.body;
@@ -116,7 +118,7 @@ export const getAllResponses = async (req, res) => {
     });
   }
 };
-
+// Student - view responses for one of their reports
 export const getMyReportResponses = async (req, res) => {
   try {
     const responses = await getResponsesByReportService(
@@ -134,7 +136,7 @@ export const getMyReportResponses = async (req, res) => {
     });
   }
 };
-
+// Get report timeline (status changes + responses)
 export const getReportTimeline = async (req, res) => {
   try {
     const timeline = await getReportTimelineService(
@@ -153,7 +155,7 @@ export const getReportTimeline = async (req, res) => {
     });
   }
 };
-
+// Admin - close a report
 export const closeReport = async (req, res) => {
   try {
     const report = await closeReportService(
@@ -171,8 +173,7 @@ export const closeReport = async (req, res) => {
     });
   }
 };
-
-
+// Admin - get report statistics
 export const getReportStats = async (req, res) => {
   try {
     const stats = await getReportStatsService();

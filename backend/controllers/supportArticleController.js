@@ -6,6 +6,9 @@ import {
   deleteArticleService,
 } from "../services/supportArticleService.js";
 
+// Controller for managing support articles in the help center
+
+// Admin - create a new support article
 export const createArticle = async (req, res) => {
   try {
     const article = await createArticleService(req.body, req.user._id);
@@ -14,7 +17,7 @@ export const createArticle = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
+// Admin - get all support articles 
 export const getAllArticles = async (req, res) => {
   try {
     const articles = await getAllArticlesService(req.query);
@@ -23,7 +26,7 @@ export const getAllArticles = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
+// Admin - get a single support article by ID
 export const getSingleArticle = async (req, res) => {
   try {
     const article = await getSingleArticleService(req.params.id);
@@ -32,7 +35,7 @@ export const getSingleArticle = async (req, res) => {
     res.status(404).json({ message: error.message });
   }
 };
-
+// Admin - update a support article by ID
 export const updateArticle = async (req, res) => {
   try {
     const article = await updateArticleService(req.params.id, req.body);
@@ -41,7 +44,7 @@ export const updateArticle = async (req, res) => {
     res.status(404).json({ message: error.message });
   }
 };
-
+// Admin - delete a support article by ID
 export const deleteArticle = async (req, res) => {
   try {
     await deleteArticleService(req.params.id);

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Schema for support chat sessions between users and the AI assistant
 const supportChatSchema = new mongoose.Schema(
   {
     userId: {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Schema for responses to user reports 
 const reportResponseSchema = new mongoose.Schema(
   {
     reportId: {

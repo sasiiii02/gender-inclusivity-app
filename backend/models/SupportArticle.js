@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Schema for support articles in the help center
 const supportArticleSchema = new mongoose.Schema(
   {
     title: {

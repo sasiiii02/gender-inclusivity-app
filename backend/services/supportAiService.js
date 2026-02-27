@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const getModel = () => {
@@ -11,7 +12,7 @@ const getModel = () => {
     },
   });
 };
-
+//Generate AI chat reply for support conversations
 export const generateChatReply = async (conversation) => {
   try {
     const model = getModel();

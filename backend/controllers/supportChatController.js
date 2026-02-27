@@ -1,6 +1,6 @@
 import SupportChat from "../models/SupportChat.js";
 import { generateChatReply } from "../services/supportAiService.js";
-
+// Controller for handling support chat interactions between users and the AI assistant
 export const sendChatMessage = async (req, res) => {
   try {
     const userId = req.user.id;

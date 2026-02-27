@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Schema to track the history of status changes for a report
 const reportStatusHistorySchema = new mongoose.Schema(
   {
     reportId: {

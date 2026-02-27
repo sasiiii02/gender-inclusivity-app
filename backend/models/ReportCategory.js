@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+// Report categories for user reports 
 const reportCategorySchema = new mongoose.Schema(
     {
         name:{
