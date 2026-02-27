@@ -20,7 +20,9 @@ import QMQuestion from "./models/QM-Question.js";
 // AI Explanation routes
 import QMAiRoutes from "./routes/QM-aiRoutes.js";
 
-import reportRoutes from "./routes/reportRoutes.js"; // Import the report routes
+
+// Report routes
+import reportRoutes from "./routes/reportRoutes.js"; 
 import supportArticleRoutes from "./routes/supportArticleRoutes.js";
 import supportChatRoutes from "./routes/supportChatRoutes.js";
 
@@ -53,10 +55,7 @@ app.use("/api/ai", QMAiRoutes);
 
 //report routes
 app.use("/api/reports", reportRoutes);
-
-
 app.use("/api/support/articles", supportArticleRoutes);
-
 app.use("/api/support", supportChatRoutes);
 
 // Protected test route
