@@ -1,4 +1,8 @@
 import * as enrollmentService from "../services/enrollmentService.js";
+import {
+  sendEnrollmentEmail,
+  sendCompletionEmail,
+} from "../services/brevoEmailService.js";
 
 // @desc    Enroll a student in a course
 // @route   POST /api/courses/:courseId/enroll
@@ -11,10 +15,36 @@ export const enrollInCourse = async (req, res) => {
     };
 
     const newEnrollment = await enrollmentService.enrollInCourse(enrollmentData);
-    res.status(201).json({ 
-      success: true, 
-      data: newEnrollment, 
-      message: "Successfully enrolled in course" 
+
+    // Fire-and-forget enrollment email, do not affect main flow
+    try {
+      const student = newEnrollment.studentId;
+      const course = newEnrollment.courseId;
+
+      if (student?.email && student?.name && course?.title) {
+        await sendEnrollmentEmail(student.email, student.name, course.title);
+      } else {
+        console.warn(
+          "[EnrollmentController] Missing student or course data for enrollment email",
+          {
+            hasStudent: !!student,
+            hasCourse: !!course,
+          }
+        );
+      }
+    } catch (emailError) {
+      console.error(
+        "[EnrollmentController] Error while sending enrollment email",
+        {
+          message: emailError.message,
+        }
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      data: newEnrollment,
+      message: "Successfully enrolled in course",
     });
   } catch (error) {
     // Handle course not found or inactive
@@ -244,27 +274,54 @@ export const updateEnrollment = async (req, res) => {
 // @access  Private (Student)
 export const markCourseComplete = async (req, res) => {
   try {
-    const updatedEnrollment = await enrollmentService.markCourseComplete(req.params.id);
+    const updatedEnrollment = await enrollmentService.markCourseComplete(
+      req.params.id
+    );
 
     if (!updatedEnrollment) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Enrollment not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found",
       });
     }
 
     // Verify that the enrollment belongs to the current user
     if (updatedEnrollment.studentId.toString() !== req.user.id) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You can only mark your own enrollments as complete" 
+      return res.status(403).json({
+        success: false,
+        message: "You can only mark your own enrollments as complete",
       });
     }
 
-    res.status(200).json({ 
-      success: true, 
-      data: updatedEnrollment, 
-      message: "Course marked as completed successfully" 
+    // Fire-and-forget completion email, do not affect main flow
+    try {
+      const student = updatedEnrollment.studentId;
+      const course = updatedEnrollment.courseId;
+
+      if (student?.email && student?.name && course?.title) {
+        await sendCompletionEmail(student.email, student.name, course.title);
+      } else {
+        console.warn(
+          "[EnrollmentController] Missing student or course data for completion email",
+          {
+            hasStudent: !!student,
+            hasCourse: !!course,
+          }
+        );
+      }
+    } catch (emailError) {
+      console.error(
+        "[EnrollmentController] Error while sending completion email",
+        {
+          message: emailError.message,
+        }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updatedEnrollment,
+      message: "Course marked as completed successfully",
     });
   } catch (error) {
     // Handle invalid ObjectId format

@@ -61,11 +61,11 @@ export const updateProgress = async (enrollmentId, progressPercentage) => {
     updateData.completedAt = new Date();
   }
 
-  // { new: true } returns the updated document, runValidators ensures schema rules still apply
+  // returnDocument: "after" returns the updated document, runValidators ensures schema rules still apply
   return await Enrollment.findByIdAndUpdate(
     enrollmentId,
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   );
 };
 
@@ -77,12 +77,14 @@ export const markCourseComplete = async (enrollmentId) => {
     completedAt: new Date(),
   };
 
-  // { new: true } returns the updated document, runValidators ensures schema rules still apply
+  // returnDocument: "after" returns the updated document, runValidators ensures schema rules still apply
   return await Enrollment.findByIdAndUpdate(
     enrollmentId,
     updateData,
-    { new: true, runValidators: true }
-  );
+    { returnDocument: "after", runValidators: true }
+  )
+    .populate("studentId", "name email")
+    .populate("courseId", "title");
 };
 
 // 6. Partial update (for PATCH) - progress and/or completion
