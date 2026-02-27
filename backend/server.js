@@ -20,6 +20,10 @@ import QMQuestion from "./models/QM-Question.js";
 // AI Explanation routes
 import QMAiRoutes from "./routes/QM-aiRoutes.js";
 
+import reportRoutes from "./routes/reportRoutes.js"; // Import the report routes
+import chatRoutes from "./routes/chatRoute.js"; // Import the chat routes
+import supportArticleRoutes from "./routes/supportArticleRoutes.js";
+
 dotenv.config();
 connectDb();
 
@@ -45,6 +49,12 @@ app.use("/api/questions", QMQuestion);
 
 // AI Explanation routes
 app.use("/api/ai", QMAiRoutes);
+
+//report routes
+app.use("/api/reports", reportRoutes);
+app.use("/api/chat", chatRoutes);
+
+app.use("/api/support/articles", supportArticleRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
