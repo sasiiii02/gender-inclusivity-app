@@ -1,260 +1,314 @@
-🌈 Gender Inclusivity App – Backend
-Backend API for the Gender Inclusivity Application, built using the MERN Stack.
+
+
+# 🌈 Gender Inclusivity App – Backend
+
+Backend API for the **Gender Inclusivity Application**, built using the **MERN Stack**.
+
 This backend powers:
 
-👤 User Management & Authentication
+* 👤 User Management & Authentication
+* 📚 Learning Management
+* 📝 Quiz & Assessment System
+* 📅 Event & Campaign Management
+* 🚨 Incident Reporting & Support System
+* 🤖 AI Chatbot (Google Gemini Integration)
+* 📂 File Uploads
+* 🔐 Role-Based Access Control
 
-📚 Learning Management
+---
 
-📝 Quiz & Assessment System
+# 🏗 Tech Stack
 
-📅 Event & Campaign Management
+* **Node.js** – JavaScript runtime environment
+* **Express.js** – Backend framework
+* **MongoDB** – NoSQL Database
+* **Mongoose** – MongoDB ODM
+* **JWT (JSON Web Token)** – Authentication
+* **bcryptjs** – Password hashing
+* **Multer** – File uploads
+* **CORS** – Cross-origin handling
+* **Google Gemini API** – AI Chatbot integration
 
-🚨 Incident Reporting & Support System
+---
 
-🤖 AI Chatbot (Google Gemini Integration)
+# 📁 Backend Folder Structure
 
-📂 File Uploads
-
-🔐 Role-Based Access Control
-
-🏗 Tech Stack
-Node.js – JavaScript runtime environment
-
-Express.js – Backend framework
-
-MongoDB – NoSQL Database
-
-Mongoose – MongoDB ODM
-
-JWT (JSON Web Token) – Authentication
-
-bcryptjs – Password hashing
-
-Multer – File uploads
-
-CORS – Cross-origin handling
-
-Google Gemini API – AI Chatbot integration
-
-📁 Backend Folder Structure
+```
 backend/
 │
-├── config/            # Database configuration
-├── controllers/       # Handle request & response logic
-├── middleware/        # Authentication & role protection
-├── models/            # MongoDB schemas
-├── routes/            # API endpoint definitions
-├── services/          # Business logic & external APIs
-├── validations/       # Input validation logic
-├── utils/             # Helper functions
-├── uploads/           # Uploaded files storage
+├── config/           # Database configuration
+├── controllers/      # Handle request & response logic
+├── middleware/       # Authentication & role protection
+├── models/           # MongoDB schemas
+├── routes/           # API endpoint definitions
+├── services/         # Business logic & external APIs
+├── validations/      # Input validation logic
+├── utils/            # Helper functions
+├── uploads/          # Uploaded files storage
 │
-├── server.js          # Main entry point
+├── server.js         # Main entry point
 ├── package.json
 └── .env.example
-🔐 Authentication & Authorization
-🔑 JWT Authentication Flow
-User registers or logs in
+```
 
-Password is hashed using bcrypt
+---
 
-If valid → JWT token is generated
+# 🔐 Authentication & Authorization
 
-Token is sent to frontend
+## 🔑 JWT Authentication Flow
 
-Frontend sends token in:
+1. User registers or logs in
+2. Password is hashed using **bcrypt**
+3. If valid → JWT token is generated
+4. Token is sent to frontend
+5. Frontend sends token in header:
 
+```
 Authorization: Bearer <token>
-Middleware verifies token before accessing protected routes
+```
 
-👥 Role-Based Access Control
+6. Middleware verifies token before accessing protected routes
+
+---
+
+## 👥 Role-Based Access Control
+
 System supports roles such as:
 
-admin
+* `admin`
+* `staff`
+* `user`
 
-staff
+### 🔒 Examples
 
-user
+* Only **admin** can delete events
+* Only **staff/admin** can update report status
 
-Certain routes are protected using role middleware.
+---
 
-Example:
+# 📚 Core Modules
 
-Only admin can delete events
+---
 
-Only staff/admin can update report status
+## 1️⃣ Learning Management
 
-📚 Core Modules
-1️⃣ Learning Management
-Features:
+### ✨ Features
 
-Create learning materials
+* Create learning materials
+* Update / Delete (Admin only)
+* View materials (All users)
 
-Update / Delete (Admin only)
+### 📌 Endpoints
 
-View materials (All users)
-
-Endpoints:
-
+```
 POST   /api/learning
 GET    /api/learning
 PUT    /api/learning/:id
 DELETE /api/learning/:id
-2️⃣ Quiz & Assessment
-Features:
+```
 
-Create quizzes
+---
 
-Submit answers
+## 2️⃣ Quiz & Assessment System
 
-Calculate score
+### ✨ Features
 
-Store results
+* Create quizzes
+* Submit answers
+* Calculate score
+* Store results
 
-Endpoints:
+### 📌 Endpoints
 
-POST   /api/quiz
-GET    /api/quiz
-POST   /api/quiz/submit
-3️⃣ Event & Campaign Management
-Features:
+```
+POST /api/quiz
+GET  /api/quiz
+POST /api/quiz/submit
+```
 
-Create events
+---
 
-Update campaigns
+## 3️⃣ Event & Campaign Management
 
-Delete events
+### ✨ Features
 
-User registration for events
+* Create events
+* Update campaigns
+* Delete events
+* User registration for events
 
-Endpoints:
+### 📌 Endpoints
 
+```
 POST   /api/events
 GET    /api/events
 PUT    /api/events/:id
 DELETE /api/events/:id
-4️⃣ Incident Reporting System
-Users can:
+```
 
-Submit incidents
+---
 
-Upload evidence
+## 4️⃣ Incident Reporting System
 
-Track report status
+### ✨ Features
 
-Endpoints:
+* Submit incidents
+* Upload evidence
+* Track report status
 
-POST   /api/reports
-GET    /api/reports
-PUT    /api/reports/:id/status
-5️⃣ Support Management System
-Admins can:
+### 📌 Endpoints
 
-Create support articles
+```
+POST /api/reports
+GET  /api/reports
+PUT  /api/reports/:id/status
+```
 
-Upload PDF documents
+---
 
-Update/Delete articles
+## 5️⃣ Support Management System
 
-Endpoints:
+### ✨ Features
 
+* Create support articles
+* Upload PDF documents
+* Update/Delete articles
+
+### 📌 Endpoints
+
+```
 POST   /api/support
 GET    /api/support
 PUT    /api/support/:id
 DELETE /api/support/:id
-🤖 AI Chatbot Integration
-Integrated Google Gemini API as a third-party service.
+```
 
-Features:
+---
 
-Conversational chatbot
+# 🤖 AI Chatbot Integration
 
-Context-based memory
+Integrated **Google Gemini API** as a third-party AI service.
 
-AI-powered support responses
+### ✨ Features
 
-Endpoint:
+* Conversational chatbot
+* Context-based memory
+* AI-powered support responses
 
+### 📌 Endpoint
+
+```
 POST /api/chat
-Flow:
+```
 
-User sends message
+### 🔄 Flow
 
-Backend sends request to Gemini API
+1. User sends message
+2. Backend sends request to Gemini API
+3. Response is returned
+4. Conversation is stored in database
 
-Response is returned
+---
 
-Conversation is stored in database
+# 📂 File Upload Support
 
-📂 File Upload Support
-Using Multer middleware:
+Using **Multer middleware**:
 
-Incident evidence uploads
+* Incident evidence uploads
+* Support document uploads
+* Stored inside `/uploads` directory
 
-Support document uploads
+---
 
-Stored inside /uploads directory
+# 🛡 Middleware Used
 
-🛡 Middleware Used
-authMiddleware – Verifies JWT
+* `authMiddleware` – Verifies JWT
+* `roleMiddleware` – Checks user role
+* `errorMiddleware` – Centralized error handling
+* `cors()` – Enables frontend communication
+* `express.json()` – Parses JSON bodies
 
-roleMiddleware – Checks user role
+---
 
-errorMiddleware – Centralized error handling
+# 🗄 Database Integration
 
-cors() – Enables frontend communication
-
-express.json() – Parses JSON bodies
-
-🗄 Database Integration
-Using MongoDB with Mongoose
+Using **MongoDB with Mongoose**
 
 Each module has its own schema:
 
-User
-
-Learning
-
-Quiz
-
-Event
-
-Report
-
-Support
-
-Chat
+* User
+* Learning
+* Quiz
+* Event
+* Report
+* Support
+* Chat
 
 Database connection is handled in:
 
+```
 config/db.js
-⚙️ Installation Guide
-1️⃣ Clone Repository
+```
+
+---
+
+# ⚙️ Installation Guide
+
+## 1️⃣ Clone Repository
+
+```
 git clone https://github.com/sasiiii02/gender-inclusivity-app.git
 cd gender-inclusivity-app/backend
-2️⃣ Install Dependencies
-npm install
-3️⃣ Create .env File
-Create a .env file in backend folder:
+```
 
+---
+
+## 2️⃣ Install Dependencies
+
+```
+npm install
+```
+
+---
+
+## 3️⃣ Create `.env` File
+
+Create a `.env` file in the backend folder:
+
+```
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 GEMINI_API_KEY=your_google_gemini_api_key
-4️⃣ Run Server
+```
+
+---
+
+## 4️⃣ Run Server
+
+```
 npm run dev
+```
+
 Server runs at:
 
+```
 http://localhost:5000
-🧪 API Testing
+```
+
+---
+
+# 🧪 API Testing
+
 You can test endpoints using:
 
-Postman
+* Postman
+* Swagger Documentation
 
-Swagger Documentation
+---
 
-✅ Key Features
+# ✅ Key Features
+
 ✔ RESTful API Design
 ✔ Clean Modular Architecture
 ✔ JWT Authentication
@@ -265,18 +319,19 @@ Swagger Documentation
 ✔ Validation & Error Handling
 ✔ Third-Party API Integration
 
-🚀 Future Improvements
-Deployment (Render / Railway / AWS)
+---
 
-Rate Limiting
+# 🚀 Future Improvements
 
-Email Notifications
+* Deployment (Render / Railway / AWS)
+* Rate Limiting
+* Email Notifications
+* Logging System
+* Docker Support
 
-Logging System
+---
 
-Docker Support
+# 👩‍💻 Developed For
 
-👩‍💻 Developed For
-Academic Project – Gender Inclusivity Application
+Academic Project – **Gender Inclusivity Application**
 MERN Stack Backend Implementation
-
