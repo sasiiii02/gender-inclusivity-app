@@ -57,3 +57,39 @@ export const cancelRegistration = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Update attendance status
+// @route   PATCH /api/registrations/:id/attend
+// @access  Private (Teacher/Admin)
+export const markAttendance = async (req, res) => {
+  try {
+    // We expect the body to have { "status": "Attended" }
+    const { status } = req.body; 
+    const updatedRegistration = await registrationService.markAttendance(req.params.id, status);
+    
+    res.status(200).json({ 
+      success: true, 
+      data: updatedRegistration,
+      message: `Attendance marked as ${status}` 
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Bulk update attendance status
+// @route   PATCH /api/registrations/bulk-attend
+// @access  Private (Teacher/Admin)
+export const bulkMarkAttendance = async (req, res) => {
+  try {
+    const { registrationIds, status } = req.body; // Expects an array of IDs
+    const result = await registrationService.bulkMarkAttendance(registrationIds, status);
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `Successfully updated ${result.modifiedCount} records to ${status}` 
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
