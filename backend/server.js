@@ -21,7 +21,6 @@ import QMQuestion from "./models/QM-Question.js";
 import QMAiRoutes from "./routes/QM-aiRoutes.js";
 
 import reportRoutes from "./routes/reportRoutes.js"; // Import the report routes
-import chatRoutes from "./routes/chatRoute.js"; // Import the chat routes
 import supportArticleRoutes from "./routes/supportArticleRoutes.js";
 import supportChatRoutes from "./routes/supportChatRoutes.js";
 
@@ -54,7 +53,7 @@ app.use("/api/ai", QMAiRoutes);
 
 //report routes
 app.use("/api/reports", reportRoutes);
-app.use("/api/chat", chatRoutes);
+
 
 app.use("/api/support/articles", supportArticleRoutes);
 
