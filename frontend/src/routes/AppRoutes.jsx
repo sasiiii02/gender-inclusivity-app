@@ -1,10 +1,20 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
+import Login          from "../pages/Auth/Login";
+import Register       from "../pages/Auth/Register";
 import ProtectedRoute from "./ProtectedRoute";
-import MainLayout from "../components/layout/MainLayout";
+import MainLayout     from "../components/layout/MainLayout";
+import AdminLayout    from "../components/layout/AdminLayout";
 
-// ── Placeholders (replace as you build each module) ──
+// Admin pages
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+import AdminUsers     from "../pages/Admin/AdminUsers";
+import AdminReports   from "../pages/Admin/AdminReports";
+import AdminLearning  from "../pages/Admin/AdminLearning";
+import AdminQuiz      from "../pages/Admin/AdminQuiz";
+import AdminEvents    from "../pages/Admin/AdminEvents";
+import AdminSupport   from "../pages/Admin/AdminSupport";
+
+// Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
   <div className="flex items-center justify-center h-64">
     <p className="font-serif text-2xl text-violet-700">{label} — coming soon</p>
@@ -14,18 +24,12 @@ const Placeholder = ({ label }) => (
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
-    <Route path="/" element={<Navigate to="/login" replace />} />
-    <Route path="/login" element={<Login />} />
+    <Route path="/"         element={<Navigate to="/login" replace />} />
+    <Route path="/login"    element={<Login />} />
     <Route path="/register" element={<Register />} />
 
-    {/* Protected — all share MainLayout (Sidebar + Navbar) */}
-    <Route
-      element={
-        <ProtectedRoute>
-          <MainLayout />
-        </ProtectedRoute>
-      }
-    >
+    {/* Student / Teacher pages — TopNav layout (MainLayout) */}
+    <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
       <Route path="/learning"  element={<Placeholder label="📚 Learning" />} />
       <Route path="/quiz"      element={<Placeholder label="📝 Quiz" />} />
@@ -33,16 +37,21 @@ const AppRoutes = () => (
       <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
+    </Route>
 
-      {/* Admin only */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <Placeholder label="🛡️ Admin Panel" />
-          </ProtectedRoute>
-        }
-      />
+    {/* Admin pages — Sidebar layout (AdminLayout) */}
+    <Route element={
+      <ProtectedRoute allowedRoles={["admin"]}>
+        <AdminLayout />
+      </ProtectedRoute>
+    }>
+      <Route path="/admin"          element={<AdminDashboard />} />
+      <Route path="/admin/users"    element={<AdminUsers />} />
+      <Route path="/admin/reports"  element={<AdminReports />} />
+      <Route path="/admin/learning" element={<AdminLearning />} />
+      <Route path="/admin/quiz"     element={<AdminQuiz />} />
+      <Route path="/admin/events"   element={<AdminEvents />} />
+      <Route path="/admin/support"  element={<AdminSupport />} />
     </Route>
 
     <Route path="*" element={<Placeholder label="404 Not Found" />} />
