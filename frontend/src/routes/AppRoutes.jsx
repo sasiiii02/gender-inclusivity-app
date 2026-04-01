@@ -15,6 +15,7 @@ import AdminEvents from "../pages/Admin/AdminEvents";
 import AdminSupport from "../pages/Admin/AdminSupport";
 
 // Teacher pages
+import TeacherLayout from "../components/teacher/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
 import QuizEditor from "../pages/Teacher/QuizEditor";
 import QuizQuestions from "../pages/Teacher/QuizQuestions";
@@ -70,8 +71,8 @@ const AppRoutes = () => (
     {/* Admin pages — Sidebar layout (AdminLayout) */}
     <Route
       element={
-        <ProtectedRoute allowedRoles={["teacher"]}>
-          <AdminLayout />
+        <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+          <TeacherLayout />
         </ProtectedRoute>
       }
     >
