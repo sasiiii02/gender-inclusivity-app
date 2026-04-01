@@ -50,6 +50,12 @@ const navItems = [
     path: "/admin",
     roles: ["admin"],
   },
+  {
+    label: "My Quizzes",
+    icon: "📝",
+    path: "/teacher/dashboard",
+    roles: ["teacher"],
+  },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -62,7 +68,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const filtered = navItems.filter(
-    (item) => user && item.roles.includes(user.role)
+    (item) => user && item.roles.includes(user.role),
   );
 
   const roleColors = {
