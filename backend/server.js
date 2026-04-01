@@ -12,15 +12,34 @@ import eEventRoutes from "./routes/eEventRoutes.js";
 import eRegistrationRoutes from "./routes/eRegistrationRoutes.js";
 import eFeedbackRoutes from "./routes/eFeedbackRoutes.js";
 
+// Quiz routes
+import QMQuizRoutes from "./routes/QM-quizRoutes.js";
+import QMStudentQuizRoutes from "./routes/QM-studentQuizRoutes.js";
+import QMQuestion from "./models/QM-Question.js";
+
+// AI Explanation routes
+import QMAiRoutes from "./routes/QM-aiRoutes.js";
+
+
+// Report routes
+import reportRoutes from "./routes/reportRoutes.js"; 
+import supportArticleRoutes from "./routes/supportArticleRoutes.js";
+import supportChatRoutes from "./routes/supportChatRoutes.js";
+
+
+// Course, Lesson, and Enrollment routes
+import courseRoutes from "./routes/courseRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+
 dotenv.config();
 connectDb();
 
-const app= express();
+const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -30,6 +49,24 @@ app.use("/api/campaigns", eCampaignRoutes);
 app.use("/api/events", eEventRoutes);
 app.use("/api/registrations", eRegistrationRoutes);
 app.use("/api/feedbacks", eFeedbackRoutes);
+
+// Quiz routes
+app.use("/api/quizzes", QMQuizRoutes);
+app.use("/api/student/quiz", QMStudentQuizRoutes);
+app.use("/api/questions", QMQuestion);
+
+// AI Explanation routes
+app.use("/api/ai", QMAiRoutes);
+
+//report routes
+app.use("/api/reports", reportRoutes);
+app.use("/api/support/articles", supportArticleRoutes);
+app.use("/api/support", supportChatRoutes);
+
+// Course, Lesson, and Enrollment routes
+app.use("/api/courses", courseRoutes);
+app.use("/api/lessons", lessonRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
 
 // Protected test route
 app.get("/api/protected", protect, (req, res) => {
@@ -41,7 +78,6 @@ app.get("/api/protected", protect, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
-    console.log(`Server running on port ${PORT}`);
-    
-})
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

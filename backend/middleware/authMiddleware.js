@@ -15,31 +15,99 @@ const protect = async (req, res, next) => {
 
       req.user = await User.findById(decoded.id).select("-password");
 
+      if (!req.user) {
+        return res.status(401).json({ 
+          success: false,
+          message: "User not found" 
+        });
+      }
+
       next();
 
     } catch (error) {
-      return res.status(401).json({ message: "Not authorized, token failed" });
+      return res.status(401).json({ 
+        success: false,
+        message: "Not authorized, token failed" 
+      });
     }
   }
 
   if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token" });
+    return res.status(401).json({ 
+      success: false,
+      message: "Not authorized, no token" 
+    });
   }
 };
 
-// We use 'export const' here to make it a "Named Export"
-// This allows you to add new middleware without breaking the default export below
+/**
+ * Role-based authorization middleware
+ * @param {...string} roles - Allowed roles (student, teacher, admin)
+ * @returns {Function} Express middleware function
+ * 
+ * Usage:
+ * router.get("/route", protect, authorize("teacher", "admin"), controller);
+ * 
+ * Note: Must be used after protect middleware
+ */
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    // Check if the user's role (extracted by the 'protect' function) is in the allowed roles array
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+    // Check if user is authenticated (should be set by protect middleware)
+    if (!req.user) {
+      return res.status(401).json({ 
         success: false, 
-        message: `User role '${req.user.role}' is not authorized to access this route` 
+        message: "Authentication required. Please use protect middleware first." 
       });
     }
+
+    // Check if user has a valid role
+    if (!req.user.role) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "User role not found" 
+      });
+    }
+
+    const userRole = req.user.role.toLowerCase();
+
+    // Normalize allowed roles to lowercase for comparison
+    const normalizedRoles = roles.map((role) => role.toLowerCase());
+
+    // Check if user's role is in the allowed roles
+    if (!normalizedRoles.includes(userRole)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: `Access denied. Required role(s): ${roles.join(", ")}. Your role: ${userRole}` 
+      });
+    }
+
     next();
   };
 };
+
+/**
+ * Convenience middleware: Check if user is a Student
+ */
+export const isStudent = authorize("student");
+
+/**
+ * Convenience middleware: Check if user is a Teacher
+ */
+export const isTeacher = authorize("teacher");
+
+/**
+ * Convenience middleware: Check if user is an Admin
+ */
+export const isAdmin = authorize("admin");
+
+/**
+ * Convenience middleware: Check if user is Teacher or Admin
+ */
+export const isTeacherOrAdmin = authorize("teacher", "admin");
+
+/**
+ * Convenience middleware: Check if user is Student or Teacher
+ */
+export const isStudentOrTeacher = authorize("student", "teacher");
 
 export default protect;
