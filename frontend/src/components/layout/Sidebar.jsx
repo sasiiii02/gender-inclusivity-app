@@ -56,6 +56,18 @@ const navItems = [
     path: "/teacher/dashboard",
     roles: ["teacher"],
   },
+  {
+    label: "My Quizzes",
+    icon: "📝",
+    path: "/student/dashboard",
+    roles: ["student"],
+  },
+  {
+    label: "Quiz History",
+    icon: "📊",
+    path: "/student/quiz/history",
+    roles: ["student"],
+  },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

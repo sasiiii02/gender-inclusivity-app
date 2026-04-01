@@ -19,6 +19,14 @@ const statusLabels = {
 const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
   const navigate = useNavigate();
 
+  const handleStartQuiz = () => {
+    navigate(`/teacher/quiz/${quiz._id}/live`);
+  };
+
+  const handleViewResults = () => {
+    navigate(`/teacher/quiz/${quiz._id}/results`);
+  };
+
   return (
     <div className="bg-white border border-zinc-200 rounded-3xl p-6 hover:shadow-lg transition-all duration-200 group">
       {/* Header */}
@@ -128,6 +136,7 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-4 border-t border-zinc-100">
+        {/* Edit Button */}
         <button
           onClick={onEdit || (() => navigate(`/teacher/quiz/${quiz._id}/edit`))}
           className="flex-1 flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-zinc-700 border border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50 rounded-2xl transition-all"
@@ -149,6 +158,7 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
           Edit
         </button>
 
+        {/* Questions Button */}
         <button
           onClick={() => navigate(`/teacher/quiz/${quiz._id}/questions`)}
           className="flex-1 flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-zinc-700 border border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50 rounded-2xl transition-all"
@@ -170,6 +180,7 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
           Questions
         </button>
 
+        {/* Publish Button (for draft quizzes) */}
         {quiz.status === "draft" && (
           <button
             onClick={() => onPublish && onPublish(quiz._id)}
@@ -186,17 +197,18 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M5 10l7-7m0 0l7 7"
+                d="M5 10l7-7m0 0l7 7M12 3v18"
               />
             </svg>
             Publish
           </button>
         )}
 
+        {/* Start Quiz Button (for published quizzes) */}
         {quiz.status === "published" && (
           <button
-            onClick={() => navigate(`/teacher/quiz/${quiz._id}/start`)}
-            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl text-sm transition-all active:scale-[0.985]"
+            onClick={handleStartQuiz}
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-2xl text-sm transition-all active:scale-[0.985]"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -215,13 +227,62 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 4.01V8"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
             Start Quiz
           </button>
         )}
 
+        {/* Live Session Button (for active quizzes) */}
+        {quiz.status === "active" && (
+          <button
+            onClick={handleStartQuiz}
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-2xl text-sm transition-all active:scale-[0.985]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            Live Session
+          </button>
+        )}
+
+        {/* View Results Button (for completed quizzes) */}
+        {quiz.status === "completed" && (
+          <button
+            onClick={handleViewResults}
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl text-sm transition-all active:scale-[0.985]"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            View Results
+          </button>
+        )}
+
+        {/* Delete Button (for draft and archived quizzes) */}
         {(quiz.status === "draft" || quiz.status === "archived") && (
           <button
             onClick={() => onDelete && onDelete(quiz._id)}
@@ -246,38 +307,38 @@ const QuizCard = ({ quiz, onDelete, onPublish, onEdit }) => {
         )}
       </div>
 
-      {/* Quiz Link (if published) */}
-      {quiz.status !== "draft" && quiz.quizLink && (
-        <div className="mt-6 pt-5 border-t border-zinc-100">
-          <p className="text-xs font-medium text-zinc-500 mb-2">Quiz Link</p>
-          <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-2xl p-3">
-            <code className="text-xs text-zinc-600 font-mono flex-1 truncate">
-              {quiz.quizLink}
-            </code>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `${window.location.origin}/quiz/join/${quiz.quizLink}`,
-                );
-                // You can replace alert with a better toast notification later
-                alert("Link copied to clipboard");
-              }}
-              className="text-blue-600 hover:text-blue-700 font-medium text-xs px-3 py-1 rounded-xl hover:bg-blue-50 transition-colors"
-            >
-              Copy
-            </button>
-          </div>
+      {/* Quiz Link (if published or active) */}
+      {(quiz.status === "published" || quiz.status === "active") &&
+        quiz.quizLink && (
+          <div className="mt-6 pt-5 border-t border-zinc-100">
+            <p className="text-xs font-medium text-zinc-500 mb-2">Quiz Link</p>
+            <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-2xl p-3">
+              <code className="text-xs text-zinc-600 font-mono flex-1 truncate">
+                {quiz.quizLink}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/quiz/join/${quiz.quizLink}`,
+                  );
+                  alert("Link copied to clipboard");
+                }}
+                className="text-blue-600 hover:text-blue-700 font-medium text-xs px-3 py-1 rounded-xl hover:bg-blue-50 transition-colors"
+              >
+                Copy
+              </button>
+            </div>
 
-          {quiz.passcode && (
-            <p className="text-xs text-zinc-500 mt-3">
-              Passcode:{" "}
-              <span className="font-mono font-semibold text-zinc-700">
-                {quiz.passcode}
-              </span>
-            </p>
-          )}
-        </div>
-      )}
+            {quiz.passcode && (
+              <p className="text-xs text-zinc-500 mt-3">
+                Passcode:{" "}
+                <span className="font-mono font-semibold text-zinc-700">
+                  {quiz.passcode}
+                </span>
+              </p>
+            )}
+          </div>
+        )}
     </div>
   );
 };

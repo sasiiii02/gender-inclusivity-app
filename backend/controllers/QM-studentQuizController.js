@@ -149,3 +149,32 @@ export const getQuizResult = async (req, res) => {
     });
   }
 };
+
+// @desc    Get available quizzes for students
+// @route   GET /api/student/quizzes/available
+// @access  Private (Student)
+export const getAvailableQuizzes = async (req, res) => {
+  try {
+    const QMQuiz = (await import("../models/QM-Quiz.js")).default;
+
+    // Find all published quizzes that are not deleted
+    const quizzes = await QMQuiz.find({
+      status: "published", // Only published quizzes
+      isDeleted: false,
+    })
+      .select(
+        "title description subject grade duration totalQuestions totalMarks passMarks quizLink",
+      )
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: quizzes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

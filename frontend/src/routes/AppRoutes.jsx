@@ -19,6 +19,16 @@ import TeacherLayout from "../components/teacher/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
 import QuizEditor from "../pages/Teacher/QuizEditor";
 import QuizQuestions from "../pages/Teacher/QuizQuestions";
+import QuizLiveSession from "../pages/Teacher/QuizLiveSession";
+import QuizResults from "../pages/Teacher/QuizResults";
+import QuizAnalytics from "../pages/Teacher/QuizAnalytics";
+
+// Student Quiz Routes
+import StudentDashboard from "../pages/Student/StudentDashboard";
+import QuizTaking from "../pages/Student/QuizTaking";
+import QuizResult from "../pages/Student/QuizResult";
+import QuizHistory from "../pages/Student/QuizHistory";
+import QuizJoin from "../pages/Student/QuizJoin";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -33,6 +43,7 @@ const AppRoutes = () => (
     <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/quiz/join/:quizLink" element={<QuizJoin />} />
 
     {/* Student / Teacher pages — TopNav layout (MainLayout) */}
     <Route
@@ -49,6 +60,16 @@ const AppRoutes = () => (
       <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support" element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
+      <Route path="/student/dashboard" element={<StudentDashboard />} />
+      <Route
+        path="/student/quiz/take/:studentQuizId"
+        element={<QuizTaking />}
+      />
+      <Route
+        path="/student/quiz/result/:studentQuizId"
+        element={<QuizResult />}
+      />
+      <Route path="/student/quiz/history" element={<QuizHistory />} />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
@@ -80,6 +101,12 @@ const AppRoutes = () => (
       <Route path="/teacher/quiz/new" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/edit" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/questions" element={<QuizQuestions />} />
+      <Route path="/teacher/quiz/:quizId/live" element={<QuizLiveSession />} />
+      <Route path="/teacher/quiz/:quizId/results" element={<QuizResults />} />
+      <Route
+        path="/teacher/quiz/:quizId/analytics"
+        element={<QuizAnalytics />}
+      />
     </Route>
 
     <Route path="*" element={<Placeholder label="404 Not Found" />} />
