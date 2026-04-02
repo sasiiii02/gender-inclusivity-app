@@ -13,6 +13,7 @@ import AdminLearning  from "../pages/Admin/AdminLearning";
 import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
+import MyRegistrations from '../pages/Events/MyRegistrations';
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -37,6 +38,7 @@ const AppRoutes = () => (
       <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
+      <Route path="/my-registrations" element={<MyRegistrations />} />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}

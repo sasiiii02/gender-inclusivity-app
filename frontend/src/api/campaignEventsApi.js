@@ -46,5 +46,17 @@ export const campaignEventsApi = {
   deleteEvent: async (eventId) => {
     const response = await axiosInstance.delete(`${EVENT_URL}/${eventId}`);
     return response.data;
-  }
+  },
+
+  // Add these under your existing Event Endpoints
+  getMyRegistrations: async () => {
+    const response = await axiosInstance.get('/registrations/my-registrations');
+    return response.data;
+  },
+
+  cancelRegistration: async (registrationId) => {
+    const response = await axiosInstance.delete(`/registrations/${registrationId}`);
+    return response.data;
+  },
+
 };
