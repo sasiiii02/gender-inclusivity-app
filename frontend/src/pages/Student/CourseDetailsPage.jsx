@@ -1,41 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import CourseDetailsCard from "../../components/student/CourseDetailsCard";
+import LessonList from "../../components/student/LessonList";
 import * as trainingApi from "../../api/trainingApi";
 
 const CourseDetailsPage = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const { user } = useAuth();
-  const isStudent = user?.role === "student";
 
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
-  const [enrollment, setEnrollment] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
-  const [updatingProgress, setUpdatingProgress] = useState(false);
-  const [completing, setCompleting] = useState(false);
-
-  const fetchEnrollment = async () => {
-    if (!isStudent) return;
-    try {
-      const res = await trainingApi.getMyEnrollments();
-      const list = res.data || [];
-      const found = list.find((e) => e?.course?._id === courseId) || null;
-      setEnrollment(found);
-    } catch {
-      setEnrollment(null);
-    }
-  };
 
   const fetchAll = async () => {
     setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const courseRes = await trainingApi.getCourseById(courseId);
       setCourse(courseRes.data || null);
@@ -43,14 +29,11 @@ const CourseDetailsPage = () => {
       if (!courseRes.data) {
         setError("Course not found.");
         setLessons([]);
-        setEnrollment(null);
         return;
       }
 
       const lessonsRes = await trainingApi.getLessonsByCourse(courseId);
       setLessons(lessonsRes.data?.data || []);
-
-      await fetchEnrollment();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load course.");
     } finally {
@@ -60,55 +43,24 @@ const CourseDetailsPage = () => {
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseId, isStudent, user?.id]);
-
-  const enrolledProgress = useMemo(() => enrollment?.progress ?? 0, [enrollment]);
+  }, [courseId]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
     setError("");
+    setSuccess("");
     try {
       await trainingApi.enrollInCourse(courseId);
-      await fetchEnrollment();
+      setIsEnrolled(true);
+      const msg = "Enrollment successful!";
+      setSuccess(msg);
+      // Temporary notification fallback (no toast system detected)
+      // eslint-disable-next-line no-alert
+      alert(msg);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to enroll.");
     } finally {
       setEnrolling(false);
-    }
-  };
-
-  const handleProgressChange = async (enrollmentId, newProgress) => {
-    if (!enrollmentId) return;
-    setUpdatingProgress(true);
-    setError("");
-    try {
-      await trainingApi.updateProgress(enrollmentId, newProgress);
-      await fetchEnrollment();
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to update progress.");
-    } finally {
-      setUpdatingProgress(false);
-    }
-  };
-
-  const handleLessonComplete = async (_lesson, computedProgress) => {
-    if (!enrollment?._id) return;
-    // Avoid spamming updates when progress isn't changing.
-    if (computedProgress <= enrolledProgress) return;
-    await handleProgressChange(enrollment._id, computedProgress);
-  };
-
-  const handleMarkComplete = async (enrollmentId) => {
-    setCompleting(true);
-    setError("");
-    try {
-      await trainingApi.markCourseComplete(enrollmentId);
-      await fetchEnrollment();
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to mark complete.");
-    } finally {
-      setCompleting(false);
     }
   };
 
@@ -149,22 +101,32 @@ const CourseDetailsPage = () => {
         </div>
       ) : null}
 
+      {success ? (
+        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+          {success}
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => navigate("/student/courses")}
+          className="text-sm bg-stone-900 hover:bg-stone-800 text-white font-medium px-4 py-2 rounded-xl transition-colors"
+        >
+          Back to courses
+        </button>
+      </div>
+
       <CourseDetailsCard
         course={course}
-        lessons={lessons}
-        enrollment={enrollment}
-        isEnrolling={enrolling || updatingProgress}
-        onEnroll={isStudent ? handleEnroll : null}
-        onProgressChange={isStudent ? handleProgressChange : null}
-        onLessonComplete={isStudent ? handleLessonComplete : null}
-        onMarkComplete={isStudent ? handleMarkComplete : null}
+        isEnrolled={isEnrolled}
+        onEnroll={enrolling || isEnrolled ? null : handleEnroll}
       />
 
-      {(updatingProgress || completing) && (
-        <div className="text-xs text-stone-500">
-          Updating… please wait.
-        </div>
-      )}
+      <div className="space-y-3">
+        <h2 className="font-serif text-xl font-bold text-stone-900">Lessons</h2>
+        <LessonList lessons={lessons} />
+      </div>
     </div>
   );
 };
