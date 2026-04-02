@@ -59,4 +59,14 @@ export const campaignEventsApi = {
     return response.data;
   },
 
+  submitFeedback: async (eventId, feedbackData) => {
+    const response = await axiosInstance.post(`/feedbacks/events/${eventId}`, feedbackData);
+    return response.data;
+  },
+
+  getEventStats: async (eventId) => {
+    const response = await axiosInstance.get(`/feedbacks/events/${eventId}/stats`);
+    return response.data;
+  }
+
 };
