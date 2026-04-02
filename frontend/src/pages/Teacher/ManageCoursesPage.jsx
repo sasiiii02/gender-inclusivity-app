@@ -11,8 +11,8 @@ const ManageCoursesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const [deletingId, setDeletingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -52,6 +52,7 @@ const ManageCoursesPage = () => {
 
   const openEdit = (course) => {
     setEditing(course);
+    setShowForm(true);
   };
 
   const handleSubmit = async (payload) => {
@@ -67,6 +68,7 @@ const ManageCoursesPage = () => {
         setSuccess("Course created successfully.");
       }
       setEditing(null);
+      setShowForm(false);
       await fetchCourses();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to save course.");
@@ -75,110 +77,152 @@ const ManageCoursesPage = () => {
     }
   };
 
-  const handleDelete = async (courseId) => {
-    if (!window.confirm("Delete this course? (soft delete)")) return;
-    setDeletingId(courseId);
-    setError("");
-    setSuccess("");
-    try {
-      await trainingApi.deleteCourse(courseId);
-      await fetchCourses();
-      setSuccess("Course deleted successfully.");
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to delete course.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   const handleManageLessons = (course) => {
     if (!course?._id) return;
     navigate(`/teacher/courses/${course._id}/lessons`);
   };
 
-  const handleViewStudents = (course) => {
-    if (!course?._id) return;
-    navigate(`/teacher/courses/${course._id}/students`);
-  };
+  const filteredCourses = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) return courses;
+
+    return courses.filter((course) => {
+      const haystack = [course.title, course.category, course.level, course.status]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(keyword);
+    });
+  }, [courses, searchTerm]);
+
+  const metrics = useMemo(() => {
+    const total = courses.length;
+    const active = courses.filter(
+      (course) => `${course.status || "Active"}`.toLowerCase() === "active"
+    ).length;
+    const enrolled = courses.reduce((sum, course) => {
+      const candidates = [
+        course?.studentsCount,
+        course?.totalStudents,
+        course?.enrolledCount,
+        course?.enrollmentsCount,
+        Array.isArray(course?.students) ? course.students.length : null,
+        Array.isArray(course?.enrollments) ? course.enrollments.length : null,
+      ];
+      const count = candidates.find((value) => Number.isFinite(Number(value)));
+      return sum + (count ? Number(count) : 0);
+    }, 0);
+
+    const completionValues = courses
+      .map((course) => Number(course.avgCompletion ?? course.completionRate))
+      .filter((value) => Number.isFinite(value));
+    const avgCompletion = completionValues.length
+      ? Math.round(completionValues.reduce((a, b) => a + b, 0) / completionValues.length)
+      : 0;
+
+    return { total, active, enrolled, avgCompletion };
+  }, [courses]);
 
   return (
-    <div className="space-y-5 animate-fade-in">
-      <div>
-        <h1 className="text-xs font-semibold uppercase tracking-wider text-amber-600">
-          Training Module - Manage Courses Page
-        </h1>
-        <h1 className="font-serif text-2xl font-bold text-stone-900">
-          Manage Courses
-        </h1>
-        <p className="text-stone-500 text-sm mt-0.5">
-          Create, update, and delete courses.
-        </p>
-      </div>
-
-      {error ? (
-        <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
-          ⚠️ {error}
+    <div className="animate-fade-in">
+      <div className="rounded-2xl border border-stone-200 bg-white text-stone-900 p-5 sm:p-6 space-y-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Manage Courses</h1>
+            <p className="text-sm text-stone-500 mt-0.5">Teacher &gt; Courses</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm((prev) => !prev);
+            }}
+            className="self-start rounded-xl bg-violet-600 px-4 py-2 text-base font-semibold text-white hover:bg-violet-700 transition-colors"
+          >
+            + Add course
+          </button>
         </div>
-      ) : null}
 
-      {success ? (
-        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
-          {success}
+        {error ? (
+          <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm">
+            {error}
+          </div>
+        ) : null}
+
+        {success ? (
+          <div className="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+            {success}
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: "Total courses", value: metrics.total },
+            { label: "Active", value: metrics.active },
+            { label: "Enrolled", value: metrics.enrolled },
+            { label: "Avg completion", value: `${metrics.avgCompletion}%` },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-center"
+            >
+              <p className="text-3xl leading-none font-bold">{stat.value}</p>
+              <p className="text-sm text-stone-600 mt-2">{stat.label}</p>
+            </div>
+          ))}
         </div>
-      ) : null}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1 border border-stone-200 rounded-2xl bg-white p-4">
-          <h2 className="font-serif text-lg font-bold text-stone-900">
-            {editing ? "Edit Course" : "Create Course"}
-          </h2>
-          <p className="text-sm text-stone-500 mt-0.5">
-            {editing ? "Update course details and save changes." : "Fill in details to publish a new course."}
-          </p>
-          <div className="mt-4">
-            <CourseForm
-              initialData={editing || emptyInitialValues}
-              submitLabel={saving ? "Saving…" : editing ? "Update Course" : "Create Course"}
-              onSubmit={saving ? null : handleSubmit}
-            />
-            {editing ? (
+        {showForm ? (
+          <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+            <h2 className="text-lg font-semibold">{editing ? "Edit Course" : "Add Course"}</h2>
+            <p className="text-sm text-stone-500 mt-0.5">
+              {editing ? "Update the selected course details." : "Fill details to publish a new course."}
+            </p>
+            <div className="mt-4">
+              <CourseForm
+                initialData={editing || emptyInitialValues}
+                submitLabel={saving ? "Saving..." : editing ? "Update Course" : "Create Course"}
+                onSubmit={saving ? null : handleSubmit}
+              />
               <button
                 type="button"
-                disabled={saving}
-                onClick={() => setEditing(null)}
-                className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors disabled:opacity-60"
+                onClick={() => {
+                  setEditing(null);
+                  setShowForm(false);
+                }}
+                className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors"
               >
-                Cancel edit
+                Cancel
               </button>
-            ) : null}
+            </div>
           </div>
+        ) : null}
+
+        <div className="flex justify-end">
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+            className="w-full sm:w-64 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-stone-800 placeholder:text-stone-400 outline-none focus:ring-2 focus:ring-violet-200"
+          />
         </div>
 
-        <div className="lg:col-span-2">
-          {loading ? (
-            <div className="grid sm:grid-cols-2 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="border border-stone-200 rounded-2xl p-4 bg-white animate-pulse"
-                />
-              ))}
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-6 text-center">
-              No courses found.
-            </div>
-          ) : (
-            <CourseTable
-              courses={courses}
-              onEdit={openEdit}
-              onDelete={handleDelete}
-              onManageLessons={handleManageLessons}
-              onViewStudents={handleViewStudents}
-              deletingId={deletingId}
-            />
-          )}
-        </div>
+        {loading ? (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="border border-stone-200 rounded-2xl p-4 bg-stone-50 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <CourseTable
+            courses={filteredCourses}
+            onEdit={openEdit}
+            onManageLessons={handleManageLessons}
+          />
+        )}
       </div>
     </div>
   );

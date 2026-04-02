@@ -76,8 +76,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     ],
     teacher: [
       { label: "Manage Courses", icon: "🧑‍🏫", path: "/teacher/manage-courses" },
-      { label: "Manage Lessons", icon: "📖", path: "/teacher/manage-courses" },
-      { label: "Enrolled Students", icon: "👩‍🎓", path: "/teacher/manage-courses" },
+      { label: "Manage Lessons", icon: "📖", disabled: true },
+      { label: "Enrolled Students", icon: "👩‍🎓", disabled: true },
     ],
   };
 
@@ -209,23 +209,34 @@ const Sidebar = ({ isOpen, onClose }) => {
 
                     {learningOpen && (
                       <div className="mt-1 ml-4 space-y-0.5 border-l border-stone-200 pl-2">
-                        {learningItems.map((learningItem) => (
-                          <NavLink
-                            key={`${learningItem.label}-${learningItem.path}`}
-                            to={learningItem.path}
-                            onClick={onClose}
-                            className={({ isActive }) =>
-                              `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
-                                isActive
-                                  ? "bg-violet-100 text-violet-800"
-                                  : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                              }`
-                            }
-                          >
-                            <span className="text-base">{learningItem.icon}</span>
-                            <span>{learningItem.label}</span>
-                          </NavLink>
-                        ))}
+                        {learningItems.map((learningItem) =>
+                          learningItem.disabled ? (
+                            <div
+                              key={learningItem.label}
+                              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-stone-400 cursor-not-allowed"
+                              title="Coming soon"
+                            >
+                              <span className="text-base">{learningItem.icon}</span>
+                              <span>{learningItem.label}</span>
+                            </div>
+                          ) : (
+                            <NavLink
+                              key={`${learningItem.label}-${learningItem.path}`}
+                              to={learningItem.path}
+                              onClick={onClose}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+                                  isActive
+                                    ? "bg-violet-100 text-violet-800"
+                                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                                }`
+                              }
+                            >
+                              <span className="text-base">{learningItem.icon}</span>
+                              <span>{learningItem.label}</span>
+                            </NavLink>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
