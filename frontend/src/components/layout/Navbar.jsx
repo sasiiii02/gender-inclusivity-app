@@ -9,6 +9,9 @@ const pageTitles = {
   "/reports":   "Incident Reports",
   "/support":   "Support Center",
   "/chat":      "AI Chatbot",
+  "/student/courses": "Courses",
+  "/student/enrollments": "My Enrollments",
+  "/teacher/manage-courses": "Manage Courses",
   "/admin":     "Admin Panel",
 };
 

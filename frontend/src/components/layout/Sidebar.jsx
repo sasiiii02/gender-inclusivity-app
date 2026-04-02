@@ -45,6 +45,24 @@ const navItems = [
     roles: ["student", "teacher", "admin"],
   },
   {
+    label: "Courses",
+    icon: "🎓",
+    path: "/student/courses",
+    roles: ["student"],
+  },
+  {
+    label: "My Enrollments",
+    icon: "📈",
+    path: "/student/enrollments",
+    roles: ["student"],
+  },
+  {
+    label: "Manage Courses",
+    icon: "🧑‍🏫",
+    path: "/teacher/manage-courses",
+    roles: ["teacher"],
+  },
+  {
     label: "Admin Panel",
     icon: "🛡️",
     path: "/admin",
