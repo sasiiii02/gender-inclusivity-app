@@ -1,7 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 // Course APIs
-export const getAllCourses = () => axiosInstance.get("/courses");
+export const getAllCourses = (params) => axiosInstance.get("/courses", { params });
 export const getCourseById = (courseId) => axiosInstance.get(`/courses/${courseId}`);
 export const createCourse = (courseData) => axiosInstance.post("/courses", courseData);
 export const updateCourse = (courseId, updatedData) =>

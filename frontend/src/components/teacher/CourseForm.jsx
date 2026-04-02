@@ -1,15 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const levelOptions = ["Beginner", "Intermediate", "Advanced"];
-const statusOptions = ["Active", "Inactive"];
 
-const CourseForm = ({
-  initialValues,
-  onSubmit,
-  onCancel,
-  submitLabel = "Save",
-  isSubmitting = false,
-}) => {
+const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
   const empty = useMemo(
     () => ({
       title: "",
@@ -17,30 +10,51 @@ const CourseForm = ({
       category: "",
       level: "Beginner",
       duration: "",
-      status: "Active",
     }),
     []
   );
 
-  const [form, setForm] = useState({ ...empty, ...(initialValues || {}) });
+  const [form, setForm] = useState({ ...empty, ...(initialData || {}) });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    setForm({ ...empty, ...(initialData || {}) });
+    setErrors({});
+  }, [empty, initialData]);
 
   const setField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const validate = () => {
+    const next = {};
+    if (!form.title?.trim()) next.title = "Title is required.";
+    if (!form.description?.trim()) next.description = "Description is required.";
+    if (!form.category?.trim()) next.category = "Category is required.";
+    if (!form.level) next.level = "Level is required.";
+
+    const d = form.duration;
+    if (d === "" || d === null || d === undefined) {
+      next.duration = "Duration is required.";
+    } else if (Number.isNaN(Number(d)) || Number(d) < 0) {
+      next.duration = "Duration must be a valid number.";
+    }
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validate()) return;
 
     const payload = {
       title: form.title.trim(),
       description: form.description.trim(),
-      category: form.category.trim() || undefined,
-      level: form.level || undefined,
-      duration:
-        form.duration === "" || form.duration === null
-          ? undefined
-          : Number(form.duration),
-      status: form.status,
+      category: form.category.trim(),
+      level: form.level,
+      duration: Number(form.duration),
     };
 
     onSubmit?.(payload);
@@ -53,12 +67,14 @@ const CourseForm = ({
           Title
         </label>
         <input
-          required
           value={form.title}
           onChange={(e) => setField("title", e.target.value)}
           className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
           placeholder="Course title"
         />
+        {errors.title ? (
+          <div className="text-xs text-rose-600 mt-1">{errors.title}</div>
+        ) : null}
       </div>
 
       <div>
@@ -66,13 +82,15 @@ const CourseForm = ({
           Description
         </label>
         <textarea
-          required
           rows={4}
           value={form.description}
           onChange={(e) => setField("description", e.target.value)}
           className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200 resize-none"
           placeholder="Short description"
         />
+        {errors.description ? (
+          <div className="text-xs text-rose-600 mt-1">{errors.description}</div>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -86,6 +104,9 @@ const CourseForm = ({
             className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
             placeholder="e.g. Gender Identity"
           />
+          {errors.category ? (
+            <div className="text-xs text-rose-600 mt-1">{errors.category}</div>
+          ) : null}
         </div>
 
         <div>
@@ -103,58 +124,35 @@ const CourseForm = ({
               </option>
             ))}
           </select>
+          {errors.level ? (
+            <div className="text-xs text-rose-600 mt-1">{errors.level}</div>
+          ) : null}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-semibold text-stone-700 mb-1">
-            Duration (minutes)
-          </label>
-          <input
-            type="number"
-            value={form.duration}
-            onChange={(e) => setField("duration", e.target.value)}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
-            placeholder="e.g. 60"
-            min={0}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-stone-700 mb-1">
-            Status
-          </label>
-          <select
-            value={form.status}
-            onChange={(e) => setField("status", e.target.value)}
-            className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
-          >
-            {statusOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <label className="block text-sm font-semibold text-stone-700 mb-1">
+          Duration (minutes)
+        </label>
+        <input
+          type="number"
+          value={form.duration}
+          onChange={(e) => setField("duration", e.target.value)}
+          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
+          placeholder="e.g. 60"
+          min={0}
+        />
+        {errors.duration ? (
+          <div className="text-xs text-rose-600 mt-1">{errors.duration}</div>
+        ) : null}
       </div>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors"
-          disabled={isSubmitting}
-        >
-          Cancel
-        </button>
-
+      <div className="flex">
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="flex-1 rounded-xl px-3 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-colors disabled:opacity-60"
+          className="w-full rounded-xl px-3 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-colors"
         >
-          {isSubmitting ? "Saving…" : submitLabel}
+          {submitLabel}
         </button>
       </div>
     </form>

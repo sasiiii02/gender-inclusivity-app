@@ -12,13 +12,14 @@ const MyEnrollmentsPage = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [updating, setUpdating] = useState(false);
   const [completing, setCompleting] = useState(false);
 
   const fetchEnrollments = async () => {
     setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const res = await trainingApi.getMyEnrollments();
       setEnrollments(res.data || []);
@@ -36,25 +37,23 @@ const MyEnrollmentsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, isStudent]);
 
-  const handleProgressChange = async (enrollmentId, progressPercentage) => {
-    setUpdating(true);
-    setError("");
-    try {
-      await trainingApi.updateProgress(enrollmentId, progressPercentage);
-      await fetchEnrollments();
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to update progress.");
-    } finally {
-      setUpdating(false);
-    }
+  const handleContinueLearning = (enrollment) => {
+    const courseId = enrollment?.course?._id;
+    if (!courseId) return;
+    navigate(`/student/courses/${courseId}`);
   };
 
-  const handleMarkComplete = async (enrollmentId) => {
+  const handleMarkComplete = async (enrollment) => {
+    const enrollmentId = enrollment?._id;
+    if (!enrollmentId) return;
     setCompleting(true);
     setError("");
+    setSuccess("");
     try {
       await trainingApi.markCourseComplete(enrollmentId);
       await fetchEnrollments();
+      const msg = "Course marked as completed successfully.";
+      setSuccess(msg);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to mark complete.");
     } finally {
@@ -87,6 +86,12 @@ const MyEnrollmentsPage = () => {
         </div>
       ) : null}
 
+      {success ? (
+        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+          {success}
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="grid sm:grid-cols-2 gap-4">
           {[...Array(4)].map((_, i) => (
@@ -103,32 +108,12 @@ const MyEnrollmentsPage = () => {
       ) : (
         <div className="space-y-4">
           {enrollments.map((e) => (
-            <div
+            <EnrollmentCard
               key={e._id}
-              className="border border-stone-200 rounded-2xl bg-white p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <EnrollmentCard
-                    enrollment={e}
-                    onProgressChange={handleProgressChange}
-                    onMarkComplete={handleMarkComplete}
-                  />
-                </div>
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    disabled={updating || completing}
-                    onClick={() =>
-                      navigate(`/student/courses/${e.course?._id || ""}`)
-                    }
-                    className="text-sm bg-stone-900 hover:bg-stone-800 text-white font-medium px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
-                  >
-                    View
-                  </button>
-                </div>
-              </div>
-            </div>
+              enrollment={e}
+              onContinue={handleContinueLearning}
+              onComplete={completing ? null : handleMarkComplete}
+            />
           ))}
         </div>
       )}

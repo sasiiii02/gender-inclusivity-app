@@ -1,9 +1,4 @@
-const LessonTable = ({
-  lessons = [],
-  onEdit,
-  onDelete,
-  deletingId = null,
-}) => {
+const LessonTable = ({ lessons = [], onEdit, onDelete, deletingId = null }) => {
   if (!lessons.length) {
     return (
       <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">

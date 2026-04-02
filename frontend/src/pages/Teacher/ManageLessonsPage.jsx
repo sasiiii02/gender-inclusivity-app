@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import LessonForm from "../../components/teacher/LessonForm";
 import LessonTable from "../../components/teacher/LessonTable";
 import * as trainingApi from "../../api/trainingApi";
 
 const ManageLessonsPage = () => {
-  const [courses, setCourses] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const navigate = useNavigate();
+  const { courseId } = useParams();
 
   const [lessons, setLessons] = useState([]);
-  const [loadingLessons, setLoadingLessons] = useState(false);
-  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [showForm, setShowForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -28,29 +28,21 @@ const ManageLessonsPage = () => {
     []
   );
 
-  const fetchCourses = async () => {
-    setLoadingCourses(true);
-    setError("");
-    try {
-      const res = await trainingApi.getAllCourses({
-        page: 1,
-        limit: 100,
-      });
-      const list = res.data?.data?.courses || [];
-      setCourses(list);
-      setSelectedCourseId((prev) => prev || list[0]?._id || "");
-    } catch (e) {
-      setError(e?.response?.data?.message || "Failed to load courses.");
-      setCourses([]);
-    } finally {
-      setLoadingCourses(false);
-    }
+  const openEdit = (lesson) => {
+    setEditingLesson(lesson);
   };
 
-  const fetchLessons = async (courseId) => {
-    if (!courseId) return;
-    setLoadingLessons(true);
+  const fetchLessons = async () => {
+    if (!courseId) {
+      setLessons([]);
+      setLoading(false);
+      setError("Missing courseId in route.");
+      return;
+    }
+
+    setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const res = await trainingApi.getLessonsByCourse(courseId);
       setLessons(res.data?.data || []);
@@ -58,47 +50,28 @@ const ManageLessonsPage = () => {
       setError(e?.response?.data?.message || "Failed to load lessons.");
       setLessons([]);
     } finally {
-      setLoadingLessons(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
-
-  useEffect(() => {
-    fetchLessons(selectedCourseId);
+    fetchLessons();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCourseId]);
-
-  const openCreate = () => {
-    setEditingLesson(null);
-    setShowForm(true);
-  };
-
-  const openEdit = (lesson) => {
-    setEditingLesson(lesson);
-    setShowForm(true);
-  };
-
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingLesson(null);
-  };
+  }, [courseId]);
 
   const handleSubmit = async (payload) => {
     setSaving(true);
     setError("");
     try {
-      if (!selectedCourseId) throw new Error("Select a course first.");
-
       if (editingLesson?._id) {
         await trainingApi.updateLesson(editingLesson._id, payload);
+        setSuccess("Lesson updated successfully.");
       } else {
-        await trainingApi.addLessonToCourse(selectedCourseId, payload);
+        await trainingApi.addLesson(courseId, payload);
+        setSuccess("Lesson created successfully.");
       }
-      closeForm();
-      await fetchLessons(selectedCourseId);
+      setEditingLesson(null);
+      await fetchLessons();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to save lesson.");
     } finally {
@@ -112,15 +85,14 @@ const ManageLessonsPage = () => {
     setError("");
     try {
       await trainingApi.deleteLesson(lessonId);
-      await fetchLessons(selectedCourseId);
+      setSuccess("Lesson deleted successfully.");
+      await fetchLessons();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to delete lesson.");
     } finally {
       setDeletingId(null);
     }
   };
-
-  const selectedCourseTitle = courses.find((c) => c._id === selectedCourseId)?.title;
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -135,11 +107,10 @@ const ManageLessonsPage = () => {
         </div>
         <button
           type="button"
-          onClick={openCreate}
-          disabled={!selectedCourseId}
-          className="bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
+          onClick={() => navigate(-1)}
+          className="bg-stone-900 hover:bg-stone-800 text-white font-medium px-4 py-2 rounded-xl transition-colors"
         >
-          + Add lesson
+          Back
         </button>
       </div>
 
@@ -149,80 +120,70 @@ const ManageLessonsPage = () => {
         </div>
       ) : null}
 
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-semibold text-stone-700">Course</label>
-        {loadingCourses ? (
-          <div className="text-sm text-stone-500">Loading courses…</div>
-        ) : (
-          <select
-            value={selectedCourseId}
-            onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="flex-1 rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
-          >
-            {courses.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.title}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
-      <div className="border border-stone-200 rounded-2xl bg-white p-4">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <h2 className="font-serif text-lg font-bold text-stone-900">
-            {selectedCourseTitle ? `Lessons • ${selectedCourseTitle}` : "Lessons"}
-          </h2>
-          {loadingLessons ? (
-            <span className="text-xs text-stone-500">Loading…</span>
-          ) : (
-            <span className="text-xs font-semibold text-stone-500">
-              {lessons.length} lessons
-            </span>
-          )}
+      {success ? (
+        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+          {success}
         </div>
+      ) : null}
 
-        {loadingLessons ? (
-          <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
-            Fetching lessons…
-          </div>
-        ) : (
-          <LessonTable
-            lessons={lessons}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-            deletingId={deletingId}
-          />
-        )}
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 border border-stone-200 rounded-2xl bg-white p-4">
+          <h2 className="font-serif text-lg font-bold text-stone-900">
+            {editingLesson ? "Edit Lesson" : "Add Lesson"}
+          </h2>
+          <p className="text-sm text-stone-500 mt-0.5">
+            Course: <span className="font-semibold">{courseId || "—"}</span>
+          </p>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg animate-slide-up">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-              <h3 className="font-serif text-lg font-bold text-stone-900">
-                {editingLesson ? "Edit Lesson" : "Add Lesson"}
-              </h3>
+          <div className="mt-4">
+            <LessonForm
+              initialData={editingLesson || emptyLessonValues}
+              submitLabel={saving ? "Saving…" : editingLesson ? "Update Lesson" : "Add Lesson"}
+              onSubmit={saving ? null : handleSubmit}
+            />
+            {editingLesson ? (
               <button
                 type="button"
-                onClick={closeForm}
-                className="text-stone-400 hover:text-stone-600 text-2xl"
+                disabled={saving}
+                onClick={() => setEditingLesson(null)}
+                className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors disabled:opacity-60"
               >
-                ×
+                Cancel edit
               </button>
-            </div>
-            <div className="px-6 py-5">
-              <LessonForm
-                initialValues={editingLesson || emptyLessonValues}
-                submitLabel={editingLesson ? "Save Changes" : "Add Lesson"}
-                isSubmitting={saving}
-                onCancel={closeForm}
-                onSubmit={handleSubmit}
-              />
-            </div>
+            ) : null}
           </div>
         </div>
-      )}
+
+        <div className="lg:col-span-2 border border-stone-200 rounded-2xl bg-white p-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="font-serif text-lg font-bold text-stone-900">Lessons</h2>
+            {loading ? (
+              <span className="text-xs text-stone-500">Loading…</span>
+            ) : (
+              <span className="text-xs font-semibold text-stone-500">
+                {lessons.length} lessons
+              </span>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
+              Fetching lessons…
+            </div>
+          ) : lessons.length === 0 ? (
+            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
+              No lessons found.
+            </div>
+          ) : (
+            <LessonTable
+              lessons={lessons}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+              deletingId={deletingId}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,11 @@
-const CourseTable = ({ courses = [], onEdit, onDelete, deletingId = null }) => {
+const CourseTable = ({
+  courses = [],
+  onEdit,
+  onDelete,
+  onManageLessons,
+  onViewStudents,
+  deletingId = null,
+}) => {
   if (!courses.length) {
     return (
       <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
@@ -47,7 +54,7 @@ const CourseTable = ({ courses = [], onEdit, onDelete, deletingId = null }) => {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => onEdit?.(c)}
@@ -62,6 +69,20 @@ const CourseTable = ({ courses = [], onEdit, onDelete, deletingId = null }) => {
                       className="text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl px-3 py-2 transition-colors disabled:opacity-60"
                     >
                       {deletingId === c._id ? "Deleting…" : "Delete"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onManageLessons?.(c)}
+                      className="text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl px-3 py-2 transition-colors"
+                    >
+                      Manage Lessons
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onViewStudents?.(c)}
+                      className="text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl px-3 py-2 transition-colors"
+                    >
+                      View Students
                     </button>
                   </div>
                 </td>

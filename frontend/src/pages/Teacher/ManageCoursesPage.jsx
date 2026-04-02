@@ -1,22 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CourseForm from "../../components/teacher/CourseForm";
 import CourseTable from "../../components/teacher/CourseTable";
 import * as trainingApi from "../../api/trainingApi";
 
 const ManageCoursesPage = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [deletingId, setDeletingId] = useState(null);
 
-  const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const fetchCourses = async () => {
     setLoading(true);
     setError("");
+    setSuccess("");
     try {
       const res = await trainingApi.getAllCourses({
         page: 1,
@@ -42,36 +45,27 @@ const ManageCoursesPage = () => {
       category: "",
       level: "Beginner",
       duration: "",
-      status: "Active",
     }),
     []
   );
 
-  const openCreate = () => {
-    setEditing(null);
-    setShowForm(true);
-  };
-
   const openEdit = (course) => {
     setEditing(course);
-    setShowForm(true);
-  };
-
-  const closeForm = () => {
-    setShowForm(false);
-    setEditing(null);
   };
 
   const handleSubmit = async (payload) => {
     setSaving(true);
     setError("");
+    setSuccess("");
     try {
       if (editing?._id) {
         await trainingApi.updateCourse(editing._id, payload);
+        setSuccess("Course updated successfully.");
       } else {
         await trainingApi.createCourse(payload);
+        setSuccess("Course created successfully.");
       }
-      closeForm();
+      setEditing(null);
       await fetchCourses();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to save course.");
@@ -84,9 +78,11 @@ const ManageCoursesPage = () => {
     if (!window.confirm("Delete this course? (soft delete)")) return;
     setDeletingId(courseId);
     setError("");
+    setSuccess("");
     try {
       await trainingApi.deleteCourse(courseId);
       await fetchCourses();
+      setSuccess("Course deleted successfully.");
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to delete course.");
     } finally {
@@ -94,24 +90,25 @@ const ManageCoursesPage = () => {
     }
   };
 
+  const handleManageLessons = (course) => {
+    if (!course?._id) return;
+    navigate(`/teacher/courses/${course._id}/lessons`);
+  };
+
+  const handleViewStudents = (course) => {
+    if (!course?._id) return;
+    navigate(`/teacher/courses/${course._id}/students`);
+  };
+
   return (
     <div className="space-y-5 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-bold text-stone-900">
-            Manage Courses
-          </h1>
-          <p className="text-stone-500 text-sm mt-0.5">
-            Create, edit, and deactivate courses.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2 rounded-xl transition-colors"
-        >
-          + Add course
-        </button>
+      <div>
+        <h1 className="font-serif text-2xl font-bold text-stone-900">
+          Manage Courses
+        </h1>
+        <p className="text-stone-500 text-sm mt-0.5">
+          Create, update, and delete courses.
+        </p>
       </div>
 
       {error ? (
@@ -120,51 +117,65 @@ const ManageCoursesPage = () => {
         </div>
       ) : null}
 
-      {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="border border-stone-200 rounded-2xl p-4 bg-white animate-pulse"
-            />
-          ))}
+      {success ? (
+        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+          {success}
         </div>
-      ) : (
-        <CourseTable
-          courses={courses}
-          onEdit={openEdit}
-          onDelete={handleDelete}
-          deletingId={deletingId}
-        />
-      )}
+      ) : null}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg animate-slide-up">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-              <h3 className="font-serif text-lg font-bold text-stone-900">
-                {editing ? "Edit Course" : "Add Course"}
-              </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 border border-stone-200 rounded-2xl bg-white p-4">
+          <h2 className="font-serif text-lg font-bold text-stone-900">
+            {editing ? "Edit Course" : "Create Course"}
+          </h2>
+          <p className="text-sm text-stone-500 mt-0.5">
+            {editing ? "Update course details and save changes." : "Fill in details to publish a new course."}
+          </p>
+          <div className="mt-4">
+            <CourseForm
+              initialData={editing || emptyInitialValues}
+              submitLabel={saving ? "Saving…" : editing ? "Update Course" : "Create Course"}
+              onSubmit={saving ? null : handleSubmit}
+            />
+            {editing ? (
               <button
                 type="button"
-                onClick={closeForm}
-                className="text-stone-400 hover:text-stone-600 text-2xl"
+                disabled={saving}
+                onClick={() => setEditing(null)}
+                className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors disabled:opacity-60"
               >
-                ×
+                Cancel edit
               </button>
-            </div>
-            <div className="px-6 py-5">
-              <CourseForm
-                initialValues={editing ? editing : emptyInitialValues}
-                submitLabel={editing ? "Save Changes" : "Create"}
-                isSubmitting={saving}
-                onCancel={closeForm}
-                onSubmit={handleSubmit}
-              />
-            </div>
+            ) : null}
           </div>
         </div>
-      )}
+
+        <div className="lg:col-span-2">
+          {loading ? (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="border border-stone-200 rounded-2xl p-4 bg-white animate-pulse"
+                />
+              ))}
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-6 text-center">
+              No courses found.
+            </div>
+          ) : (
+            <CourseTable
+              courses={courses}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+              onManageLessons={handleManageLessons}
+              onViewStudents={handleViewStudents}
+              deletingId={deletingId}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };
