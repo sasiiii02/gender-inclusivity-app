@@ -1,56 +1,28 @@
 import axiosInstance from "./axiosInstance";
 
-// Courses
-export const getAllCourses = (query = {}) =>
-  axiosInstance.get("/courses", { params: query });
-
-export const getCourseById = (courseId) =>
-  axiosInstance.get(`/courses/${courseId}`);
-
-export const createCourse = (data) => axiosInstance.post("/courses", data);
-
-export const updateCourse = (courseId, data) =>
-  axiosInstance.put(`/courses/${courseId}`, data);
-
-export const patchCourse = (courseId, data) =>
-  axiosInstance.patch(`/courses/${courseId}`, data);
-
+// Course APIs
+export const getAllCourses = () => axiosInstance.get("/courses");
+export const getCourseById = (courseId) => axiosInstance.get(`/courses/${courseId}`);
+export const createCourse = (courseData) => axiosInstance.post("/courses", courseData);
+export const updateCourse = (courseId, updatedData) =>
+  axiosInstance.put(`/courses/${courseId}`, updatedData);
 export const deleteCourse = (courseId) => axiosInstance.delete(`/courses/${courseId}`);
 
-// Lessons
+// Lesson APIs
+export const addLesson = (courseId, lessonData) =>
+  axiosInstance.post(`/courses/${courseId}/lessons`, lessonData);
 export const getLessonsByCourse = (courseId) =>
   axiosInstance.get(`/courses/${courseId}/lessons`);
-
-export const addLessonToCourse = (courseId, data) =>
-  axiosInstance.post(`/courses/${courseId}/lessons`, data);
-
-export const updateLesson = (lessonId, data) =>
-  axiosInstance.put(`/lessons/${lessonId}`, data);
-
-export const patchLesson = (lessonId, data) =>
-  axiosInstance.patch(`/lessons/${lessonId}`, data);
-
+export const updateLesson = (lessonId, updatedData) =>
+  axiosInstance.put(`/lessons/${lessonId}`, updatedData);
 export const deleteLesson = (lessonId) => axiosInstance.delete(`/lessons/${lessonId}`);
 
-// Enrollment / Progress
-export const enrollInCourse = (courseId) =>
-  // Backend derives studentId from auth token and uses courseId from the URL.
-  axiosInstance.post(`/courses/${courseId}/enroll`, {});
-
+// Enrollment APIs
+export const enrollInCourse = (courseId) => axiosInstance.post(`/courses/${courseId}/enroll`, {});
 export const getMyEnrollments = () => axiosInstance.get("/enrollments/my");
-
-export const updateProgress = (enrollmentId, progressPercentage) =>
-  axiosInstance.put(`/enrollments/${enrollmentId}/progress`, {
-    progressPercentage,
-  });
-
+export const updateEnrollmentProgress = (enrollmentId, progressData) =>
+  axiosInstance.put(`/enrollments/${enrollmentId}/progress`, progressData);
 export const markCourseComplete = (enrollmentId) =>
   axiosInstance.put(`/enrollments/${enrollmentId}/complete`, {});
-
-export const updateEnrollment = (enrollmentId, payload) =>
-  axiosInstance.patch(`/enrollments/${enrollmentId}`, payload);
-
-// Teacher: students enrolled in a course
-export const getStudentsByCourse = (courseId) =>
-  axiosInstance.get(`/courses/${courseId}/students`);
+export const getStudentsByCourse = (courseId) => axiosInstance.get(`/courses/${courseId}/students`);
 
