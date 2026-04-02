@@ -13,6 +13,9 @@ import AdminLearning  from "../pages/Admin/AdminLearning";
 import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
+import MyRegistrations from '../pages/Events/MyRegistrations';
+import AttendanceManager from '../pages/Events/AttendanceManager';
+import EventAnalytics from '../pages/Events/EventAnalytics';
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -37,6 +40,8 @@ const AppRoutes = () => (
       <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
+      <Route path="/my-registrations" element={<MyRegistrations />} />
+      <Route path="/admin/analytics" element={<EventAnalytics />} />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
@@ -52,6 +57,7 @@ const AppRoutes = () => (
       <Route path="/admin/quiz"     element={<AdminQuiz />} />
       <Route path="/admin/events"   element={<AdminEvents />} />
       <Route path="/admin/support"  element={<AdminSupport />} />
+      <Route path="/admin/attendance" element={<AttendanceManager />} />
     </Route>
 
     <Route path="*" element={<Placeholder label="404 Not Found" />} />
