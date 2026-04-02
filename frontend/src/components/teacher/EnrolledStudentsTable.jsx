@@ -1,10 +1,10 @@
 import ProgressBar from "../student/ProgressBar";
 
-const EnrolledStudentsTable = ({ students = [], courseTitle }) => {
+const EnrolledStudentsTable = ({ students = [] }) => {
   if (!students.length) {
     return (
       <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
-        No students enrolled{courseTitle ? ` in “${courseTitle}”` : ""}.
+        No students are enrolled in this course yet.
       </div>
     );
   }
@@ -48,7 +48,7 @@ const EnrolledStudentsTable = ({ students = [], courseTitle }) => {
                       isCompleted ? "bg-green-100 text-green-700" : "bg-violet-100 text-violet-700"
                     }`}
                   >
-                    {isCompleted ? "Completed" : "In Progress"}
+                    {s.completionStatus || (isCompleted ? "Completed" : "In Progress")}
                   </span>
                 </td>
               </tr>
