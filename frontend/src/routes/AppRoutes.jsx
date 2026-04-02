@@ -13,6 +13,12 @@ import AdminLearning  from "../pages/Admin/AdminLearning";
 import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
+import CoursesPage from "../pages/Student/CoursesPage";
+import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
+import MyEnrollmentsPage from "../pages/Student/MyEnrollmentsPage";
+import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
+import ManageLessonsPage from "../pages/Teacher/ManageLessonsPage";
+import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -37,6 +43,54 @@ const AppRoutes = () => (
       <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
+      <Route
+        path="/student/courses"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <CoursesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/courses/:courseId"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <CourseDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/enrollments"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <MyEnrollmentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/manage-courses"
+        element={
+          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+            <ManageCoursesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/courses/:courseId/lessons"
+        element={
+          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+            <ManageLessonsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/courses/:courseId/students"
+        element={
+          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+            <EnrolledStudentsPage />
+          </ProtectedRoute>
+        }
+      />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
