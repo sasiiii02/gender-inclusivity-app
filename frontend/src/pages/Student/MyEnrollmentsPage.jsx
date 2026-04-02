@@ -5,6 +5,7 @@ import EnrollmentCard from "../../components/student/EnrollmentCard";
 import * as trainingApi from "../../api/trainingApi";
 
 const MyEnrollmentsPage = () => {
+  console.log("[Training] MyEnrollmentsPage rendered");
   const navigate = useNavigate();
   const { user } = useAuth();
   const isStudent = user?.role === "student";
@@ -72,6 +73,9 @@ const MyEnrollmentsPage = () => {
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
+        <h1 className="text-xs font-semibold uppercase tracking-wider text-violet-600">
+          Training Module - My Enrollments Page
+        </h1>
         <h1 className="font-serif text-2xl font-bold text-stone-900">
           My Enrollments
         </h1>

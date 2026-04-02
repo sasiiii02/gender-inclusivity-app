@@ -5,6 +5,7 @@ import CourseTable from "../../components/teacher/CourseTable";
 import * as trainingApi from "../../api/trainingApi";
 
 const ManageCoursesPage = () => {
+  console.log("[Training] ManageCoursesPage rendered");
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +104,9 @@ const ManageCoursesPage = () => {
   return (
     <div className="space-y-5 animate-fade-in">
       <div>
+        <h1 className="text-xs font-semibold uppercase tracking-wider text-amber-600">
+          Training Module - Manage Courses Page
+        </h1>
         <h1 className="font-serif text-2xl font-bold text-stone-900">
           Manage Courses
         </h1>

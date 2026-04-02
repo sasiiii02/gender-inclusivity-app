@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
@@ -12,7 +13,7 @@ const navItems = [
     label: "Learning",
     icon: "📚",
     path: "/learning",
-    roles: ["student", "teacher", "admin"],
+    roles: ["admin"],
   },
   {
     label: "Quiz",
@@ -45,24 +46,6 @@ const navItems = [
     roles: ["student", "teacher", "admin"],
   },
   {
-    label: "Courses",
-    icon: "🎓",
-    path: "/student/courses",
-    roles: ["student"],
-  },
-  {
-    label: "My Enrollments",
-    icon: "📈",
-    path: "/student/enrollments",
-    roles: ["student"],
-  },
-  {
-    label: "Manage Courses",
-    icon: "🧑‍🏫",
-    path: "/teacher/manage-courses",
-    roles: ["teacher"],
-  },
-  {
     label: "Admin Panel",
     icon: "🛡️",
     path: "/admin",
@@ -73,6 +56,8 @@ const navItems = [
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [learningOpen, setLearningOpen] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -82,6 +67,28 @@ const Sidebar = ({ isOpen, onClose }) => {
   const filtered = navItems.filter(
     (item) => user && item.roles.includes(user.role)
   );
+  const filteredWithoutLearning = filtered.filter((item) => item.path !== "/learning");
+
+  const learningItemsByRole = {
+    student: [
+      { label: "Courses", icon: "🎓", path: "/student/courses" },
+      { label: "My Enrollments", icon: "📈", path: "/student/enrollments" },
+    ],
+    teacher: [
+      { label: "Manage Courses", icon: "🧑‍🏫", path: "/teacher/manage-courses" },
+      { label: "Manage Lessons", icon: "📖", path: "/teacher/manage-courses" },
+      { label: "Enrolled Students", icon: "👩‍🎓", path: "/teacher/manage-courses" },
+    ],
+  };
+
+  const learningItems = user ? learningItemsByRole[user.role] || [] : [];
+  const isLearningActive =
+    location.pathname.startsWith("/learning") ||
+    location.pathname.startsWith("/student/courses") ||
+    location.pathname.startsWith("/student/enrollments") ||
+    location.pathname.startsWith("/teacher/manage-courses") ||
+    location.pathname.includes("/lessons") ||
+    location.pathname.includes("/students");
 
   const roleColors = {
     student: "bg-violet-100 text-violet-700",
@@ -164,22 +171,81 @@ const Sidebar = ({ isOpen, onClose }) => {
           <p className="px-3 text-[10px] font-semibold text-stone-400 uppercase tracking-widest mb-2">
             Menu
           </p>
-          {filtered.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={onClose}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
-                  isActive
-                    ? "bg-violet-700 text-white shadow-sm"
-                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                }`
-              }
-            >
-              <span className="text-base">{item.icon}</span>
-              <span>{item.label}</span>
-            </NavLink>
+          {filteredWithoutLearning.map((item) => (
+            <div key={item.path}>
+              <NavLink
+                to={item.path}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
+                    isActive
+                      ? "bg-violet-700 text-white shadow-sm"
+                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                  }`
+                }
+              >
+                <span className="text-base">{item.icon}</span>
+                <span>{item.label}</span>
+              </NavLink>
+
+              {item.path === "/dashboard" &&
+                (learningItems.length > 0 ? (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setLearningOpen((prev) => !prev)}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                        isLearningActive
+                          ? "bg-violet-700 text-white shadow-sm"
+                          : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="text-base">📚</span>
+                        <span>Learning</span>
+                      </span>
+                      <span className="text-xs">{learningOpen ? "▾" : "▸"}</span>
+                    </button>
+
+                    {learningOpen && (
+                      <div className="mt-1 ml-4 space-y-0.5 border-l border-stone-200 pl-2">
+                        {learningItems.map((learningItem) => (
+                          <NavLink
+                            key={`${learningItem.label}-${learningItem.path}`}
+                            to={learningItem.path}
+                            onClick={onClose}
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+                                isActive
+                                  ? "bg-violet-100 text-violet-800"
+                                  : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                              }`
+                            }
+                          >
+                            <span className="text-base">{learningItem.icon}</span>
+                            <span>{learningItem.label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <NavLink
+                    to="/learning"
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      `mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                        isActive
+                          ? "bg-violet-700 text-white shadow-sm"
+                          : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                      }`
+                    }
+                  >
+                    <span className="text-base">📚</span>
+                    <span>Learning</span>
+                  </NavLink>
+                ))}
+            </div>
           ))}
         </nav>
 

@@ -4,6 +4,7 @@ import CourseCard from "../../components/student/CourseCard";
 import * as trainingApi from "../../api/trainingApi";
 
 const CoursesPage = () => {
+  console.log("[Training] CoursesPage rendered");
   const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
@@ -47,6 +48,9 @@ const CoursesPage = () => {
     <div className="space-y-5 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
         <div>
+          <h1 className="text-xs font-semibold uppercase tracking-wider text-violet-600">
+            Training Module - Courses Page
+          </h1>
           <h1 className="font-serif text-2xl font-bold text-stone-900">
             Available Courses
           </h1>

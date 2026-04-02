@@ -4,6 +4,7 @@ import EnrolledStudentsTable from "../../components/teacher/EnrolledStudentsTabl
 import * as trainingApi from "../../api/trainingApi";
 
 const EnrolledStudentsPage = () => {
+  console.log("[Training] EnrolledStudentsPage rendered");
   const { courseId } = useParams();
 
   const [students, setStudents] = useState([]);
@@ -38,6 +39,9 @@ const EnrolledStudentsPage = () => {
   return (
     <div className="space-y-5 animate-fade-in">
       <div>
+        <h1 className="text-xs font-semibold uppercase tracking-wider text-amber-600">
+          Training Module - Enrolled Students Page
+        </h1>
         <h1 className="font-serif text-2xl font-bold text-stone-900">
           Enrolled Students
         </h1>

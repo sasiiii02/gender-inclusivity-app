@@ -5,6 +5,7 @@ import LessonTable from "../../components/teacher/LessonTable";
 import * as trainingApi from "../../api/trainingApi";
 
 const ManageLessonsPage = () => {
+  console.log("[Training] ManageLessonsPage rendered");
   const navigate = useNavigate();
   const { courseId } = useParams();
 
@@ -98,6 +99,9 @@ const ManageLessonsPage = () => {
     <div className="space-y-5 animate-fade-in">
       <div className="flex items-start justify-between gap-4">
         <div>
+          <h1 className="text-xs font-semibold uppercase tracking-wider text-amber-600">
+            Training Module - Manage Lessons Page
+          </h1>
           <h1 className="font-serif text-2xl font-bold text-stone-900">
             Manage Lessons
           </h1>

@@ -5,6 +5,7 @@ import LessonList from "../../components/student/LessonList";
 import * as trainingApi from "../../api/trainingApi";
 
 const CourseDetailsPage = () => {
+  console.log("[Training] CourseDetailsPage rendered");
   const navigate = useNavigate();
   const { courseId } = useParams();
 
@@ -134,6 +135,9 @@ const CourseDetailsPage = () => {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      <h1 className="text-xs font-semibold uppercase tracking-wider text-violet-600">
+        Training Module - Course Details Page
+      </h1>
       {error ? (
         <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
           ⚠️ {error}

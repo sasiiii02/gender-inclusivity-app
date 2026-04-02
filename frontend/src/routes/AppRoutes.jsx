@@ -27,6 +27,12 @@ const Placeholder = ({ label }) => (
   </div>
 );
 
+const PageNotFound = () => (
+  <div className="flex items-center justify-center h-64">
+    <h1 className="font-serif text-2xl text-stone-900">Page Not Found</h1>
+  </div>
+);
+
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
@@ -108,7 +114,7 @@ const AppRoutes = () => (
       <Route path="/admin/support"  element={<AdminSupport />} />
     </Route>
 
-    <Route path="*" element={<Placeholder label="404 Not Found" />} />
+    <Route path="*" element={<PageNotFound />} />
   </Routes>
 );
 
