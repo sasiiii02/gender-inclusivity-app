@@ -13,6 +13,8 @@ import AdminLearning  from "../pages/Admin/AdminLearning";
 import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
+
+//learning pages
 import CoursesPage from "../pages/Student/CoursesPage";
 import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
 import MyEnrollmentsPage from "../pages/Student/MyEnrollmentsPage";
