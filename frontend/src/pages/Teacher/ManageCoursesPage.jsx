@@ -16,6 +16,8 @@ const ManageCoursesPage = () => {
 
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [courseToDeactivate, setCourseToDeactivate] = useState(null);
+  const [deactivatingId, setDeactivatingId] = useState(null);
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -86,6 +88,23 @@ const ManageCoursesPage = () => {
   const handleManageLessons = (course) => {
     if (!course?._id) return;
     navigate(`/teacher/courses/${course._id}/lessons`);
+  };
+
+  const handleConfirmDeactivate = async () => {
+    if (!courseToDeactivate?._id) return;
+    const id = courseToDeactivate._id;
+    setDeactivatingId(id);
+    setError("");
+    try {
+      await trainingApi.deleteCourse(id);
+      setCourseToDeactivate(null);
+      await fetchCourses();
+      setSuccess("Course deactivated. It is now inactive and no longer available for enrollment.");
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to deactivate course.");
+    } finally {
+      setDeactivatingId(null);
+    }
   };
 
   const filteredCourses = useMemo(() => {
@@ -228,6 +247,46 @@ const ManageCoursesPage = () => {
           </div>
         ) : null}
 
+        {courseToDeactivate ? (
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="deactivate-course-title"
+          >
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+              <h3 id="deactivate-course-title" className="text-lg font-bold text-stone-900 mb-2">
+                Deactivate course?
+              </h3>
+              <p className="text-stone-500 text-sm mb-5">
+                <span className="font-semibold text-stone-800">{courseToDeactivate.title}</span> will
+                be set to <span className="font-semibold text-stone-800">Inactive</span>. Students
+                cannot enroll, and the course will be hidden from views that only show active courses.
+              </p>
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!deactivatingId) setCourseToDeactivate(null);
+                  }}
+                  disabled={!!deactivatingId}
+                  className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeactivate}
+                  disabled={deactivatingId === courseToDeactivate._id}
+                  className="flex-1 rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-700 transition-colors disabled:opacity-60"
+                >
+                  {deactivatingId === courseToDeactivate._id ? "Deactivating…" : "Deactivate"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex justify-end">
           <input
             value={searchTerm}
@@ -251,6 +310,7 @@ const ManageCoursesPage = () => {
             courses={filteredCourses}
             onEdit={openEdit}
             onManageLessons={handleManageLessons}
+            onDeactivate={setCourseToDeactivate}
           />
         )}
       </div>

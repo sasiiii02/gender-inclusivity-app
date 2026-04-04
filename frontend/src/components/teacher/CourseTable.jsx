@@ -2,6 +2,7 @@ const CourseTable = ({
   courses = [],
   onEdit,
   onManageLessons,
+  onDeactivate,
 }) => {
   if (!courses.length) {
     return (
@@ -69,6 +70,8 @@ const CourseTable = ({
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
                       normalizedStatus === "active"
                         ? "bg-lime-100 text-lime-700"
+                        : normalizedStatus === "inactive"
+                        ? "bg-rose-50 text-rose-700"
                         : normalizedStatus === "draft"
                         ? "bg-stone-200 text-stone-700"
                         : "bg-stone-100 text-stone-700"
@@ -93,6 +96,15 @@ const CourseTable = ({
                     >
                       Lessons
                     </button>
+                    {normalizedStatus === "active" ? (
+                      <button
+                        type="button"
+                        onClick={() => onDeactivate?.(c)}
+                        className="text-xs sm:text-sm font-semibold border border-rose-200 text-rose-700 rounded-xl px-4 py-1.5 hover:bg-rose-50 transition-colors"
+                      >
+                        Deactivate
+                      </button>
+                    ) : null}
                   </div>
                 </td>
               </tr>
