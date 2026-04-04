@@ -75,8 +75,18 @@ const Sidebar = ({ isOpen, onClose }) => {
       { label: "My Enrollments", icon: "📈", path: "/student/enrollments" },
     ],
     teacher: [
-      { label: "Manage Courses", icon: "🧑‍🏫", path: "/teacher/manage-courses" },
-      { label: "Manage Lessons", icon: "📖", disabled: true },
+      {
+        label: "Manage Courses",
+        icon: "🧑‍🏫",
+        path: "/teacher/manage-courses",
+        matchPathExact: true,
+      },
+      {
+        label: "Manage Lessons",
+        icon: "📖",
+        path: "/teacher/manage-courses",
+        activeWhenPathIncludes: "/lessons",
+      },
       { label: "Enrolled Students", icon: "👩‍🎓", disabled: true },
     ],
   };
@@ -223,14 +233,24 @@ const Sidebar = ({ isOpen, onClose }) => {
                             <NavLink
                               key={`${learningItem.label}-${learningItem.path}`}
                               to={learningItem.path}
+                              end={Boolean(learningItem.matchPathExact)}
                               onClick={onClose}
-                              className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
-                                  isActive
+                              className={({ isActive }) => {
+                                const { pathname } = location;
+                                let active = isActive;
+                                if (learningItem.activeWhenPathIncludes) {
+                                  active = pathname.includes(
+                                    learningItem.activeWhenPathIncludes
+                                  );
+                                } else if (learningItem.matchPathExact) {
+                                  active = pathname === learningItem.path;
+                                }
+                                return `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+                                  active
                                     ? "bg-violet-100 text-violet-800"
                                     : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                                }`
-                              }
+                                }`;
+                              }}
                             >
                               <span className="text-base">{learningItem.icon}</span>
                               <span>{learningItem.label}</span>
