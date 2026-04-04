@@ -55,6 +55,12 @@ const ManageCoursesPage = () => {
     setShowForm(true);
   };
 
+  const closeForm = () => {
+    if (saving) return;
+    setEditing(null);
+    setShowForm(false);
+  };
+
   const handleSubmit = async (payload) => {
     setSaving(true);
     setError("");
@@ -135,7 +141,7 @@ const ManageCoursesPage = () => {
             type="button"
             onClick={() => {
               setEditing(null);
-              setShowForm((prev) => !prev);
+              setShowForm(true);
             }}
             className="self-start rounded-xl bg-violet-600 px-4 py-2 text-base font-semibold text-white hover:bg-violet-700 transition-colors"
           >
@@ -173,27 +179,51 @@ const ManageCoursesPage = () => {
         </div>
 
         {showForm ? (
-          <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-            <h2 className="text-lg font-semibold">{editing ? "Edit Course" : "Add Course"}</h2>
-            <p className="text-sm text-stone-500 mt-0.5">
-              {editing ? "Update the selected course details." : "Fill details to publish a new course."}
-            </p>
-            <div className="mt-4">
-              <CourseForm
-                initialData={editing || emptyInitialValues}
-                submitLabel={saving ? "Saving..." : editing ? "Update Course" : "Create Course"}
-                onSubmit={saving ? null : handleSubmit}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setEditing(null);
-                  setShowForm(false);
-                }}
-                className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors"
-              >
-                Cancel
-              </button>
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="course-form-title"
+            onClick={() => closeForm()}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-lg animate-slide-up my-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
+                <h2 id="course-form-title" className="text-lg font-bold text-stone-900">
+                  {editing ? "Edit course" : "Add course"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  disabled={saving}
+                  className="text-stone-400 hover:text-stone-600 text-2xl leading-none disabled:opacity-50"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-sm text-stone-500 mb-4">
+                  {editing
+                    ? "Update the selected course details."
+                    : "Fill in the details to publish a new course."}
+                </p>
+                <CourseForm
+                  initialData={editing || emptyInitialValues}
+                  submitLabel={saving ? "Saving..." : editing ? "Update course" : "Create course"}
+                  onSubmit={saving ? null : handleSubmit}
+                />
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  disabled={saving}
+                  className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         ) : null}
