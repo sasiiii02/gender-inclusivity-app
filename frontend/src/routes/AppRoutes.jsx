@@ -20,6 +20,7 @@ import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
 import MyEnrollmentsPage from "../pages/Student/MyEnrollmentsPage";
 import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
 import ManageLessonsPage from "../pages/Teacher/ManageLessonsPage";
+import ManageLessonsHubPage from "../pages/Teacher/ManageLessonsHubPage";
 import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 
 // Placeholders for student/teacher pages (replace as you build them)
@@ -80,6 +81,14 @@ const AppRoutes = () => (
         element={
           <ProtectedRoute allowedRoles={["teacher", "admin"]}>
             <ManageCoursesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/lessons"
+        element={
+          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+            <ManageLessonsHubPage />
           </ProtectedRoute>
         }
       />

@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {
         label: "Manage Lessons",
         icon: "📖",
-        path: "/teacher/manage-courses",
+        path: "/teacher/lessons",
         activeWhenPathIncludes: "/lessons",
       },
       { label: "Enrolled Students", icon: "👩‍🎓", disabled: true },
@@ -97,6 +97,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     location.pathname.startsWith("/student/courses") ||
     location.pathname.startsWith("/student/enrollments") ||
     location.pathname.startsWith("/teacher/manage-courses") ||
+    location.pathname.startsWith("/teacher/lessons") ||
     location.pathname.includes("/lessons") ||
     location.pathname.includes("/students");
 

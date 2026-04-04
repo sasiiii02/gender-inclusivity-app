@@ -12,6 +12,7 @@ const pageTitles = {
   "/student/courses": "Courses",
   "/student/enrollments": "My Enrollments",
   "/teacher/manage-courses": "Manage Courses",
+  "/teacher/lessons": "Manage Lessons",
   "/admin":     "Admin Panel",
 };
 
@@ -19,12 +20,17 @@ const Navbar = ({ onMenuClick }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  const title =
-    pageTitles[location.pathname] ||
-    Object.entries(pageTitles).find(([key]) =>
-      location.pathname.startsWith(key)
-    )?.[1] ||
-    "InclusiveSpace";
+  const lessonsManagePath =
+    location.pathname.includes("/teacher/courses/") &&
+    location.pathname.includes("/lessons");
+
+  const title = lessonsManagePath
+    ? "Manage Lessons"
+    : pageTitles[location.pathname] ||
+      Object.entries(pageTitles).find(([key]) =>
+        location.pathname.startsWith(key)
+      )?.[1] ||
+      "InclusiveSpace";
 
   return (
     <header className="h-16 bg-white border-b border-stone-100 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-10 shadow-[0_1px_0_0_#e7e5e4]">

@@ -5,7 +5,6 @@ import CourseTable from "../../components/teacher/CourseTable";
 import * as trainingApi from "../../api/trainingApi";
 
 const ManageCoursesPage = () => {
-  console.log("[Training] ManageCoursesPage rendered");
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
