@@ -11,6 +11,7 @@ const CourseDetailsPage = () => {
 
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -32,6 +33,7 @@ const CourseDetailsPage = () => {
         setError("Course not found.");
         setLessons([]);
         setEnrollment(null);
+        setSelectedLesson(null);
         return;
       }
 
@@ -187,9 +189,65 @@ const CourseDetailsPage = () => {
         </div>
       ) : null}
 
-      <div className="space-y-3">
-        <h2 className="font-serif text-xl font-bold text-stone-900">Lessons</h2>
-        <LessonList lessons={lessons} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-3">
+          <h2 className="font-serif text-xl font-bold text-stone-900">Lessons</h2>
+          <LessonList 
+            lessons={lessons} 
+            onSelectLesson={setSelectedLesson} 
+            selectedLessonId={selectedLesson?._id}
+          />
+        </div>
+
+        <div className="lg:col-span-2 space-y-4">
+          <h2 className="font-serif text-xl font-bold text-stone-900">Lesson Details</h2>
+          {selectedLesson ? (
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-lg font-bold text-stone-900">{selectedLesson.title}</h3>
+                {selectedLesson.duration && (
+                  <p className="text-sm text-stone-500">{selectedLesson.duration} minutes</p>
+                )}
+              </div>
+              
+              <div className="text-sm text-stone-700 whitespace-pre-wrap">
+                {selectedLesson.content}
+              </div>
+
+              {(selectedLesson.videoUrl || selectedLesson.pdf) && (
+                <div className="border-t border-stone-100 pt-4 space-y-3">
+                  <h4 className="text-sm font-semibold text-stone-900">Resources</h4>
+                  <div className="flex flex-col gap-2">
+                    {selectedLesson.videoUrl && (
+                      <a
+                        href={selectedLesson.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium"
+                      >
+                        🎥 Watch Video
+                      </a>
+                    )}
+                    {selectedLesson.pdf && selectedLesson.pdf.url && (
+                      <a
+                        href={selectedLesson.pdf.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm text-rose-600 hover:text-rose-700 font-medium"
+                      >
+                        📄 View PDF Document
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5 flex items-center justify-center h-40">
+              Select a lesson from the list to view its details.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

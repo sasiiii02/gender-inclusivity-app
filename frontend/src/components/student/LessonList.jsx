@@ -1,4 +1,4 @@
-const LessonList = ({ lessons = [], onSelectLesson }) => {
+const LessonList = ({ lessons = [], onSelectLesson, selectedLessonId }) => {
   if (!lessons || lessons.length === 0) {
     return (
       <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5">
@@ -22,7 +22,9 @@ const LessonList = ({ lessons = [], onSelectLesson }) => {
                 onClick={() => onSelectLesson?.(lesson)}
                 className={`w-full text-left px-4 py-3 flex items-start justify-between gap-4 transition-colors ${
                   isClickable
-                    ? "hover:bg-stone-50"
+                    ? lesson?._id === selectedLessonId
+                      ? "bg-violet-50 border-l-4 border-violet-600 pl-3" // adjust padding for border
+                      : "hover:bg-stone-50"
                     : "cursor-default"
                 }`}
               >
