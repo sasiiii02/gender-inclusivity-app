@@ -22,6 +22,9 @@ const lessonSchema = new mongoose.Schema(
     duration: {
       type: Number,
     },
+    videoUrl: {
+      type: String,
+    },
   },
   {
     timestamps: true,

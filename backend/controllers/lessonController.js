@@ -146,6 +146,7 @@ export const patchLesson = async (req, res) => {
         _id: updatedLesson._id,
         title: updatedLesson.title,
         content: updatedLesson.content,
+        videoUrl: updatedLesson.videoUrl,
       },
     });
   } catch (error) {

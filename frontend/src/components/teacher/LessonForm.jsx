@@ -7,6 +7,7 @@ const normalizeInitial = (data) => {
       content: "",
       orderNumber: "",
       duration: "",
+      videoUrl: "",
     };
   }
   return {
@@ -20,6 +21,7 @@ const normalizeInitial = (data) => {
       data.duration !== null && data.duration !== undefined && data.duration !== ""
         ? String(data.duration)
         : "",
+    videoUrl: data.videoUrl ?? "",
   };
 };
 
@@ -35,6 +37,7 @@ const LessonForm = ({
       content: "",
       orderNumber: "",
       duration: "",
+      videoUrl: "",
     }),
     []
   );
@@ -90,6 +93,7 @@ const LessonForm = ({
         form.duration === "" || form.duration === null || form.duration === undefined
           ? undefined
           : Number(form.duration),
+      videoUrl: form.videoUrl?.trim() || undefined,
     };
 
     onSubmit?.(payload);
@@ -130,6 +134,23 @@ const LessonForm = ({
         />
         {errors.content ? (
           <div className="text-xs text-rose-600 mt-1">{errors.content}</div>
+        ) : null}
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-stone-700 mb-1">
+          Video URL
+        </label>
+        <input
+          type="url"
+          value={form.videoUrl}
+          onChange={(e) => setField("videoUrl", e.target.value)}
+          className={fieldClass}
+          placeholder="e.g. https://youtube.com/watch?v=..."
+          disabled={disabled}
+        />
+        {errors.videoUrl ? (
+          <div className="text-xs text-rose-600 mt-1">{errors.videoUrl}</div>
         ) : null}
       </div>
 
