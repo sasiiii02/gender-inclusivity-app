@@ -10,6 +10,7 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
       category: "",
       level: "Beginner",
       duration: "",
+      image: null,
     }),
     []
   );
@@ -49,15 +50,18 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      category: form.category.trim(),
-      level: form.level,
-      duration: Number(form.duration),
-    };
+    const formData = new FormData();
+    formData.append("title", form.title.trim());
+    formData.append("description", form.description.trim());
+    formData.append("category", form.category.trim());
+    formData.append("level", form.level);
+    formData.append("duration", Number(form.duration));
+    
+    if (form.image) {
+      formData.append("image", form.image);
+    }
 
-    onSubmit?.(payload);
+    onSubmit?.(formData);
   };
 
   return (
@@ -145,6 +149,23 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
         {errors.duration ? (
           <div className="text-xs text-rose-600 mt-1">{errors.duration}</div>
         ) : null}
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-stone-700 mb-1">
+          Course Image (Optional)
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setField("image", e.target.files[0])}
+          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
+        />
+        {form.image && (
+          <p className="text-xs text-stone-500 mt-1">
+            Selected: {form.image.name}
+          </p>
+        )}
       </div>
 
       <div className="flex">

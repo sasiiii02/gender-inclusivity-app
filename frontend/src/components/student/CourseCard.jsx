@@ -11,45 +11,54 @@ const CourseCard = ({ course, onViewDetails }) => {
       : "—";
 
   return (
-    <div className="border border-stone-200 rounded-2xl p-4 bg-white shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-violet-700 text-white flex items-center justify-center flex-shrink-0">
-          📘
-        </div>
+    <div className="border border-stone-200 rounded-2xl bg-white shadow-sm overflow-hidden flex flex-col h-full">
+      {course?.imageUrl && (
+        <img
+          src={course.imageUrl}
+          alt={title}
+          className="w-full h-32 sm:h-40 object-cover"
+        />
+      )}
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-violet-700 text-white flex items-center justify-center flex-shrink-0">
+            📘
+          </div>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="font-serif font-semibold text-stone-900 truncate">
-            {title}
-          </h3>
-          <p className="text-sm text-stone-600 mt-2 line-clamp-2">
-            {description}
-          </p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-serif font-semibold text-stone-900 truncate">
+              {title}
+            </h3>
+            <p className="text-sm text-stone-600 mt-2 line-clamp-2">
+              {description}
+            </p>
 
-          <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-            <div className="text-stone-500">
-              <span className="font-semibold text-stone-700">Category:</span>{" "}
-              {category}
-            </div>
-            <div className="text-stone-500">
-              <span className="font-semibold text-stone-700">Level:</span>{" "}
-              {level}
-            </div>
-            <div className="text-stone-500 col-span-2">
-              <span className="font-semibold text-stone-700">Duration:</span>{" "}
-              {duration}
+            <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+              <div className="text-stone-500">
+                <span className="font-semibold text-stone-700">Category:</span>{" "}
+                {category}
+              </div>
+              <div className="text-stone-500">
+                <span className="font-semibold text-stone-700">Level:</span>{" "}
+                {level}
+              </div>
+              <div className="text-stone-500 col-span-2">
+                <span className="font-semibold text-stone-700">Duration:</span>{" "}
+                {duration}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <button
-          type="button"
-          onClick={() => onViewDetails?.(course?._id)}
-          className="w-full text-sm bg-stone-900 text-white rounded-xl px-3 py-2 hover:bg-stone-800 transition-colors"
-        >
-          View Details
-        </button>
+        <div className="mt-4 mt-auto">
+          <button
+            type="button"
+            onClick={() => onViewDetails?.(course?._id)}
+            className="w-full text-sm bg-stone-900 text-white rounded-xl px-3 py-2 hover:bg-stone-800 transition-colors"
+          >
+            View Details
+          </button>
+        </div>
       </div>
     </div>
   );

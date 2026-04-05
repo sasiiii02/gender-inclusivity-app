@@ -49,6 +49,7 @@ router.post(
   "/",
   protect,
   authorize("teacher"),
+  upload.single("image"),
   courseController.createCourse
 );
 
@@ -57,6 +58,7 @@ router.put(
   "/:id",
   protect,
   authorize("teacher", "admin"),
+  upload.single("image"),
   courseController.updateCourse
 );
 

@@ -39,6 +39,38 @@ export const uploadPdfToCloudinary = (fileBuffer, originalFilename) => {
 };
 
 /**
+ * Uploads an image buffer to Cloudinary courses images folder.
+ * 
+ * @param {Buffer} fileBuffer - The buffer of the image file to upload.
+ * @param {string} originalFilename - The original name of the uploaded file.
+ * @returns {Promise<Object>} - The standardized upload result data.
+ */
+export const uploadImageToCloudinary = (fileBuffer, originalFilename) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "gender-inclusivity/courses/images",
+        resource_type: "image",
+        use_filename: true,
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary upload utility error:", error);
+          return reject(error);
+        }
+
+        resolve({
+          secure_url: result.secure_url,
+          public_id: result.public_id,
+        });
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(uploadStream);
+  });
+};
+
+/**
  * Deletes a file from Cloudinary using its public_id.
  * 
  * @param {string} publicId - The Cloudinary public_id of the file to delete.

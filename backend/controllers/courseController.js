@@ -1,14 +1,25 @@
 import * as courseService from "../services/courseService.js";
+import { uploadImageToCloudinary } from "../utils/cloudinaryUtils.js";
 
 // @desc    Create a new course
 // @route   POST /api/courses
 // @access  Private (Admin/Teacher)
 export const createCourse = async (req, res) => {
   try {
+    let imageUrl = null;
+    if (req.file) {
+      const uploadResult = await uploadImageToCloudinary(
+        req.file.buffer,
+        req.file.originalname
+      );
+      imageUrl = uploadResult.secure_url;
+    }
+
     // Attach the logged-in user's ID as the creator
     const courseData = {
       ...req.body,
       createdBy: req.user.id,
+      ...(imageUrl && { imageUrl }),
     };
 
     const newCourse = await courseService.createCourse(courseData);
@@ -81,7 +92,17 @@ export const getCourseById = async (req, res) => {
 // @access  Private (Admin/Teacher)
 export const updateCourse = async (req, res) => {
   try {
-    const updatedCourse = await courseService.updateCourse(req.params.id, req.body);
+    let courseDataToUpdate = { ...req.body };
+
+    if (req.file) {
+      const uploadResult = await uploadImageToCloudinary(
+        req.file.buffer,
+        req.file.originalname
+      );
+      courseDataToUpdate.imageUrl = uploadResult.secure_url;
+    }
+
+    const updatedCourse = await courseService.updateCourse(req.params.id, courseDataToUpdate);
     if (!updatedCourse) {
       return res.status(404).json({ 
         success: false, 
