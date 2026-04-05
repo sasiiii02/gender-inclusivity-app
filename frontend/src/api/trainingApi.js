@@ -9,12 +9,20 @@ export const updateCourse = (courseId, updatedData) =>
 export const deleteCourse = (courseId) => axiosInstance.delete(`/courses/${courseId}`);
 
 // Lesson APIs
-export const addLesson = (courseId, lessonData) =>
-  axiosInstance.post(`/courses/${courseId}/lessons`, lessonData);
+export const addLesson = (courseId, lessonData) => {
+  const isFormData = lessonData instanceof FormData;
+  return axiosInstance.post(`/courses/${courseId}/lessons`, lessonData, {
+    headers: isFormData ? { "Content-Type": "multipart/form-data" } : undefined,
+  });
+};
 export const getLessonsByCourse = (courseId) =>
   axiosInstance.get(`/courses/${courseId}/lessons`);
-export const updateLesson = (lessonId, updatedData) =>
-  axiosInstance.put(`/lessons/${lessonId}`, updatedData);
+export const updateLesson = (lessonId, updatedData) => {
+  const isFormData = updatedData instanceof FormData;
+  return axiosInstance.put(`/lessons/${lessonId}`, updatedData, {
+    headers: isFormData ? { "Content-Type": "multipart/form-data" } : undefined,
+  });
+};
 export const deleteLesson = (lessonId) => axiosInstance.delete(`/lessons/${lessonId}`);
 
 // Enrollment APIs

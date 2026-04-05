@@ -1,46 +1,59 @@
 import * as lessonService from "../services/lessonService.js";
+import { uploadPdfToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUtils.js";
+import Lesson from "../models/Lesson.js";
 
 // @desc    Add a lesson to a course
 // @route   POST /api/courses/:courseId/lessons
 // @access  Private (Admin/Teacher)
 export const addLessonToCourse = async (req, res) => {
   try {
+    let pdfData = undefined;
+    if (req.file) {
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
+      }
+      const uploadData = await uploadPdfToCloudinary(req.file.buffer, req.file.originalname);
+      pdfData = {
+        url: uploadData.secure_url,
+        publicId: uploadData.public_id,
+        originalFilename: uploadData.original_filename,
+        resourceType: uploadData.resource_type,
+        format: uploadData.format,
+        bytes: uploadData.bytes,
+      };
+    }
+
     const lessonData = {
       ...req.body,
-      courseId: req.params.courseId, // From the URL
+      courseId: req.params.courseId,
     };
+    if (pdfData) lessonData.pdf = pdfData;
 
-    const newLesson = await lessonService.addLessonToCourse(lessonData);
-    res.status(201).json({ 
-      success: true, 
-      data: newLesson, 
-      message: "Lesson added to course successfully" 
-    });
-  } catch (error) {
-    // Handle course not found or inactive
-    if (error.message === "Course not found") {
-      return res.status(404).json({ 
-        success: false, 
-        message: error.message 
+    try {
+      const newLesson = await lessonService.addLessonToCourse(lessonData);
+      res.status(201).json({ 
+        success: true, 
+        data: newLesson, 
+        message: "Lesson added to course successfully" 
       });
+    } catch (serviceErr) {
+      // Cleanup Cloudinary if DB failed
+      if (pdfData && pdfData.publicId) {
+        await deleteFromCloudinary(pdfData.publicId, pdfData.resourceType).catch((e) => console.error("Cloudinary cleanup failed:", e));
+      }
+      throw serviceErr;
+    }
+  } catch (error) {
+    if (error.message === "Course not found") {
+      return res.status(404).json({ success: false, message: error.message });
     }
     if (error.message === "Cannot add lesson to an inactive course") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
-      });
+      return res.status(400).json({ success: false, message: error.message });
     }
-    // Handle validation errors
     if (error.name === "ValidationError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
-      });
+      return res.status(400).json({ success: false, message: error.message });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -55,24 +68,13 @@ export const getLessonsByCourse = async (req, res) => {
       data: lessons 
     });
   } catch (error) {
-    // Handle course not found
     if (error.message === "Course not found") {
-      return res.status(404).json({ 
-        success: false, 
-        message: error.message 
-      });
+      return res.status(404).json({ success: false, message: error.message });
     }
-    // Handle invalid ObjectId format
     if (error.name === "CastError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid course ID format" 
-      });
+      return res.status(400).json({ success: false, message: "Invalid course ID format" });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -81,44 +83,58 @@ export const getLessonsByCourse = async (req, res) => {
 // @access  Private (Admin/Teacher)
 export const updateLesson = async (req, res) => {
   try {
-    const updatedLesson = await lessonService.updateLesson(req.params.id, req.body);
-    if (!updatedLesson) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Lesson not found" 
-      });
+    const oldLesson = await Lesson.findById(req.params.id);
+    if (!oldLesson) {
+      return res.status(404).json({ success: false, message: "Lesson not found" });
     }
-    res.status(200).json({ 
-      success: true, 
-      data: updatedLesson, 
-      message: "Lesson updated successfully" 
-    });
+
+    let newPdfData = undefined;
+    if (req.file) {
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
+      }
+      const uploadData = await uploadPdfToCloudinary(req.file.buffer, req.file.originalname);
+      newPdfData = {
+        url: uploadData.secure_url,
+        publicId: uploadData.public_id,
+        originalFilename: uploadData.original_filename,
+        resourceType: uploadData.resource_type,
+        format: uploadData.format,
+        bytes: uploadData.bytes,
+      };
+    }
+
+    const updateData = { ...req.body };
+    if (newPdfData) updateData.pdf = newPdfData;
+
+    try {
+      const updatedLesson = await lessonService.updateLesson(req.params.id, updateData);
+      
+      // Cleanup old PDF if new PDF was properly saved
+      if (newPdfData && oldLesson.pdf && oldLesson.pdf.publicId) {
+        await deleteFromCloudinary(oldLesson.pdf.publicId, oldLesson.pdf.resourceType).catch(console.error);
+      }
+
+      res.status(200).json({ 
+        success: true, 
+        data: updatedLesson, 
+        message: "Lesson updated successfully" 
+      });
+    } catch (serviceErr) {
+      // Cleanup new PDF if saving to DB failed
+      if (newPdfData && newPdfData.publicId) {
+        await deleteFromCloudinary(newPdfData.publicId, newPdfData.resourceType).catch(console.error);
+      }
+      throw serviceErr;
+    }
   } catch (error) {
-    // Handle course not found (if courseId is being updated)
     if (error.message === "Course not found") {
-      return res.status(404).json({ 
-        success: false, 
-        message: error.message 
-      });
+      return res.status(404).json({ success: false, message: error.message });
     }
-    // Handle validation errors
-    if (error.name === "ValidationError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
-      });
+    if (error.name === "ValidationError" || error.name === "CastError") {
+      return res.status(400).json({ success: false, message: "Validation error or Invalid ID" });
     }
-    // Handle invalid ObjectId format
-    if (error.name === "CastError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid lesson ID format" 
-      });
-    }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -126,48 +142,25 @@ export const updateLesson = async (req, res) => {
 // @route   PATCH /api/lessons/:id
 // @access  Private (Teacher/Admin)
 export const patchLesson = async (req, res) => {
+  // Let updateLesson handle file logic cleanly; simple patch defers to logic as needed,
+  // but since we support robust updateLesson, we delegate file replacement there natively.
   try {
     if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({
-        message: "Validation Error",
-      });
+      return res.status(400).json({ message: "Validation Error" });
     }
 
+    // Pass body smoothly assuming no file in PATCH context usually, else adapt
     const updatedLesson = await lessonService.updateLesson(req.params.id, req.body);
     if (!updatedLesson) {
-      return res.status(404).json({
-        message: "Lesson not found",
-      });
+      return res.status(404).json({ message: "Lesson not found" });
     }
 
     res.status(200).json({
       message: "Lesson updated successfully",
-      lesson: {
-        _id: updatedLesson._id,
-        title: updatedLesson.title,
-        content: updatedLesson.content,
-        videoUrl: updatedLesson.videoUrl,
-      },
+      lesson: updatedLesson,
     });
   } catch (error) {
-    if (error.message === "Course not found") {
-      return res.status(404).json({
-        message: error.message,
-      });
-    }
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        message: "Validation Error",
-      });
-    }
-    if (error.name === "CastError") {
-      return res.status(400).json({
-        message: "Invalid lesson ID format",
-      });
-    }
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -176,24 +169,21 @@ export const patchLesson = async (req, res) => {
 // @access  Private (Admin/Teacher)
 export const deleteLesson = async (req, res) => {
   try {
-    const deletedLesson = await lessonService.deleteLesson(req.params.id);
-    if (!deletedLesson) {
-      return res.status(404).json({ 
-        message: "Lesson not found" 
-      });
+    const lesson = await Lesson.findById(req.params.id);
+    if (!lesson) {
+      return res.status(404).json({ message: "Lesson not found" });
     }
-    res.status(200).json({
-      message: "Lesson deleted successfully",
-    });
+
+    if (lesson.pdf && lesson.pdf.publicId) {
+      await deleteFromCloudinary(lesson.pdf.publicId, lesson.pdf.resourceType).catch(e => console.error("Failed to delete Cloudinary PDF:", e));
+    }
+
+    await lessonService.deleteLesson(req.params.id);
+    res.status(200).json({ message: "Lesson deleted successfully" });
   } catch (error) {
-    // Handle invalid ObjectId format
     if (error.name === "CastError") {
-      return res.status(400).json({ 
-        message: "Invalid lesson ID format" 
-      });
+      return res.status(400).json({ message: "Invalid lesson ID format" });
     }
-    res.status(500).json({ 
-      message: error.message 
-    });
+    res.status(500).json({ message: error.message });
   }
 };
