@@ -170,17 +170,28 @@ export const getStudentQuizQuestions = async (studentQuizId, studentId) => {
       throw new Error("Quiz not found or not in progress");
     }
 
+    // Dynamic timer calculation
+    const timeElapsedSecs = Math.floor(
+      (Date.now() - studentQuiz.startedAt.getTime()) / 1000
+    );
+    const quiz = await QMQuiz.findById(studentQuiz.quizId);
+    
+    if (!quiz) {
+      throw new Error("Quiz not found");
+    }
+
+    const quizDurationSecs = quiz.duration * 60;
+    const actualTimeRemaining = Math.max(0, quizDurationSecs - timeElapsedSecs);
+    studentQuiz.timeRemaining = actualTimeRemaining;
+
     // Check if quiz time expired
     if (checkQuizTimeExpiry(studentQuiz)) {
       await studentQuiz.save();
       throw new Error("Quiz time expired");
     }
 
-    const quiz = await QMQuiz.findById(studentQuiz.quizId);
-
-    if (!quiz) {
-      throw new Error("Quiz not found");
-    }
+    // Save dynamic time if needed
+    await studentQuiz.save();
 
     // Get questions without correct answers
     let questions = await QMQuestion.find({
@@ -304,6 +315,7 @@ export const submitAnswer = async (studentQuizId, studentId, answerData) => {
     if (existingAnswerIndex >= 0) {
       // Update existing answer
       studentQuiz.answers[existingAnswerIndex] = answer;
+      studentQuiz.markModified("answers");
     } else {
       // Add new answer
       studentQuiz.answers.push(answer);
