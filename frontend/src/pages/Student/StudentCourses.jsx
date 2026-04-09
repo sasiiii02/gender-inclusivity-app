@@ -1,45 +1,77 @@
-import React from "react";
-
-const courses = [
-  {
-    id: 1,
-    title: "Understanding Gender Equality",
-    instructor: "Dr. Sarah Jenkins",
-    progress: 75,
-    modules: 12,
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1000&auto=format&fit=crop",
-    category: "Diversity",
-  },
-  {
-    id: 2,
-    title: "Inclusive Language in Tech",
-    instructor: "Prof. Alex Rivera",
-    progress: 30,
-    modules: 8,
-    image: "https://images.unsplash.com/photo-1531496730074-83b638c0a7ac?q=80&w=1000&auto=format&fit=crop",
-    category: "Communication",
-  },
-  {
-    id: 3,
-    title: "Building Safe Workspaces",
-    instructor: "Emma Thompson",
-    progress: 0,
-    modules: 15,
-    image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1000&auto=format&fit=crop",
-    category: "Leadership",
-  },
-  {
-    id: 4,
-    title: "Intersectionality 101",
-    instructor: "David Chen",
-    progress: 100,
-    modules: 5,
-    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop",
-    category: "Social Studies",
-  }
-];
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import * as trainingApi from "../../api/trainingApi";
+import CourseCard from "../../components/student/CourseCard";
+import EnrollmentCard from "../../components/student/EnrollmentCard";
 
 const StudentCourses = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState("enrolled"); // "enrolled" or "available"
+  
+  const [enrollments, setEnrollments] = useState([]);
+  const [courses, setCourses] = useState([]);
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [completing, setCompleting] = useState(false);
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // Fetch Enrollments
+      try {
+        const enrollRes = await trainingApi.getMyEnrollments();
+        setEnrollments(enrollRes.data || []);
+      } catch (err) {
+        console.error("Failed to load enrollments", err);
+      }
+
+      // Fetch Available Courses
+      try {
+        const res = await trainingApi.getAllCourses();
+        const raw = res?.data?.data?.courses ?? res?.data?.courses ?? res?.data?.data ?? res?.data ?? [];
+        const list = Array.isArray(raw) ? raw : [];
+        const activeOnly = list.filter((c) => !c?.status || String(c.status).toLowerCase() === "active");
+        setCourses(activeOnly);
+      } catch (err) {
+        console.error("Failed to load courses", err);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred while loading courses.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinueLearning = (enrollment) => {
+    const courseId = enrollment?.course?._id;
+    if (!courseId) return;
+    navigate(`/student/courses/${courseId}`);
+  };
+
+  const handleMarkComplete = async (enrollment) => {
+    const enrollmentId = enrollment?._id;
+    if (!enrollmentId) return;
+    setCompleting(true);
+    try {
+      await trainingApi.markCourseComplete(enrollmentId);
+      await fetchAll();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to mark complete.");
+    } finally {
+      setCompleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Header */}
@@ -47,73 +79,111 @@ const StudentCourses = () => {
         <div>
           <span className="text-violet-600 font-bold tracking-widest text-sm uppercase mb-2 block">Learning Hub</span>
           <h1 className="font-serif text-3xl md:text-4xl font-bold text-stone-900">
-            My Enrolled Courses
+            {activeTab === "enrolled" ? "My Enrolled Courses" : "Browse Courses"}
           </h1>
           <p className="text-stone-500 mt-2 max-w-lg">
-            Stay on track with your curriculum. Dive into interactive modules and complete your certifications.
+            {activeTab === "enrolled" 
+              ? "Stay on track with your curriculum. Dive into interactive modules and complete your certifications."
+              : "Discover new skills and expand your knowledge. Enroll in our interactive courses today."}
           </p>
         </div>
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-stone-100 self-start md:self-end">
-          <button className="px-4 py-2 bg-violet-100 text-violet-700 rounded-lg text-sm font-semibold">Active</button>
-          <button className="px-4 py-2 text-stone-500 hover:text-stone-900 rounded-lg text-sm font-medium transition-colors">Completed</button>
+        <div className="relative flex bg-white/80 backdrop-blur-md rounded-full p-1.5 shadow-sm border border-stone-200 self-start md:self-end">
+          {/* Sliding Background */}
+          <div
+            className={`absolute top-1.5 bottom-1.5 left-1.5 w-[140px] bg-violet-600 rounded-full shadow-md transition-transform duration-300 ease-out ${
+              activeTab === "enrolled" ? "translate-x-0" : "translate-x-[140px]"
+            }`}
+          />
+          
+          <button 
+            onClick={() => setActiveTab("enrolled")}
+            className={`relative z-10 w-[140px] flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 ${
+              activeTab === "enrolled" ? "text-white" : "text-stone-600 hover:text-stone-900"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477-4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            My Learning
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab("available")}
+            className={`relative z-10 w-[140px] flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 ${
+              activeTab === "available" ? "text-white" : "text-stone-600 hover:text-stone-900"
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Browse All
+          </button>
         </div>
       </div>
 
+      {error && (
+        <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
       {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-xl hover:border-violet-200 transition-all duration-300 group flex flex-col">
-            <div className="relative h-48 overflow-hidden">
-              <img 
-                src={course.image} 
-                alt={course.title} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute top-4 left-4">
-                <span className="bg-white/90 backdrop-blur-sm text-stone-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                  {course.category}
-                </span>
-              </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border border-stone-200 rounded-3xl h-80 bg-white animate-pulse p-4">
+               <div className="h-40 bg-stone-200 rounded-2xl w-full mb-4" />
+               <div className="h-4 bg-stone-200 rounded w-2/3 mb-2" />
+               <div className="h-3 bg-stone-200 rounded w-5/6" />
             </div>
-            
-            <div className="p-6 flex-1 flex flex-col">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-serif text-xl font-bold text-stone-900 group-hover:text-violet-700 transition-colors line-clamp-2">
-                  {course.title}
-                </h3>
-              </div>
-              <p className="text-sm text-stone-500 mb-6 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-stone-200 flex items-center justify-center text-[10px]">👩‍🏫</span>
-                {course.instructor} • {course.modules} Modules
-              </p>
-              
-              <div className="mt-auto">
-                <div className="flex justify-between text-xs font-semibold mb-2">
-                  <span className={course.progress === 100 ? "text-emerald-600" : "text-stone-700"}>
-                    {course.progress === 100 ? "Completed" : `${course.progress}% Completed`}
-                  </span>
-                </div>
-                <div className="w-full bg-stone-100 rounded-full h-2 mb-6">
-                  <div 
-                    className={`h-2 rounded-full ${course.progress === 100 ? "bg-emerald-500" : "bg-violet-600"}`} 
-                    style={{ width: `${course.progress}%` }}
-                  ></div>
-                </div>
-                
-                <button className={`w-full py-3 rounded-xl font-bold text-sm transition-all focus:ring-4 focus:outline-none ${
-                    course.progress === 100 
-                    ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 focus:ring-emerald-100" 
-                    : course.progress === 0
-                    ? "bg-stone-900 text-white hover:bg-stone-800 focus:ring-stone-200"
-                    : "bg-violet-100 text-violet-700 hover:bg-violet-200 focus:ring-violet-100"
-                  }`}>
-                  {course.progress === 100 ? "Review Course" : course.progress === 0 ? "Start Course" : "Continue Learning"}
-                </button>
-              </div>
-            </div>
+          ))}
+        </div>
+      ) : activeTab === "enrolled" ? (
+        enrollments.length === 0 ? (
+          <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-3xl p-10 text-center">
+            <div className="text-4xl mb-4">📚</div>
+            <p className="font-semibold text-lg text-stone-900">You haven't enrolled in any courses yet</p>
+            <p className="mt-1 mb-4">Head over to the Browse All tab to find your first course!</p>
+            <button 
+              onClick={() => setActiveTab("available")}
+              className="bg-violet-600 text-white px-6 py-2 rounded-full font-medium shadow-md shadow-violet-200 hover:bg-violet-700 transition-colors"
+            >
+              Browse Courses
+            </button>
           </div>
-        ))}
-      </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {enrollments.map((e) => (
+              <EnrollmentCard
+                key={e._id}
+                enrollment={e}
+                onContinue={handleContinueLearning}
+                onComplete={completing ? null : handleMarkComplete}
+              />
+            ))}
+          </div>
+        )
+      ) : (
+        courses.length === 0 ? (
+          <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-3xl p-12 text-center flex flex-col items-center justify-center">
+            <div className="text-5xl mb-4">✨</div>
+            <h3 className="font-semibold text-xl text-stone-900 mb-2">More Courses Coming Soon</h3>
+            <p className="text-stone-500 max-w-md">
+               We are currently curating new and exciting content for you. Please check back later to discover more courses!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <CourseCard
+                key={course._id}
+                course={course}
+                onViewDetails={(id) => navigate(`/student/courses/${id}`)}
+              />
+            ))}
+          </div>
+        )
+      )}
     </div>
   );
 };

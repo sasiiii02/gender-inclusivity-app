@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import CourseDetailsCard from "../../components/student/CourseDetailsCard";
-import LessonList from "../../components/student/LessonList";
 import * as trainingApi from "../../api/trainingApi";
 
 const CourseDetailsPage = () => {
-  console.log("[Training] CourseDetailsPage rendered");
   const navigate = useNavigate();
   const { courseId } = useParams();
 
@@ -23,24 +20,18 @@ const CourseDetailsPage = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    setError("");
-    setSuccess("");
     try {
       const courseRes = await trainingApi.getCourseById(courseId);
       setCourse(courseRes.data || null);
 
       if (!courseRes.data) {
         setError("Course not found.");
-        setLessons([]);
-        setEnrollment(null);
-        setSelectedLesson(null);
         return;
       }
 
       const lessonsRes = await trainingApi.getLessonsByCourse(courseId);
       setLessons(lessonsRes.data?.data || []);
 
-      // Enrollment status (student only endpoint; if unauthorized, treat as not enrolled)
       try {
         const enrollRes = await trainingApi.getMyEnrollments();
         const list = enrollRes.data || [];
@@ -50,7 +41,7 @@ const CourseDetailsPage = () => {
         setEnrollment(null);
       }
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to load course.");
+      setError(e?.response?.data?.message || "Failed to load course details.");
     } finally {
       setLoading(false);
     }
@@ -60,17 +51,20 @@ const CourseDetailsPage = () => {
     fetchAll();
   }, [courseId]);
 
+  // Auto-select first lesson if available and nothing selected
+  useEffect(() => {
+    if (!selectedLesson && lessons.length > 0) {
+      setSelectedLesson(lessons[0]);
+    }
+  }, [lessons]);
+
   const handleEnroll = async () => {
     setEnrolling(true);
     setError("");
-    setSuccess("");
     try {
       await trainingApi.enrollInCourse(courseId);
-      const msg = "Enrollment successful!";
-      setSuccess(msg);
-      // Temporary notification fallback (no toast system detected)
-      // eslint-disable-next-line no-alert
-      alert(msg);
+      setSuccess("Successfully enrolled in the course!");
+      setTimeout(() => setSuccess(""), 3000);
       await fetchAll();
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to enroll.");
@@ -82,169 +76,286 @@ const CourseDetailsPage = () => {
   const handleUpdateProgress = async () => {
     if (!enrollment?._id) return;
     setUpdatingProgress(true);
-    setError("");
-    setSuccess("");
     try {
-      const current = Number(enrollment?.progress);
-      const safeCurrent = Number.isNaN(current) ? 0 : Math.min(100, Math.max(0, current));
-      const newValue = Math.min(100, safeCurrent + 10);
+      const current = Number(enrollment?.progress) || 0;
+      const increment = lessons.length > 0 ? Math.ceil(100 / lessons.length) : 100;
+      const newValue = Math.min(100, current + increment);
       await trainingApi.updateEnrollmentProgress(enrollment._id, {
         progressPercentage: newValue,
       });
       await fetchAll();
-      setSuccess(`Progress updated to ${newValue}%.`);
+      setSuccess(`Progress updated!`);
+      setTimeout(() => setSuccess(""), 3000);
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to update progress.");
+      setError("Failed to update progress.");
     } finally {
       setUpdatingProgress(false);
     }
   };
 
-  const isReady = !loading && course;
-  const isEnrolled = !!enrollment?._id;
-  const progress = (() => {
-    const n = Number(enrollment?.progress);
-    return Number.isNaN(n) ? 0 : Math.min(100, Math.max(0, n));
-  })();
-  const canComplete = isEnrolled && progress >= 100;
-
   if (loading) {
     return (
-      <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-6">
-        Loading…
+      <div className="flex items-center justify-center h-64">
+        <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!isReady) {
+  if (!course) {
     return (
-      <div className="space-y-4">
-        {error ? (
-          <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
-            ⚠️ {error}
-          </div>
-        ) : null}
+      <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-stone-100">
+        <p className="text-stone-500 mb-4">{error || "Course not found"}</p>
         <button
-          type="button"
           onClick={() => navigate("/student/courses")}
-          className="text-sm bg-stone-900 hover:bg-stone-800 text-white font-medium px-4 py-2 rounded-xl transition-colors"
+          className="bg-stone-900 text-white px-6 py-2 rounded-xl"
         >
-          Back to courses
+          Back to Courses
         </button>
       </div>
     );
   }
+
+  const isEnrolled = !!enrollment?._id;
+  const progress = Number(enrollment?.progress) || 0;
+  const canComplete = isEnrolled && progress >= 100;
+  const isCompleted = String(enrollment?.completionStatus).toLowerCase() === "completed" || canComplete;
+
+  const image = course.imageUrl || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
 
   return (
-    <div className="space-y-5 animate-fade-in">
-      <h1 className="text-xs font-semibold uppercase tracking-wider text-violet-600">
-        Training Module - Course Details Page
-      </h1>
-      {error ? (
-        <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
+    <div className="space-y-6 animate-fade-in pb-12">
+      {/* Toast Notifications */}
+      {success && (
+        <div className="fixed top-20 right-6 z-50 bg-green-500 text-white px-6 py-3 rounded-2xl shadow-lg border border-green-400 animate-slide-in">
+          ✅ {success}
+        </div>
+      )}
+      {error && (
+        <div className="fixed top-20 right-6 z-50 bg-rose-500 text-white px-6 py-3 rounded-2xl shadow-lg border border-rose-400 animate-slide-in">
           ⚠️ {error}
         </div>
-      ) : null}
+      )}
 
-      {success ? (
-        <div className="px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
-          {success}
+      {/* Breadcrumb & Navigation */}
+      <button
+        onClick={() => navigate("/student/courses")}
+        className="flex items-center gap-2 text-stone-500 hover:text-violet-600 transition-colors font-medium text-sm"
+      >
+        <span>←</span> Back to Courses
+      </button>
+
+      {/* Hero Section */}
+      <div className="relative rounded-3xl overflow-hidden bg-stone-900 shadow-xl border border-stone-200 group">
+        <div className="absolute inset-0">
+          <img src={image} className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-700" alt={course.title} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
         </div>
-      ) : null}
-
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => navigate("/student/courses")}
-          className="text-sm bg-stone-900 hover:bg-stone-800 text-white font-medium px-4 py-2 rounded-xl transition-colors"
-        >
-          Back to courses
-        </button>
-
-        {isEnrolled ? (
-          <button
-            type="button"
-            disabled={updatingProgress}
-            onClick={handleUpdateProgress}
-            className="text-sm bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
-          >
-            {updatingProgress ? "Updating…" : "Update Progress"}
-          </button>
-        ) : (
-          <div className="text-xs text-stone-500">
-            Not enrolled — enroll to track progress.
+        
+        <div className="relative p-8 md:p-12 flex flex-col md:flex-row gap-8 items-end justify-between">
+          <div className="max-w-2xl text-white">
+            <div className="flex gap-3 mb-4">
+              <span className="bg-violet-600/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                {course.category || "General"}
+              </span>
+              <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                {course.level || "Beginner"}
+              </span>
+            </div>
+            
+            <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
+              {course.title}
+            </h1>
+            <p className="text-stone-300 text-sm md:text-base line-clamp-3">
+              {course.description || "Dive into this engaging course and master new concepts. Join our expert instructors to expand your knowledge."}
+            </p>
+            
+            <div className="flex items-center gap-6 mt-6">
+              <div className="flex items-center gap-2 text-stone-300 text-sm">
+                <span className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white">👩‍🏫</span>
+                <span className="font-medium text-white">{course.instructor?.name || "Expert Instructor"}</span>
+              </div>
+              <div className="text-stone-400 text-sm">
+                ⏱ {course.duration ? `${course.duration} mins` : "Self-paced"}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      <CourseDetailsCard
-        course={course}
-        isEnrolled={isEnrolled}
-        onEnroll={enrolling || isEnrolled ? null : handleEnroll}
-      />
-
-      {canComplete ? (
-        <div className="px-4 py-3 bg-violet-50 border border-violet-200 rounded-xl text-violet-700 text-sm">
-          You’ve reached 100% progress — this course can now be completed.
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-3">
-          <h2 className="font-serif text-xl font-bold text-stone-900">Lessons</h2>
-          <LessonList 
-            lessons={lessons} 
-            onSelectLesson={setSelectedLesson} 
-            selectedLessonId={selectedLesson?._id}
-          />
-        </div>
-
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="font-serif text-xl font-bold text-stone-900">Lesson Details</h2>
-          {selectedLesson ? (
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm space-y-4">
-              <div>
-                <h3 className="text-lg font-bold text-stone-900">{selectedLesson.title}</h3>
-                {selectedLesson.duration && (
-                  <p className="text-sm text-stone-500">{selectedLesson.duration} minutes</p>
+          <div className="w-full md:w-auto flex-shrink-0 bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-3xl text-center shadow-2xl">
+            {isEnrolled ? (
+              <div className="space-y-4 min-w-[200px]">
+                <div className="flex justify-between text-white text-sm font-semibold mb-1">
+                  <span>My Progress</span>
+                  <span className={isCompleted ? "text-emerald-400" : "text-violet-300"}>
+                    {isCompleted ? "Completed" : `${progress}%`}
+                  </span>
+                </div>
+                <div className="h-3 w-full bg-black/40 rounded-full overflow-hidden border border-white/10">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? "bg-emerald-500" : "bg-gradient-to-r from-violet-500 to-indigo-400"}`}
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+                {!isCompleted && (
+                  <div className="w-full py-2 rounded-xl bg-white/10 text-white/80 font-medium text-sm border border-white/10 mt-2">
+                    Keep up the good work!
+                  </div>
+                )}
+                {isCompleted && (
+                  <div className="w-full py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold text-sm border border-emerald-500/30">
+                    Course Certified
+                  </div>
                 )}
               </div>
-              
-              <div className="text-sm text-stone-700 whitespace-pre-wrap">
-                {selectedLesson.content}
+            ) : (
+              <div className="min-w-[200px] py-2 text-white">
+                <p className="font-semibold mb-4 text-emerald-300 border-b border-white/10 pb-3">Available Now</p>
+                <button
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                  className="w-full py-3 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/40 transition-all active:scale-95 disabled:opacity-70"
+                >
+                  {enrolling ? "Enrolling..." : "Enroll for Free"}
+                </button>
               </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-              {(selectedLesson.videoUrl || selectedLesson.pdf) && (
-                <div className="border-t border-stone-100 pt-4 space-y-3">
-                  <h4 className="text-sm font-semibold text-stone-900">Resources</h4>
-                  <div className="flex flex-col gap-2">
-                    {selectedLesson.videoUrl && (
-                      <a
-                        href={selectedLesson.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium"
-                      >
-                        🎥 Watch Video
-                      </a>
-                    )}
-                    {selectedLesson.pdf && selectedLesson.pdf.url && (
-                      <a
-                        href={selectedLesson.pdf.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm text-rose-600 hover:text-rose-700 font-medium"
-                      >
-                        📄 View PDF Document
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
+        {/* Lesson List Sidebar */}
+        <div className="lg:col-span-1 space-y-4">
+          <h2 className="font-serif text-2xl font-bold text-stone-900 border-b border-stone-200 pb-3">Course Content</h2>
+          {lessons.length === 0 ? (
+            <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6 text-center text-stone-500 text-sm">
+              No lessons have been uploaded for this course yet.
             </div>
           ) : (
-            <div className="text-sm text-stone-500 bg-stone-50 border border-stone-200 rounded-2xl p-5 flex items-center justify-center h-40">
-              Select a lesson from the list to view its details.
+            <div className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-sm">
+              <ul className="divide-y divide-stone-100">
+                {lessons.map((lesson, idx) => (
+                   <li key={lesson._id}>
+                     <button
+                       onClick={() => setSelectedLesson(lesson)}
+                       className={`w-full text-left px-5 py-4 transition-colors flex items-center justify-between ${
+                         selectedLesson?._id === lesson._id
+                           ? "bg-violet-50 border-l-4 border-violet-600"
+                           : "hover:bg-stone-50 border-l-4 border-transparent"
+                       }`}
+                     >
+                       <div>
+                         <p className="text-[10px] font-bold tracking-widest text-violet-600 uppercase mb-1">
+                           Module {idx + 1}
+                         </p>
+                         <p className={`font-semibold ${selectedLesson?._id === lesson._id ? "text-violet-900" : "text-stone-800"}`}>
+                           {lesson.title}
+                         </p>
+                       </div>
+                       {lesson.duration && (
+                         <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded-md">{lesson.duration}m</span>
+                       )}
+                     </button>
+                   </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Lesson View Area */}
+        <div className="lg:col-span-2">
+          {!isEnrolled ? (
+            <div className="h-full flex flex-col items-center justify-center bg-stone-50 rounded-3xl border border-stone-200 p-10 text-center min-h-[400px]">
+              <span className="text-6xl mb-4 opacity-50">🔒</span>
+              <h3 className="font-serif text-2xl font-bold text-stone-700 mb-2">Content Locked</h3>
+              <p className="text-stone-500 max-w-sm">Please enroll in this course to access the videos, materials, and lessons created by the instructor.</p>
+            </div>
+          ) : selectedLesson ? (
+            <div className="bg-white border border-stone-200 rounded-3xl p-8 shadow-sm flex flex-col min-h-[500px]">
+              <div className="mb-6">
+                <span className="text-violet-600 font-bold text-xs uppercase tracking-wider mb-2 block">
+                  Current Lesson
+                </span>
+                <h2 className="font-serif text-3xl font-bold text-stone-900">{selectedLesson.title}</h2>
+              </div>
+              
+              {selectedLesson.videoUrl ? (
+                <div className="w-full aspect-video bg-stone-900 rounded-2xl overflow-hidden mb-8 shadow-lg ring-1 ring-stone-900/5">
+                  <iframe 
+                    className="w-full h-full" 
+                    src={selectedLesson.videoUrl.replace("watch?v=", "embed/")} 
+                    title={selectedLesson.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-48 bg-stone-100 rounded-2xl flex items-center justify-center mb-8 border border-stone-200">
+                  <span className="text-stone-400 font-medium">No video provided for this lesson.</span>
+                </div>
+              )}
+
+              <div className="prose prose-stone prose-sm max-w-none mb-8 text-stone-600">
+                <h3 className="text-lg font-bold text-stone-900 border-b border-stone-100 pb-2">Overview</h3>
+                <p className="whitespace-pre-wrap mt-4">{selectedLesson.content || "No overview available."}</p>
+              </div>
+
+              {selectedLesson.pdf && selectedLesson.pdf.url && (
+                <div className="mt-auto pt-6 border-t border-stone-100">
+                   <h3 className="text-sm font-bold text-stone-900 mb-3">Resource Files</h3>
+                   <a
+                     href={selectedLesson.pdf.url}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="inline-flex items-center gap-3 bg-rose-50 hover:bg-rose-100 text-rose-700 p-4 rounded-xl transition-colors border border-rose-100"
+                   >
+                     <span className="text-2xl text-rose-500">📄</span>
+                     <div>
+                       <p className="font-bold text-sm">{selectedLesson.pdf.originalName || "Lesson Reference PDF"}</p>
+                       <p className="text-xs text-rose-600 opacity-80">Click to View/Download</p>
+                     </div>
+                   </a>
+                </div>
+              )}
+
+              <div className="mt-8 pt-6 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-bold text-stone-900">Finished this lesson?</h4>
+                  <p className="text-stone-500 text-sm">Mark as complete to update your overall course progress.</p>
+                </div>
+                <button
+                  onClick={handleUpdateProgress}
+                  disabled={updatingProgress || isCompleted}
+                  className={`px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 min-w-[200px] ${
+                    isCompleted 
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+                      : "bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50"
+                  }`}
+                >
+                  {updatingProgress ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Logging...
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      <span className="text-lg">🏆</span>
+                      Course Completed
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg leading-none">✨</span>
+                      Mark Lesson Complete
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center bg-stone-50 rounded-3xl border border-stone-200 p-10 text-center min-h-[400px]">
+              <h3 className="font-serif text-xl font-bold text-stone-400 mb-2">Select a Lesson</h3>
+              <p className="text-stone-400 max-w-sm">Choose a lesson from the left sidebar to start learning.</p>
             </div>
           )}
         </div>

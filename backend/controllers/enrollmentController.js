@@ -136,6 +136,16 @@ export const getMyEnrollments = async (req, res) => {
         ? {
           _id: enrollment.courseId._id,
           title: enrollment.courseId.title,
+          category: enrollment.courseId.category,
+          level: enrollment.courseId.level,
+          duration: enrollment.courseId.duration,
+          status: enrollment.courseId.status,
+          imageUrl: enrollment.courseId.imageUrl,
+          instructor: enrollment.courseId.createdBy
+            ? {
+                name: enrollment.courseId.createdBy.name,
+              }
+            : null,
         }
         : null,
       progress: enrollment.progressPercentage,

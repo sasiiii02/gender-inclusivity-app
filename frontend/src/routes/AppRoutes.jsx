@@ -20,6 +20,7 @@ import TeacherLayout from "../components/teacher/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
 import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
 import ManageLessonsHubPage from "../pages/Teacher/ManageLessonsHubPage";
+import ManageLessonsPage from "../pages/Teacher/ManageLessonsPage";
 import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 import QuizEditor from "../pages/Teacher/QuizEditor";
 import QuizQuestions from "../pages/Teacher/QuizQuestions";
@@ -37,6 +38,7 @@ import QuizJoin from "../pages/Student/QuizJoin";
 // New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
 import StudentCourses from "../pages/Student/StudentCourses";
+import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
 import StudentSupport from "../pages/Student/StudentSupport";
 import StudentEvents from "../pages/Student/StudentEvents";
 
@@ -82,6 +84,7 @@ const AppRoutes = () => (
     >
       <Route path="/student/home" element={<StudentHome />} />
       <Route path="/student/courses" element={<StudentCourses />} />
+      <Route path="/student/courses/:courseId" element={<CourseDetailsPage />} />
       <Route path="/student/support" element={<StudentSupport />} />
       <Route path="/student/events" element={<StudentEvents />} />
       <Route path="/student/dashboard" element={<StudentDashboard />} />
@@ -124,6 +127,7 @@ const AppRoutes = () => (
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
       <Route path="/teacher/manage-courses" element={<ManageCoursesPage />} />
       <Route path="/teacher/lessons" element={<ManageLessonsHubPage />} />
+      <Route path="/teacher/courses/:courseId/lessons" element={<ManageLessonsPage />} />
       <Route path="/teacher/students" element={<EnrolledStudentsPage />} />
       <Route path="/teacher/quiz/new" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/edit" element={<QuizEditor />} />
