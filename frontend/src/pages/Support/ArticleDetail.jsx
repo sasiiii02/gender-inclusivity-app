@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Download, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, FileText, Loader2, ChevronRight } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getArticleById } from "../../services/supportService";
 import PDFViewer from "../../components/support/PDFViewer";
@@ -37,10 +37,10 @@ const ArticleDetail = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
         <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Article Not Found</h2>
-        <p className="text-gray-500 mb-6">This support article might have been moved or deleted.</p>
-        <Link to="/support" className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition">
-          <ArrowLeft className="w-4 h-4 mr-2" />
+        <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Article Not Found</h2>
+        <p className="text-gray-600 mb-8 max-w-sm mx-auto">We couldn't find the article you're looking for. It may have been moved or removed.</p>
+        <Link to="/student/support" className="inline-flex items-center px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-200">
+          <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Support Center
         </Link>
       </div>
@@ -50,14 +50,10 @@ const ArticleDetail = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in duration-500">
       {/* Breadcrumb / Back Navigation */}
-      <nav className="flex items-center text-sm font-medium text-gray-500 mb-8">
-        <Link to="/support" className="hover:text-purple-600 transition-colors flex items-center truncate">
-          <ArrowLeft className="w-4 h-4 mr-1 lg:mr-2" />
-          <span className="hidden sm:inline">Support Center</span>
-          <span className="sm:hidden">Back</span>
-        </Link>
-        <span className="mx-2 text-gray-300">/</span>
-        <span className="truncate text-gray-700">{article.category?.name || "General"}</span>
+      <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8 overflow-hidden whitespace-nowrap">
+        <Link to="/student/support" className="hover:text-purple-600 transition-colors font-medium">Support Center</Link>
+        <ChevronRight className="w-4 h-4 flex-shrink-0" />
+        <span className="text-gray-900 font-bold truncate">{article.title}</span>
       </nav>
 
       {/* Main Content Area */}

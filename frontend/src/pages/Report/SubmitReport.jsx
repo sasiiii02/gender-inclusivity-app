@@ -80,8 +80,8 @@ const SubmitReport = () => {
 
       const response = await submitReport(payload);
       
-      toast.success("Report submitted successfully");
-      navigate("/reports/success", { state: { reportId: response.report._id } });
+      navigate("/student/reports/success", { state: { reportId: response.report._id } });
+      toast.success("Report submitted successfully!");
       
     } catch (error) {
       toast.error(error.response?.data?.message || "Error submitting report");

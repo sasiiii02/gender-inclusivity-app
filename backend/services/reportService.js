@@ -8,6 +8,18 @@ export const getReportCategoriesService = async () => {
     return await ReportCategory.find();
 };
 
+export const getCaseStatusesService = async () => {
+    return await CaseStatus.find();
+};
+
+export const createReportCategoryService = async (name) => {
+    return await ReportCategory.create({ name });
+};
+
+export const deleteReportCategoryService = async (id) => {
+    return await ReportCategory.findByIdAndDelete(id);
+};
+
 // Create a new report
 export const createReportService = async(req)=>{
     const {
@@ -121,16 +133,18 @@ export const getAllReportResponsesService = async()=>{
 
 
 // Student - view responses for one of their reports
-export const getResponsesByReportService = async (reportId, userId) => {
+export const getResponsesByReportService = async (reportId, userId, isAdmin = false) => {
     const report = await Report.findById(reportId);
 
     if (!report) {
     throw new Error("Report not found");
     }
 
-  // Security check
-    if (report.reportedBy.toString() !== userId.toString()) {
-    throw new Error("Not authorized to view these responses");
+  // Security check: Allow if admin OR if it matches the reporter
+    if (!isAdmin) {
+        if (!report.reportedBy || report.reportedBy.toString() !== userId.toString()) {
+            throw new Error("Not authorized to view these responses");
+        }
     }
 
     return await ReportResponse.find({ reportId })
@@ -263,6 +277,16 @@ export const getReportStatsService = async () => {
     },
   ]);
 
+  // Group by priority
+  const reportsByPriority = await Report.aggregate([
+    {
+      $group: {
+        _id: "$priority",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
   return {
     totalReports,
     openReports,
@@ -270,5 +294,6 @@ export const getReportStatsService = async () => {
     highPriorityReports,
     reportsByStatus,
     reportsByCategory,
+    reportsByPriority,
   };
 };

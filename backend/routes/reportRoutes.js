@@ -1,12 +1,19 @@
 import express from "express";
 import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
-  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories} from "../controllers/reportController.js";
+  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory} from "../controllers/reportController.js";
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // Get report categories
 router.get("/categories", protect, getReportCategories);
+// Admin - create report category
+router.post("/categories", protect, createReportCategory);
+// Admin - delete report category
+router.delete("/categories/:id", protect, deleteReportCategory);
+
+// Get report statuses
+router.get("/statuses", protect, getReportStatuses);
 
 // User - create a report
 router.post("/create",protect,createReport);

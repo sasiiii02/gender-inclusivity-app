@@ -46,8 +46,8 @@ const ReportDetail = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Report Not Found</h2>
-        <p className="text-gray-500 mb-6">The report you are looking for does not exist or you do not have permission to view it.</p>
-        <Link to="/reports" className="text-purple-600 font-medium hover:underline">Back to My Reports</Link>
+        <p className="text-gray-600 mb-6">Could not find the incident report you are looking for.</p>
+        <Link to="/student/reports" className="text-purple-600 font-medium hover:underline">Back to My Reports</Link>
       </div>
     );
   }
@@ -56,10 +56,10 @@ const ReportDetail = () => {
   const incidentDate = new Date(report.incidentDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-      <Link to="/reports" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-purple-600 mb-6 transition-colors">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
+      <Link to="/student/reports" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-purple-600 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Reports
+        Back to My Reports
       </Link>
 
       <div className="flex flex-col md:flex-row gap-8">

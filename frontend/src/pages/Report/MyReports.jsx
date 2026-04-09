@@ -32,7 +32,7 @@ const MyReports = () => {
           <p className="text-gray-500 mt-1">Track and manage your submitted incident reports.</p>
         </div>
         <Link 
-          to="/reports/submit"
+          to="/student/reports/submit"
           className="inline-flex items-center justify-center px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
         >
           <PlusCircle className="w-5 h-5 mr-2" />
@@ -60,7 +60,7 @@ const MyReports = () => {
             If you experience or witness an incident, you can report it securely here.
           </p>
           <Link 
-            to="/reports/submit"
+            to="/student/reports/submit"
             className="inline-flex items-center justify-center px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 text-sm font-medium rounded-lg transition-colors"
           >
             Submit your first report

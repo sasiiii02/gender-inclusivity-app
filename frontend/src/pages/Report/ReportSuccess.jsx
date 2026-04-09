@@ -5,8 +5,8 @@ const ReportSuccess = () => {
   const location = useLocation();
   const reportId = location.state?.reportId;
 
-  if (!reportId) {
-    return <Navigate to="/reports" replace />;
+  if (!location.state || !location.state.reportId) {
+    return <Navigate to="/student/reports" replace />;
   }
 
   return (
@@ -28,14 +28,14 @@ const ReportSuccess = () => {
 
         <div className="space-y-3">
           <Link 
-            to={`/reports/${reportId}`}
+            to={`/student/reports/${reportId}`}
             className="w-full flex items-center justify-center px-6 py-3 rounded-lg text-white bg-purple-600 hover:bg-purple-700 font-medium transition-colors"
           >
             Track Report Status
             <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
           <Link 
-            to="/dashboard"
+            to="/student/dashboard"
             className="w-full flex items-center justify-center px-6 py-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 font-medium transition-colors"
           >
             <LayoutDashboard className="w-4 h-4 mr-2" />

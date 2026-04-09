@@ -26,9 +26,9 @@ const ReportCard = ({ report }) => {
         </p>
 
         <div className="mt-4 pt-3 border-t border-gray-50 flex justify-end">
-          <Link
-            to={`/reports/${report._id}`}
-            className="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors"
+          <Link 
+            to={`/student/reports/${report._id}`}
+            className="inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors group"
           >
             View Details
             <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />

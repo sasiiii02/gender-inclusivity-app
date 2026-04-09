@@ -27,7 +27,7 @@ const SupportCard = ({ article }) => {
       
       <div className="px-6 py-4 border-t border-gray-50 mt-auto bg-gray-50/50 group-hover:bg-purple-50/50 transition-colors">
         <Link 
-          to={`/support/${article._id}`}
+          to={`/student/support/${article._id}`}
           className="inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors w-full justify-between"
         >
           Read More
