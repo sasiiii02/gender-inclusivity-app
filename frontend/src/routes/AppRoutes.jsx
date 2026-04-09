@@ -30,6 +30,7 @@ import QuizTaking from "../pages/Student/QuizTaking";
 import QuizResult from "../pages/Student/QuizResult";
 import QuizHistory from "../pages/Student/QuizHistory";
 import QuizJoin from "../pages/Student/QuizJoin";
+import QuizExplanations from "../pages/Student/QuizExplanations";
 
 // New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
@@ -89,6 +90,10 @@ const AppRoutes = () => (
       <Route
         path="/student/quiz/result/:studentQuizId"
         element={<QuizResult />}
+      />
+      <Route
+        path="/student/quiz/:studentQuizId/explanations"
+        element={<QuizExplanations />}
       />
       <Route path="/student/quiz/history" element={<QuizHistory />} />
     </Route>
