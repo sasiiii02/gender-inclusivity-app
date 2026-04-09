@@ -48,4 +48,10 @@ router.get(
   studentQuizController.getQuizResult,
 );
 
+router.get(
+  "/available",
+  authorize("student"),
+  studentQuizController.getAvailableQuizzes,
+);
+
 export default router;
