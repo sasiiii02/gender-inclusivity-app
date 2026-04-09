@@ -4,6 +4,7 @@ import Register from "../pages/Auth/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 import AdminLayout from "../components/layout/AdminLayout";
+import StudentLayout from "../components/layout/StudentLayout";
 
 // Admin pages
 import AdminDashboard from "../pages/Admin/AdminDashboard";
@@ -29,6 +30,12 @@ import QuizTaking from "../pages/Student/QuizTaking";
 import QuizResult from "../pages/Student/QuizResult";
 import QuizHistory from "../pages/Student/QuizHistory";
 import QuizJoin from "../pages/Student/QuizJoin";
+
+// New Student Pages
+import StudentHome from "../pages/Student/StudentHome";
+import StudentCourses from "../pages/Student/StudentCourses";
+import StudentSupport from "../pages/Student/StudentSupport";
+import StudentEvents from "../pages/Student/StudentEvents";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -60,6 +67,20 @@ const AppRoutes = () => (
       <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support" element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
+    </Route>
+
+    {/* Student pages — No Sidebar layout (StudentLayout) */}
+    <Route
+      element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <StudentLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="/student/home" element={<StudentHome />} />
+      <Route path="/student/courses" element={<StudentCourses />} />
+      <Route path="/student/support" element={<StudentSupport />} />
+      <Route path="/student/events" element={<StudentEvents />} />
       <Route path="/student/dashboard" element={<StudentDashboard />} />
       <Route
         path="/student/quiz/take/:studentQuizId"
