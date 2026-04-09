@@ -15,7 +15,7 @@ import eFeedbackRoutes from "./routes/eFeedbackRoutes.js";
 // Quiz routes
 import QMQuizRoutes from "./routes/QM-quizRoutes.js";
 import QMStudentQuizRoutes from "./routes/QM-studentQuizRoutes.js";
-import QMQuestion from "./models/QM-Question.js";
+import QMQuestionRoutes from "./routes/QM-questionRoutes.js";
 
 // AI Explanation routes
 import QMAiRoutes from "./routes/QM-aiRoutes.js";
@@ -53,7 +53,7 @@ app.use("/api/feedbacks", eFeedbackRoutes);
 // Quiz routes
 app.use("/api/quizzes", QMQuizRoutes);
 app.use("/api/student/quiz", QMStudentQuizRoutes);
-app.use("/api/questions", QMQuestion);
+app.use("/api/questions", QMQuestionRoutes);
 
 // AI Explanation routes
 app.use("/api/ai", QMAiRoutes);
