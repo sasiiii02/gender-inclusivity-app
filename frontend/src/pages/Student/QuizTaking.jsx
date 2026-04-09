@@ -182,7 +182,13 @@ const QuizTaking = () => {
             currentIndex={currentQuestionIndex}
             answered={answeredMap}
             onSelect={setCurrentQuestionIndex}
-            onNext={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
+            onNext={() => {
+              if (currentQuestionIndex === questions.length - 1) {
+                setShowConfirm(true);
+              } else {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+              }
+            }}
             onPrevious={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
           />
         </div>
