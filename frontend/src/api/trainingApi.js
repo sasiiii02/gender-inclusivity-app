@@ -6,6 +6,10 @@ export const getCourseById = (courseId) => axiosInstance.get(`/courses/${courseI
 export const createCourse = (courseData) => axiosInstance.post("/courses", courseData);
 export const updateCourse = (courseId, updatedData) =>
   axiosInstance.put(`/courses/${courseId}`, updatedData);
+export const activateCourse = (courseId) =>
+  axiosInstance.patch(`/courses/${courseId}`, { status: "Active" });
+export const deactivateCourse = (courseId) =>
+  axiosInstance.patch(`/courses/${courseId}`, { status: "Inactive" });
 export const deleteCourse = (courseId) => axiosInstance.delete(`/courses/${courseId}`);
 
 // Lesson APIs

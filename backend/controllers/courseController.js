@@ -136,7 +136,7 @@ export const updateCourse = async (req, res) => {
   }
 };
 
-// @desc    Soft Delete a course (change status to Inactive)
+// @desc    Delete a course completely
 // @route   DELETE /api/courses/:id
 // @access  Private (Admin/Teacher)
 export const deleteCourse = async (req, res) => {
@@ -150,7 +150,7 @@ export const deleteCourse = async (req, res) => {
     }
     res.status(200).json({ 
       success: true, 
-      message: "Course deleted successfully (status set to Inactive)" 
+      message: "Course and associated data deleted successfully" 
     });
   } catch (error) {
     // Handle invalid ObjectId format

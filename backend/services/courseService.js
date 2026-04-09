@@ -1,4 +1,6 @@
 import Course from "../models/Course.js";
+import Lesson from "../models/Lesson.js";
+import Enrollment from "../models/Enrollment.js";
 
 // 1. Create a new course
 export const createCourse = async (courseData) => {
@@ -66,8 +68,12 @@ export const updateCourse = async (id, updateData) => {
   return await Course.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
 
-// 5. Soft Delete a course (change status to Inactive)
+// 5. Delete a course completely and its associated data
 export const deleteCourse = async (id) => {
-  // Soft delete by changing status to "Inactive"
-  return await Course.findByIdAndUpdate(id, { status: "Inactive" }, { new: true });
+  const deletedCourse = await Course.findByIdAndDelete(id);
+  if (deletedCourse) {
+    await Lesson.deleteMany({ courseId: id });
+    await Enrollment.deleteMany({ courseId: id });
+  }
+  return deletedCourse;
 };

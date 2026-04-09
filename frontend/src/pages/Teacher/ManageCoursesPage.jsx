@@ -17,6 +17,10 @@ const ManageCoursesPage = () => {
   const [saving, setSaving] = useState(false);
   const [courseToDeactivate, setCourseToDeactivate] = useState(null);
   const [deactivatingId, setDeactivatingId] = useState(null);
+  const [courseToActivate, setCourseToActivate] = useState(null);
+  const [activatingId, setActivatingId] = useState(null);
+  const [courseToDelete, setCourseToDelete] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -95,7 +99,7 @@ const ManageCoursesPage = () => {
     setDeactivatingId(id);
     setError("");
     try {
-      await trainingApi.deleteCourse(id);
+      await trainingApi.deactivateCourse(id);
       setCourseToDeactivate(null);
       await fetchCourses();
       setSuccess("Course deactivated. It is now inactive and no longer available for enrollment.");
@@ -103,6 +107,40 @@ const ManageCoursesPage = () => {
       setError(e?.response?.data?.message || "Failed to deactivate course.");
     } finally {
       setDeactivatingId(null);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete?._id) return;
+    const id = courseToDelete._id;
+    setDeletingId(id);
+    setError("");
+    try {
+      await trainingApi.deleteCourse(id);
+      setCourseToDelete(null);
+      await fetchCourses();
+      setSuccess("Course completely deleted. All associated lessons and enrollments were removed.");
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to delete course.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleConfirmActivate = async () => {
+    if (!courseToActivate?._id) return;
+    const id = courseToActivate._id;
+    setActivatingId(id);
+    setError("");
+    try {
+      await trainingApi.activateCourse(id);
+      setCourseToActivate(null);
+      await fetchCourses();
+      setSuccess("Course activated. It is now active and available for enrollment.");
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to activate course.");
+    } finally {
+      setActivatingId(null);
     }
   };
 
@@ -286,6 +324,84 @@ const ManageCoursesPage = () => {
           </div>
         ) : null}
 
+        {courseToActivate ? (
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="activate-course-title"
+          >
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+              <h3 id="activate-course-title" className="text-lg font-bold text-stone-900 mb-2">
+                Activate course?
+              </h3>
+              <p className="text-stone-500 text-sm mb-5">
+                <span className="font-semibold text-stone-800">{courseToActivate.title}</span> will
+                be set to <span className="font-semibold text-stone-800">Active</span>. Students
+                will be able to enroll and view the course.
+              </p>
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activatingId) setCourseToActivate(null);
+                  }}
+                  disabled={!!activatingId}
+                  className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmActivate}
+                  disabled={activatingId === courseToActivate._id}
+                  className="flex-1 rounded-xl bg-lime-600 px-4 py-3 text-sm font-semibold text-white hover:bg-lime-700 transition-colors disabled:opacity-60"
+                >
+                  {activatingId === courseToActivate._id ? "Activating…" : "Activate"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {courseToDelete ? (
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-course-title"
+          >
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full animate-slide-up">
+              <h3 id="delete-course-title" className="text-lg font-bold text-rose-600 mb-2">
+                Delete course permanently?
+              </h3>
+              <p className="text-stone-500 text-sm mb-5">
+                Are you sure you want to completely delete <span className="font-semibold text-stone-800">{courseToDelete.title}</span>? This action is irreversible and will also delete all associated lessons and enrollments.
+              </p>
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!deletingId) setCourseToDelete(null);
+                  }}
+                  disabled={!!deletingId}
+                  className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold border border-stone-300 bg-white hover:bg-stone-100 transition-colors disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={deletingId === courseToDelete._id}
+                  className="flex-1 rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-700 transition-colors disabled:opacity-60"
+                >
+                  {deletingId === courseToDelete._id ? "Deleting…" : "Delete Permanently"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex justify-end">
           <input
             value={searchTerm}
@@ -310,6 +426,8 @@ const ManageCoursesPage = () => {
             onEdit={openEdit}
             onManageLessons={handleManageLessons}
             onDeactivate={setCourseToDeactivate}
+            onActivate={setCourseToActivate}
+            onDelete={setCourseToDelete}
           />
         )}
       </div>
