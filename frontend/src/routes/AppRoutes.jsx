@@ -14,6 +14,14 @@ import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
 
+// User pages - Reports & Support
+import MyReports      from "../pages/Report/MyReports";
+import SubmitReport   from "../pages/Report/SubmitReport";
+import ReportSuccess  from "../pages/Report/ReportSuccess";
+import ReportDetail   from "../pages/Report/ReportDetail";
+import SupportHome    from "../pages/Support/SupportHome";
+import ArticleDetail  from "../pages/Support/ArticleDetail";
+
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
   <div className="flex items-center justify-center h-64">
@@ -34,8 +42,17 @@ const AppRoutes = () => (
       <Route path="/learning"  element={<Placeholder label="📚 Learning" />} />
       <Route path="/quiz"      element={<Placeholder label="📝 Quiz" />} />
       <Route path="/events"    element={<Placeholder label="📅 Events" />} />
-      <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
-      <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
+      
+      {/* Reports System */}
+      <Route path="/reports"          element={<MyReports />} />
+      <Route path="/reports/submit"   element={<SubmitReport />} />
+      <Route path="/reports/success"  element={<ReportSuccess />} />
+      <Route path="/reports/:id"      element={<ReportDetail />} />
+
+      {/* Support System */}
+      <Route path="/support"          element={<SupportHome />} />
+      <Route path="/support/:id"      element={<ArticleDetail />} />
+
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
     </Route>
 

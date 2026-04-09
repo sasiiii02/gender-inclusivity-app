@@ -1,9 +1,13 @@
 import express from "express";
 import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
-  getMyReportResponses,getReportTimeline,closeReport , getReportStats} from "../controllers/reportController.js";
+  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories} from "../controllers/reportController.js";
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+// Get report categories
+router.get("/categories", protect, getReportCategories);
+
 // User - create a report
 router.post("/create",protect,createReport);
 // User - view my reports

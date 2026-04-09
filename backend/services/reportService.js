@@ -2,6 +2,11 @@ import Report from "../models/Report.js";
 import CaseStatus from "../models/CaseStatus.js";
 import ReportResponse from "../models/ReportResponse.js";
 import ReportStatusHistory from "../models/ReportStatusHistory.js";
+import ReportCategory from "../models/ReportCategory.js";
+
+export const getReportCategoriesService = async () => {
+    return await ReportCategory.find();
+};
 
 // Create a new report
 export const createReportService = async(req)=>{
