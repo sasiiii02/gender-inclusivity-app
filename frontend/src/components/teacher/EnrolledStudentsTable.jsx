@@ -44,9 +44,8 @@ const EnrolledStudentsTable = ({ students = [] }) => {
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
-                      isCompleted ? "bg-green-100 text-green-700" : "bg-violet-100 text-violet-700"
-                    }`}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${isCompleted ? "bg-green-100 text-green-700" : "bg-violet-100 text-violet-700"
+                      }`}
                   >
                     {s.completionStatus || (isCompleted ? "Completed" : "In Progress")}
                   </span>

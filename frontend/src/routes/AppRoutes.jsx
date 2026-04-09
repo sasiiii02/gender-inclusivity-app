@@ -18,6 +18,9 @@ import AdminSupport from "../pages/Admin/AdminSupport";
 // Teacher pages
 import TeacherLayout from "../components/teacher/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
+import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
+import ManageLessonsHubPage from "../pages/Teacher/ManageLessonsHubPage";
+import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 import QuizEditor from "../pages/Teacher/QuizEditor";
 import QuizQuestions from "../pages/Teacher/QuizQuestions";
 import QuizLiveSession from "../pages/Teacher/QuizLiveSession";
@@ -119,6 +122,9 @@ const AppRoutes = () => (
       }
     >
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher/manage-courses" element={<ManageCoursesPage />} />
+      <Route path="/teacher/lessons" element={<ManageLessonsHubPage />} />
+      <Route path="/teacher/students" element={<EnrolledStudentsPage />} />
       <Route path="/teacher/quiz/new" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/edit" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/questions" element={<QuizQuestions />} />
