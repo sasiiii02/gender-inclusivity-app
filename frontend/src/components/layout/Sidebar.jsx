@@ -51,6 +51,24 @@ const navItems = [
     path: "/admin",
     roles: ["admin"],
   },
+  {
+    label: "My Quizzes",
+    icon: "📝",
+    path: "/teacher/dashboard",
+    roles: ["teacher"],
+  },
+  {
+    label: "My Quizzes",
+    icon: "📝",
+    path: "/student/dashboard",
+    roles: ["student"],
+  },
+  {
+    label: "Quiz History",
+    icon: "📊",
+    path: "/student/quiz/history",
+    roles: ["student"],
+  },
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -65,7 +83,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const filtered = navItems.filter(
-    (item) => user && item.roles.includes(user.role)
+    (item) => user && item.roles.includes(user.role),
   );
   const filteredWithoutLearning = filtered.filter((item) => item.path !== "/learning");
 

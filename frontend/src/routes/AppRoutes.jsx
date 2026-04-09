@@ -1,9 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login          from "../pages/Auth/Login";
-import Register       from "../pages/Auth/Register";
+import Login from "../pages/Auth/Login";
+import Register from "../pages/Auth/Register";
 import ProtectedRoute from "./ProtectedRoute";
-import MainLayout     from "../components/layout/MainLayout";
-import AdminLayout    from "../components/layout/AdminLayout";
+import MainLayout from "../components/layout/MainLayout";
+import AdminLayout from "../components/layout/AdminLayout";
+import StudentLayout from "../components/layout/StudentLayout";
 
 // Admin pages
 import AdminDashboard from "../pages/Admin/AdminDashboard";
@@ -13,15 +14,6 @@ import AdminLearning  from "../pages/Admin/AdminLearning";
 import AdminQuiz      from "../pages/Admin/AdminQuiz";
 import AdminEvents    from "../pages/Admin/AdminEvents";
 import AdminSupport   from "../pages/Admin/AdminSupport";
-
-//learning pages
-import CoursesPage from "../pages/Student/CoursesPage";
-import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
-import MyEnrollmentsPage from "../pages/Student/MyEnrollmentsPage";
-import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
-import ManageLessonsPage from "../pages/Teacher/ManageLessonsPage";
-import ManageLessonsHubPage from "../pages/Teacher/ManageLessonsHubPage";
-import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -39,12 +31,19 @@ const PageNotFound = () => (
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
-    <Route path="/"         element={<Navigate to="/login" replace />} />
-    <Route path="/login"    element={<Login />} />
+    <Route path="/" element={<Navigate to="/login" replace />} />
+    <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/quiz/join/:quizLink" element={<QuizJoin />} />
 
     {/* Student / Teacher pages — TopNav layout (MainLayout) */}
-    <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+    <Route
+      element={
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      }
+    >
       <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
       <Route path="/learning"  element={<Placeholder label="📚 Learning" />} />
       <Route path="/quiz"      element={<Placeholder label="📝 Quiz" />} />
@@ -52,77 +51,43 @@ const AppRoutes = () => (
       <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
-      <Route
-        path="/student/courses"
-        element={
-          <ProtectedRoute allowedRoles={["student"]}>
-            <CoursesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/student/courses/:courseId"
-        element={
-          <ProtectedRoute allowedRoles={["student"]}>
-            <CourseDetailsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/student/enrollments"
-        element={
-          <ProtectedRoute allowedRoles={["student"]}>
-            <MyEnrollmentsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher/manage-courses"
-        element={
-          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
-            <ManageCoursesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher/lessons"
-        element={
-          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
-            <ManageLessonsHubPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher/courses/:courseId/lessons"
-        element={
-          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
-            <ManageLessonsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teacher/courses/:courseId/students"
-        element={
-          <ProtectedRoute allowedRoles={["teacher", "admin"]}>
-            <EnrolledStudentsPage />
-          </ProtectedRoute>
-        }
-      />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
-    <Route element={
-      <ProtectedRoute allowedRoles={["admin"]}>
-        <AdminLayout />
-      </ProtectedRoute>
-    }>
-      <Route path="/admin"          element={<AdminDashboard />} />
-      <Route path="/admin/users"    element={<AdminUsers />} />
-      <Route path="/admin/reports"  element={<AdminReports />} />
+    <Route
+      element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <MainLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/users" element={<AdminUsers />} />
+      <Route path="/admin/reports" element={<AdminReports />} />
       <Route path="/admin/learning" element={<AdminLearning />} />
-      <Route path="/admin/quiz"     element={<AdminQuiz />} />
-      <Route path="/admin/events"   element={<AdminEvents />} />
-      <Route path="/admin/support"  element={<AdminSupport />} />
+      <Route path="/admin/quiz" element={<AdminQuiz />} />
+      <Route path="/admin/events" element={<AdminEvents />} />
+      <Route path="/admin/support" element={<AdminSupport />} />
+    </Route>
+
+    {/* Admin pages — Sidebar layout (AdminLayout) */}
+    <Route
+      element={
+        <ProtectedRoute allowedRoles={["teacher", "admin"]}>
+          <TeacherLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher/quiz/new" element={<QuizEditor />} />
+      <Route path="/teacher/quiz/:id/edit" element={<QuizEditor />} />
+      <Route path="/teacher/quiz/:id/questions" element={<QuizQuestions />} />
+      <Route path="/teacher/quiz/:quizId/live" element={<QuizLiveSession />} />
+      <Route path="/teacher/quiz/:quizId/results" element={<QuizResults />} />
+      <Route
+        path="/teacher/quiz/:quizId/analytics"
+        element={<QuizAnalytics />}
+      />
     </Route>
 
     <Route path="*" element={<PageNotFound />} />
