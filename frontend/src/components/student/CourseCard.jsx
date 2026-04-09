@@ -1,12 +1,22 @@
 import React from "react";
 
+const resolveCourseImage = (course) =>
+  course?.imageUrl ||
+  course?.image ||
+  course?.coverImage ||
+  course?.thumbnail ||
+  course?.courseImage?.url ||
+  "";
+
 const CourseCard = ({ course, onViewDetails }) => {
   if (!course) return null;
 
   const title = course?.title || "Untitled course";
   const category = course?.category || "Untagged";
   const level = course?.level || "Beginner";
-  const image = course?.imageUrl || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
+  const image =
+    resolveCourseImage(course) ||
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
   const instructor = course?.instructor?.name || "Expert Instructor";
   const duration = course?.duration ? `${course.duration} mins` : "Self-paced";
 

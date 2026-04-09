@@ -1,5 +1,13 @@
 import React from "react";
 
+const resolveCourseImage = (course) =>
+  course?.imageUrl ||
+  course?.image ||
+  course?.coverImage ||
+  course?.thumbnail ||
+  course?.courseImage?.url ||
+  "";
+
 const EnrollmentCard = ({
   enrollment,
   onContinue,
@@ -10,7 +18,9 @@ const EnrollmentCard = ({
 
   const title = course?.title || "Course";
   const category = course?.category || "Trained Skill";
-  const image = course?.imageUrl || "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1000&auto=format&fit=crop";
+  const image =
+    resolveCourseImage(course) ||
+    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1000&auto=format&fit=crop";
   const instructor = course?.instructor?.name || "Expert Instructor";
   const duration = course?.duration ? `${course.duration} mins` : "Self-paced";
 

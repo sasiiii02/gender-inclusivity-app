@@ -25,11 +25,13 @@ const StudentCourses = () => {
   const fetchAll = async () => {
     setLoading(true);
     setError("");
+    let fetchedEnrollments = [];
+    let fetchedCourses = [];
     try {
       // Fetch Enrollments
       try {
         const enrollRes = await trainingApi.getMyEnrollments();
-        setEnrollments(enrollRes.data || []);
+        fetchedEnrollments = Array.isArray(enrollRes?.data) ? enrollRes.data : [];
       } catch (err) {
         console.error("Failed to load enrollments", err);
       }
@@ -40,10 +42,32 @@ const StudentCourses = () => {
         const raw = res?.data?.data?.courses ?? res?.data?.courses ?? res?.data?.data ?? res?.data ?? [];
         const list = Array.isArray(raw) ? raw : [];
         const activeOnly = list.filter((c) => !c?.status || String(c.status).toLowerCase() === "active");
-        setCourses(activeOnly);
+        fetchedCourses = activeOnly;
       } catch (err) {
         console.error("Failed to load courses", err);
       }
+
+      const courseById = new Map(
+        fetchedCourses
+          .filter((course) => course?._id)
+          .map((course) => [String(course._id), course])
+      );
+
+      const mergedEnrollments = fetchedEnrollments.map((enrollment) => {
+        const enrollmentCourse = enrollment?.course || {};
+        const matchedCourse = courseById.get(String(enrollmentCourse?._id || ""));
+        if (!matchedCourse) return enrollment;
+        return {
+          ...enrollment,
+          course: {
+            ...matchedCourse,
+            ...enrollmentCourse,
+          },
+        };
+      });
+
+      setCourses(fetchedCourses);
+      setEnrollments(mergedEnrollments);
     } catch (err) {
       setError("An unexpected error occurred while loading courses.");
     } finally {
