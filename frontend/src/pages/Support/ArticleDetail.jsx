@@ -10,10 +10,22 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getFileUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    // Derive backend origin from VITE_API_BASE_URL (http://localhost:5000/api -> http://localhost:5000)
+    const backendOrigin = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api")
+      .replace('/api', '');
+    return `${backendOrigin}${url}`;
+  };
+
   useEffect(() => {
     const fetchArticle = async () => {
       try {
         const data = await getArticleById(id);
+        if (data && data.pdfUrl) {
+           data.pdfUrl = getFileUrl(data.pdfUrl);
+        }
         setArticle(data);
       } catch (error) {
         toast.error("Failed to fetch article details");
@@ -67,7 +79,7 @@ const ArticleDetail = () => {
           </h1>
         </div>
 
-        <div className="prose prose-purple prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+        <div className="prose prose-purple prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap break-words overflow-hidden">
           {article.content}
         </div>
 

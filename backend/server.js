@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 import connectDb from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -40,6 +41,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+const __dirname = path.resolve();
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // Routes
 app.use("/api/auth", authRoutes);
