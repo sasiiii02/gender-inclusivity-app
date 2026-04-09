@@ -8,23 +8,39 @@ import StudentLayout from "../components/layout/StudentLayout";
 
 // Admin pages
 import AdminDashboard from "../pages/Admin/AdminDashboard";
-import AdminUsers     from "../pages/Admin/AdminUsers";
-import AdminReports   from "../pages/Admin/AdminReports";
-import AdminLearning  from "../pages/Admin/AdminLearning";
-import AdminQuiz      from "../pages/Admin/AdminQuiz";
-import AdminEvents    from "../pages/Admin/AdminEvents";
-import AdminSupport   from "../pages/Admin/AdminSupport";
+import AdminUsers from "../pages/Admin/AdminUsers";
+import AdminReports from "../pages/Admin/AdminReports";
+import AdminLearning from "../pages/Admin/AdminLearning";
+import AdminQuiz from "../pages/Admin/AdminQuiz";
+import AdminEvents from "../pages/Admin/AdminEvents";
+import AdminSupport from "../pages/Admin/AdminSupport";
+
+// Teacher pages
+import TeacherLayout from "../components/teacher/TeacherLayout";
+import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
+import QuizEditor from "../pages/Teacher/QuizEditor";
+import QuizQuestions from "../pages/Teacher/QuizQuestions";
+import QuizLiveSession from "../pages/Teacher/QuizLiveSession";
+import QuizResults from "../pages/Teacher/QuizResults";
+import QuizAnalytics from "../pages/Teacher/QuizAnalytics";
+
+// Student Quiz Routes
+import StudentDashboard from "../pages/Student/StudentDashboard";
+import QuizTaking from "../pages/Student/QuizTaking";
+import QuizResult from "../pages/Student/QuizResult";
+import QuizHistory from "../pages/Student/QuizHistory";
+import QuizJoin from "../pages/Student/QuizJoin";
+
+// New Student Pages
+import StudentHome from "../pages/Student/StudentHome";
+import StudentCourses from "../pages/Student/StudentCourses";
+import StudentSupport from "../pages/Student/StudentSupport";
+import StudentEvents from "../pages/Student/StudentEvents";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
   <div className="flex items-center justify-center h-64">
     <p className="font-serif text-2xl text-violet-700">{label} — coming soon</p>
-  </div>
-);
-
-const PageNotFound = () => (
-  <div className="flex items-center justify-center h-64">
-    <h1 className="font-serif text-2xl text-stone-900">Page Not Found</h1>
   </div>
 );
 
@@ -45,12 +61,36 @@ const AppRoutes = () => (
       }
     >
       <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
-      <Route path="/learning"  element={<Placeholder label="📚 Learning" />} />
-      <Route path="/quiz"      element={<Placeholder label="📝 Quiz" />} />
-      <Route path="/events"    element={<Placeholder label="📅 Events" />} />
-      <Route path="/reports"   element={<Placeholder label="🚨 Reports" />} />
-      <Route path="/support"   element={<Placeholder label="🛟 Support" />} />
-      <Route path="/chat"      element={<Placeholder label="🤖 Chatbot" />} />
+      <Route path="/learning" element={<Placeholder label="📚 Learning" />} />
+      <Route path="/quiz" element={<Placeholder label="📝 Quiz" />} />
+      <Route path="/events" element={<Placeholder label="📅 Events" />} />
+      <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
+      <Route path="/support" element={<Placeholder label="🛟 Support" />} />
+      <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
+    </Route>
+
+    {/* Student pages — No Sidebar layout (StudentLayout) */}
+    <Route
+      element={
+        <ProtectedRoute allowedRoles={["student"]}>
+          <StudentLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="/student/home" element={<StudentHome />} />
+      <Route path="/student/courses" element={<StudentCourses />} />
+      <Route path="/student/support" element={<StudentSupport />} />
+      <Route path="/student/events" element={<StudentEvents />} />
+      <Route path="/student/dashboard" element={<StudentDashboard />} />
+      <Route
+        path="/student/quiz/take/:studentQuizId"
+        element={<QuizTaking />}
+      />
+      <Route
+        path="/student/quiz/result/:studentQuizId"
+        element={<QuizResult />}
+      />
+      <Route path="/student/quiz/history" element={<QuizHistory />} />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
@@ -90,7 +130,7 @@ const AppRoutes = () => (
       />
     </Route>
 
-    <Route path="*" element={<PageNotFound />} />
+    <Route path="*" element={<Placeholder label="404 Not Found" />} />
   </Routes>
 );
 
