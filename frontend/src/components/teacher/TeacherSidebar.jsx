@@ -9,6 +9,24 @@ const teacherNavItems = [
     description: "Overview & stats",
   },
   {
+    label: "Learning",
+    description: "Course Management",
+    subItems: [
+      {
+        label: "Manage Courses",
+        path: "/teacher/manage-courses",
+      },
+      {
+        label: "Manage Lessons",
+        path: "/teacher/lessons",
+      },
+      {
+        label: "Enrolled Students",
+        path: "/teacher/students",
+      },
+    ],
+  },
+  {
     label: "Create Quiz",
     path: "/teacher/quiz/new",
     description: "Create new quiz",
@@ -29,6 +47,11 @@ const TeacherSidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(true);
+  const [openSubMenus, setOpenSubMenus] = useState({ Learning: true });
+
+  const toggleSubMenu = (label) => {
+    setOpenSubMenus((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
 
   const handleLogout = () => {
     logout();
@@ -145,44 +168,109 @@ const TeacherSidebar = ({ isOpen, onClose }) => {
           </p>
 
           <div className="space-y-1">
-            {teacherNavItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={() => {
-                  if (onClose) onClose();
-                }}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium
-                  transition-all duration-200 group
-                  ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
-                  }
-                `}
-              >
-                {/* Icon placeholder - you can replace with proper SVGs later */}
-                <div className="w-5 h-5 flex items-center justify-center text-lg opacity-75">
-                  •
-                </div>
-
-                {expanded && (
-                  <div className="flex-1">
-                    <span className="block">{item.label}</span>
-                    <span className="text-xs text-zinc-500 block mt-0.5">
-                      {item.description}
-                    </span>
+            {teacherNavItems.map((item) => {
+              if (item.subItems) {
+                const isSubMenuOpen = openSubMenus[item.label];
+                return (
+                  <div key={item.label} className="mb-2">
+                    <button
+                      onClick={() => {
+                        setExpanded(true);
+                        toggleSubMenu(item.label);
+                      }}
+                      className={`
+                        w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-medium
+                        transition-all duration-200 group text-zinc-300 hover:bg-zinc-900 hover:text-white
+                      `}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 flex items-center justify-center text-lg opacity-75">
+                          •
+                        </div>
+                        {expanded && (
+                          <div className="text-left flex-1">
+                            <span className="block">{item.label}</span>
+                            <span className="text-xs text-zinc-500 block mt-0.5">
+                              {item.description}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {expanded && (
+                        <span className="text-xs text-zinc-500">
+                          {isSubMenuOpen ? "▼" : "▶"}
+                        </span>
+                      )}
+                    </button>
+                    {expanded && isSubMenuOpen && (
+                      <div className="mt-1 ml-4 pl-3 border-l border-zinc-800 space-y-1">
+                        {item.subItems.map((subItem) => (
+                          <NavLink
+                            key={subItem.path}
+                            to={subItem.path}
+                            onClick={() => {
+                              if (onClose) onClose();
+                            }}
+                            className={({ isActive }) => `
+                              flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-medium
+                              transition-all duration-200 group
+                              ${
+                                isActive
+                                  ? "bg-blue-600/10 text-blue-500"
+                                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50"
+                              }
+                            `}
+                          >
+                            <div className="w-5 h-5 flex items-center justify-center text-xs opacity-75">
+                              -
+                            </div>
+                            <span>{subItem.label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                );
+              }
 
-                {!expanded && (
-                  <div className="absolute left-full ml-3 px-3 py-1.5 bg-zinc-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap shadow-xl z-50">
-                    {item.label}
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => {
+                    if (onClose) onClose();
+                  }}
+                  className={({ isActive }) => `
+                    flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium
+                    transition-all duration-200 group
+                    ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                    }
+                  `}
+                >
+                  <div className="w-5 h-5 flex items-center justify-center text-lg opacity-75">
+                    •
                   </div>
-                )}
-              </NavLink>
-            ))}
+
+                  {expanded && (
+                    <div className="flex-1">
+                      <span className="block">{item.label}</span>
+                      <span className="text-xs text-zinc-500 block mt-0.5">
+                        {item.description}
+                      </span>
+                    </div>
+                  )}
+
+                  {!expanded && (
+                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-zinc-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap shadow-xl z-50">
+                      {item.label}
+                    </div>
+                  )}
+                </NavLink>
+              );
+            })}
           </div>
         </nav>
 

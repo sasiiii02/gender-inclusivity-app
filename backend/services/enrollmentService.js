@@ -31,7 +31,14 @@ export const enrollInCourse = async (enrollmentData) => {
 // 2. Get all enrollments for a student
 export const getMyEnrollments = async (studentId) => {
   const enrollments = await Enrollment.find({ studentId })
-    .populate("courseId", "title description category level duration status")
+    .populate({
+      path: "courseId",
+      select: "title description category level duration status imageUrl createdBy",
+      populate: {
+        path: "createdBy",
+        select: "name email"
+      }
+    })
     .sort({ enrollmentDate: -1 }); // Newest enrollments first
 
   return enrollments;

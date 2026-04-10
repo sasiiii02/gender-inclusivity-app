@@ -27,6 +27,10 @@ import AdminEvents from "../pages/Admin/AdminEvents";
 // Teacher pages
 import TeacherLayout from "../components/teacher/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
+import ManageCoursesPage from "../pages/Teacher/ManageCoursesPage";
+import ManageLessonsHubPage from "../pages/Teacher/ManageLessonsHubPage";
+import ManageLessonsPage from "../pages/Teacher/ManageLessonsPage";
+import EnrolledStudentsPage from "../pages/Teacher/EnrolledStudentsPage";
 import QuizEditor from "../pages/Teacher/QuizEditor";
 import QuizQuestions from "../pages/Teacher/QuizQuestions";
 import QuizLiveSession from "../pages/Teacher/QuizLiveSession";
@@ -44,6 +48,8 @@ import QuizExplanations from "../pages/Student/QuizExplanations";
 // New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
 import StudentCourses from "../pages/Student/StudentCourses";
+import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
+import StudentSupport from "../pages/Student/StudentSupport";
 import StudentEvents from "../pages/Student/StudentEvents";
 
 // Incident Reporting & Support Integration
@@ -93,10 +99,14 @@ const AppRoutes = () => (
     >
       <Route path="/student/home" element={<StudentHome />} />
       <Route path="/student/courses" element={<StudentCourses />} />
+      <Route path="/student/courses/:courseId" element={<CourseDetailsPage />} />
 
       {/* Support System (Student) */}
       <Route path="/student/support" element={<SupportHome />} />
       <Route path="/student/support/:id" element={<ArticleDetail />} />
+
+      {/* Legacy/Alternative Student Support */}
+      <Route path="/student/student-support" element={<StudentSupport />} />
 
       {/* Reports System (Student) */}
       <Route path="/student/reports" element={<MyReports />} />
@@ -154,6 +164,10 @@ const AppRoutes = () => (
       }
     >
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher/manage-courses" element={<ManageCoursesPage />} />
+      <Route path="/teacher/lessons" element={<ManageLessonsHubPage />} />
+      <Route path="/teacher/courses/:courseId/lessons" element={<ManageLessonsPage />} />
+      <Route path="/teacher/students" element={<EnrolledStudentsPage />} />
       <Route path="/teacher/quiz/new" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/edit" element={<QuizEditor />} />
       <Route path="/teacher/quiz/:id/questions" element={<QuizQuestions />} />

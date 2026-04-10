@@ -2,6 +2,7 @@ import express from "express";
 import * as courseController from "../controllers/courseController.js";
 import * as lessonController from "../controllers/lessonController.js";
 import * as enrollmentController from "../controllers/enrollmentController.js";
+import upload from "../middleware/uploadMiddleware.js";
 import protect, { authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -19,6 +20,7 @@ router.post(
   "/:courseId/lessons",
   protect,
   authorize("teacher", "admin"),
+  upload.single("pdf"),
   lessonController.addLessonToCourse
 );
 
@@ -47,6 +49,7 @@ router.post(
   "/",
   protect,
   authorize("teacher"),
+  upload.single("image"),
   courseController.createCourse
 );
 
@@ -55,6 +58,7 @@ router.put(
   "/:id",
   protect,
   authorize("teacher", "admin"),
+  upload.single("image"),
   courseController.updateCourse
 );
 
