@@ -11,7 +11,11 @@ import {
 // Admin - create a new support article
 export const createArticle = async (req, res) => {
   try {
-    const article = await createArticleService(req.body, req.user._id);
+    const data = req.body;
+    if (req.file) {
+      data.pdfUrl = `/uploads/pdf/${req.file.filename}`;
+    }
+    const article = await createArticleService(data, req.user._id);
     res.status(201).json(article);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -38,7 +42,11 @@ export const getSingleArticle = async (req, res) => {
 // Admin - update a support article by ID
 export const updateArticle = async (req, res) => {
   try {
-    const article = await updateArticleService(req.params.id, req.body);
+    const data = req.body;
+    if (req.file) {
+      data.pdfUrl = `/uploads/pdf/${req.file.filename}`;
+    }
+    const article = await updateArticleService(req.params.id, data);
     res.status(200).json(article);
   } catch (error) {
     res.status(404).json({ message: error.message });

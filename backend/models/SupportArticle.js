@@ -13,8 +13,10 @@ const supportArticleSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Reporting", "Mental Health", "Policies", "General"],
       default: "General",
+    },
+    pdfUrl: {
+      type: String,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

@@ -7,13 +7,22 @@ import AdminLayout from "../components/layout/AdminLayout";
 import StudentLayout from "../components/layout/StudentLayout";
 
 // Admin pages
+// Admin Reports
+import AdminReportsDashboard from "../pages/Admin/reports/AdminReportsDashboard";
+import AdminAllReports from "../pages/Admin/reports/AdminAllReports";
+import AdminReportDetail from "../pages/Admin/reports/AdminReportDetail";
+import AdminAllResponses from "../pages/Admin/reports/AdminAllResponses";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
+
+// Admin Support
+import AdminSupportList from "../pages/Admin/support/AdminSupportList";
+import AdminCreateArticle from "../pages/Admin/support/AdminCreateArticle";
+import AdminEditArticle from "../pages/Admin/support/AdminEditArticle";
+
 import AdminUsers from "../pages/Admin/AdminUsers";
-import AdminReports from "../pages/Admin/AdminReports";
 import AdminLearning from "../pages/Admin/AdminLearning";
 import AdminQuiz from "../pages/Admin/AdminQuiz";
 import AdminEvents from "../pages/Admin/AdminEvents";
-import AdminSupport from "../pages/Admin/AdminSupport";
 
 // Teacher pages
 import TeacherLayout from "../components/teacher/TeacherLayout";
@@ -35,8 +44,15 @@ import QuizExplanations from "../pages/Student/QuizExplanations";
 // New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
 import StudentCourses from "../pages/Student/StudentCourses";
-import StudentSupport from "../pages/Student/StudentSupport";
 import StudentEvents from "../pages/Student/StudentEvents";
+
+// Incident Reporting & Support Integration
+import MyReports      from "../pages/Report/MyReports";
+import SubmitReport   from "../pages/Report/SubmitReport";
+import ReportSuccess  from "../pages/Report/ReportSuccess";
+import ReportDetail   from "../pages/Report/ReportDetail";
+import SupportHome    from "../pages/Support/SupportHome";
+import ArticleDetail  from "../pages/Support/ArticleDetail";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -61,12 +77,8 @@ const AppRoutes = () => (
         </ProtectedRoute>
       }
     >
-      <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
-      <Route path="/learning" element={<Placeholder label="📚 Learning" />} />
       <Route path="/quiz" element={<Placeholder label="📝 Quiz" />} />
       <Route path="/events" element={<Placeholder label="📅 Events" />} />
-      <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
-      <Route path="/support" element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
     </Route>
 
@@ -80,7 +92,17 @@ const AppRoutes = () => (
     >
       <Route path="/student/home" element={<StudentHome />} />
       <Route path="/student/courses" element={<StudentCourses />} />
-      <Route path="/student/support" element={<StudentSupport />} />
+      
+      {/* Support System (Student) */}
+      <Route path="/student/support" element={<SupportHome />} />
+      <Route path="/student/support/:id" element={<ArticleDetail />} />
+
+      {/* Reports System (Student) */}
+      <Route path="/student/reports"          element={<MyReports />} />
+      <Route path="/student/reports/submit"   element={<SubmitReport />} />
+      <Route path="/student/reports/success"  element={<ReportSuccess />} />
+      <Route path="/student/reports/:id"      element={<ReportDetail />} />
+
       <Route path="/student/events" element={<StudentEvents />} />
       <Route path="/student/dashboard" element={<StudentDashboard />} />
       <Route
@@ -102,17 +124,24 @@ const AppRoutes = () => (
     <Route
       element={
         <ProtectedRoute allowedRoles={["admin"]}>
-          <MainLayout />
+          <AdminLayout />
         </ProtectedRoute>
       }
     >
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/reports" element={<AdminReportsDashboard />} />
+      <Route path="/admin/reports/all" element={<AdminAllReports />} />
+      <Route path="/admin/reports/responses" element={<AdminAllResponses />} />
+      <Route path="/admin/reports/:id" element={<AdminReportDetail />} />
+      
+      <Route path="/admin/support" element={<AdminSupportList />} />
+      <Route path="/admin/support/create" element={<AdminCreateArticle />} />
+      <Route path="/admin/support/:id/edit" element={<AdminEditArticle />} />
+
       <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/reports" element={<AdminReports />} />
       <Route path="/admin/learning" element={<AdminLearning />} />
       <Route path="/admin/quiz" element={<AdminQuiz />} />
       <Route path="/admin/events" element={<AdminEvents />} />
-      <Route path="/admin/support" element={<AdminSupport />} />
     </Route>
 
     {/* Admin pages — Sidebar layout (AdminLayout) */}
