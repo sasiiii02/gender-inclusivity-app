@@ -1,0 +1,66 @@
+{
+  "success": true,
+  "data": {
+    "courses": [
+      {
+        "_id": "69d7f36f03c401bf9e2a4921",
+        "title": "test2",
+        "description": "regdh",
+        "category": "male",
+        "level": "Beginner",
+        "createdBy": {
+          "_id": "69ce33a204998958fa6cd44f",
+          "name": "staff",
+          "email": "staff123@gmail.com"
+        },
+        "duration": 45,
+        "status": "Active",
+        "imageUrl": "https://res.cloudinary.com/dsq5hogwt/image/upload/v1775760239/gender-inclusivity/courses/images/file_tg4vrq.png",
+        "createdAt": "2026-04-09T18:43:59.367Z",
+        "updatedAt": "2026-04-09T18:43:59.367Z",
+        "__v": 0
+      },
+      {
+        "_id": "69d7ec8803c401bf9e2a4676",
+        "title": "Test",
+        "description": "Test Test",
+        "category": "male",
+        "level": "Beginner",
+        "createdBy": {
+          "_id": "69ce33a204998958fa6cd44f",
+          "name": "staff",
+          "email": "staff123@gmail.com"
+        },
+        "duration": 20,
+        "status": "Active",
+        "imageUrl": "https://res.cloudinary.com/dsq5hogwt/image/upload/v1775758472/gender-inclusivity/courses/images/file_oqqbpv.jpg",
+        "createdAt": "2026-04-09T18:14:32.455Z",
+        "updatedAt": "2026-04-09T18:14:32.455Z",
+        "__v": 0
+      },
+      {
+        "_id": "69a17ece3e1ce838e5d5f136",
+        "title": "Promoting Equal Opportunities in Education",
+        "description": "Understanding equal rights, responsibilities, and opportunities for all genders within the school environment",
+        "category": "Equity",
+        "level": "Intermediate",
+        "createdBy": {
+          "_id": "699b13fcc767d07deee59dbe",
+          "name": "teacher",
+          "email": "teacher123@gmail.com"
+        },
+        "duration": 40,
+        "status": "Active",
+        "createdAt": "2026-02-27T11:23:58.448Z",
+        "updatedAt": "2026-04-05T17:58:21.878Z",
+        "__v": 0,
+        "imageUrl": "https://res.cloudinary.com/dsq5hogwt/image/upload/v1775411901/gender-inclusivity/courses/images/file_f3fguc.png"
+      }
+    ],
+    "pagination": {
+      "total": 3,
+      "page": 1,
+      "pages": 1
+    }
+  }
+}

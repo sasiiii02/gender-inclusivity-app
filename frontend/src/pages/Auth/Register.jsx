@@ -44,7 +44,14 @@ const Register = () => {
         role: form.role,
       });
       login(res.data.user, res.data.token);
-      navigate("/dashboard");
+      
+      if (res.data.user.role === "student") {
+        navigate("/student/home");
+      } else if (res.data.user.role === "teacher") {
+        navigate("/teacher/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(
         err.response?.data?.message || "Registration failed. Please try again."

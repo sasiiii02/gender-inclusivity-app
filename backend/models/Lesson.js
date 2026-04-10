@@ -22,6 +22,17 @@ const lessonSchema = new mongoose.Schema(
     duration: {
       type: Number,
     },
+    videoUrl: {
+      type: String,
+    },
+    pdf: {
+      url: String,
+      publicId: String,
+      originalFilename: String,
+      resourceType: String,
+      format: String,
+      bytes: Number,
+    },
   },
   {
     timestamps: true,

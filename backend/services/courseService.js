@@ -1,4 +1,6 @@
 import Course from "../models/Course.js";
+import Lesson from "../models/Lesson.js";
+import Enrollment from "../models/Enrollment.js";
 
 // 1. Create a new course
 export const createCourse = async (courseData) => {
@@ -43,9 +45,55 @@ export const getAllCourses = async (query) => {
 
   const total = await Course.countDocuments(filter);
 
+  const courseIds = courses.map((course) => course._id);
+  let statsByCourseId = new Map();
+
+  if (courseIds.length > 0) {
+    const enrollmentStats = await Enrollment.aggregate([
+      { $match: { courseId: { $in: courseIds } } },
+      {
+        $group: {
+          _id: "$courseId",
+          enrolledCount: { $sum: 1 },
+          avgCompletion: { $avg: "$progressPercentage" },
+          completedCount: {
+            $sum: {
+              $cond: [{ $eq: ["$completionStatus", "Completed"] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    statsByCourseId = new Map(
+      enrollmentStats.map((row) => [String(row._id), row])
+    );
+  }
+
+  const coursesWithStats = courses.map((courseDoc) => {
+    const course = courseDoc.toObject();
+    const stats = statsByCourseId.get(String(course._id));
+
+    const enrolledCount = stats?.enrolledCount || 0;
+    const avgCompletion = Number.isFinite(stats?.avgCompletion)
+      ? Math.round(stats.avgCompletion)
+      : 0;
+    const completionRate =
+      enrolledCount > 0
+        ? Math.round(((stats?.completedCount || 0) / enrolledCount) * 100)
+        : 0;
+
+    return {
+      ...course,
+      enrolledCount,
+      avgCompletion,
+      completionRate,
+    };
+  });
+
   // Return clean data and pagination metadata for the React frontend
   return {
-    courses,
+    courses: coursesWithStats,
     pagination: {
       total,
       page: parseInt(page),
@@ -66,8 +114,12 @@ export const updateCourse = async (id, updateData) => {
   return await Course.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 };
 
-// 5. Soft Delete a course (change status to Inactive)
+// 5. Delete a course completely and its associated data
 export const deleteCourse = async (id) => {
-  // Soft delete by changing status to "Inactive"
-  return await Course.findByIdAndUpdate(id, { status: "Inactive" }, { new: true });
+  const deletedCourse = await Course.findByIdAndDelete(id);
+  if (deletedCourse) {
+    await Lesson.deleteMany({ courseId: id });
+    await Enrollment.deleteMany({ courseId: id });
+  }
+  return deletedCourse;
 };

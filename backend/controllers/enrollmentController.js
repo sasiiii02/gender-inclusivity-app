@@ -49,41 +49,41 @@ export const enrollInCourse = async (req, res) => {
   } catch (error) {
     // Handle course not found or inactive
     if (error.message === "Course not found") {
-      return res.status(404).json({ 
-        success: false, 
-        message: error.message 
+      return res.status(404).json({
+        success: false,
+        message: error.message
       });
     }
     if (error.message === "Cannot enroll in an inactive course") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
+      return res.status(400).json({
+        success: false,
+        message: error.message
       });
     }
     // Handle duplicate enrollment
     if (error.message === "Student is already enrolled in this course") {
-      return res.status(409).json({ 
-        success: false, 
-        message: error.message 
+      return res.status(409).json({
+        success: false,
+        message: error.message
       });
     }
     // Handle MongoDB duplicate key error (backup check)
     if (error.code === 11000) {
-      return res.status(409).json({ 
-        success: false, 
-        message: "Student is already enrolled in this course" 
+      return res.status(409).json({
+        success: false,
+        message: "Student is already enrolled in this course"
       });
     }
     // Handle validation errors
     if (error.name === "ValidationError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
+      return res.status(400).json({
+        success: false,
+        message: error.message
       });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -100,10 +100,10 @@ export const getStudentsByCourse = async (req, res) => {
       _id: enrollment._id,
       student: enrollment.studentId
         ? {
-            _id: enrollment.studentId._id,
-            name: enrollment.studentId.name,
-            email: enrollment.studentId.email,
-          }
+          _id: enrollment.studentId._id,
+          name: enrollment.studentId.name,
+          email: enrollment.studentId.email,
+        }
         : null,
       progress: enrollment.progressPercentage,
       completionStatus: enrollment.completionStatus,
@@ -134,9 +134,19 @@ export const getMyEnrollments = async (req, res) => {
       _id: enrollment._id,
       course: enrollment.courseId
         ? {
-            _id: enrollment.courseId._id,
-            title: enrollment.courseId.title,
-          }
+          _id: enrollment.courseId._id,
+          title: enrollment.courseId.title,
+          category: enrollment.courseId.category,
+          level: enrollment.courseId.level,
+          duration: enrollment.courseId.duration,
+          status: enrollment.courseId.status,
+          imageUrl: enrollment.courseId.imageUrl,
+          instructor: enrollment.courseId.createdBy
+            ? {
+                name: enrollment.courseId.createdBy.name,
+              }
+            : null,
+        }
         : null,
       progress: enrollment.progressPercentage,
       completionStatus: enrollment.completionStatus,
@@ -144,8 +154,8 @@ export const getMyEnrollments = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ 
-      message: error.message 
+    res.status(500).json({
+      message: error.message
     });
   }
 };
@@ -158,9 +168,9 @@ export const updateProgress = async (req, res) => {
     const { progressPercentage } = req.body;
 
     if (progressPercentage === undefined || progressPercentage === null) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Progress percentage is required" 
+      return res.status(400).json({
+        success: false,
+        message: "Progress percentage is required"
       });
     }
 
@@ -170,43 +180,43 @@ export const updateProgress = async (req, res) => {
     );
 
     if (!updatedEnrollment) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Enrollment not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Enrollment not found"
       });
     }
 
     // Verify that the enrollment belongs to the current user
     if (updatedEnrollment.studentId.toString() !== req.user.id) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You can only update your own enrollment progress" 
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own enrollment progress"
       });
     }
 
-    res.status(200).json({ 
-      success: true, 
-      data: updatedEnrollment, 
-      message: "Progress updated successfully" 
+    res.status(200).json({
+      success: true,
+      data: updatedEnrollment,
+      message: "Progress updated successfully"
     });
   } catch (error) {
     // Handle validation errors
     if (error.message === "Progress percentage must be between 0 and 100") {
-      return res.status(400).json({ 
-        success: false, 
-        message: error.message 
+      return res.status(400).json({
+        success: false,
+        message: error.message
       });
     }
     // Handle invalid ObjectId format
     if (error.name === "CastError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid enrollment ID format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid enrollment ID format"
       });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -326,14 +336,14 @@ export const markCourseComplete = async (req, res) => {
   } catch (error) {
     // Handle invalid ObjectId format
     if (error.name === "CastError") {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid enrollment ID format" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid enrollment ID format"
       });
     }
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
