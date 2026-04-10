@@ -47,12 +47,12 @@ import StudentCourses from "../pages/Student/StudentCourses";
 import StudentEvents from "../pages/Student/StudentEvents";
 
 // Incident Reporting & Support Integration
-import MyReports      from "../pages/Report/MyReports";
-import SubmitReport   from "../pages/Report/SubmitReport";
-import ReportSuccess  from "../pages/Report/ReportSuccess";
-import ReportDetail   from "../pages/Report/ReportDetail";
-import SupportHome    from "../pages/Support/SupportHome";
-import ArticleDetail  from "../pages/Support/ArticleDetail";
+import MyReports from "../pages/Report/MyReports";
+import SubmitReport from "../pages/Report/SubmitReport";
+import ReportSuccess from "../pages/Report/ReportSuccess";
+import ReportDetail from "../pages/Report/ReportDetail";
+import SupportHome from "../pages/Support/SupportHome";
+import ArticleDetail from "../pages/Support/ArticleDetail";
 
 // Placeholders for student/teacher pages (replace as you build them)
 const Placeholder = ({ label }) => (
@@ -61,6 +61,7 @@ const Placeholder = ({ label }) => (
   </div>
 );
 
+//merger dasunDev and reporting system dev branch
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
@@ -92,16 +93,16 @@ const AppRoutes = () => (
     >
       <Route path="/student/home" element={<StudentHome />} />
       <Route path="/student/courses" element={<StudentCourses />} />
-      
+
       {/* Support System (Student) */}
       <Route path="/student/support" element={<SupportHome />} />
       <Route path="/student/support/:id" element={<ArticleDetail />} />
 
       {/* Reports System (Student) */}
-      <Route path="/student/reports"          element={<MyReports />} />
-      <Route path="/student/reports/submit"   element={<SubmitReport />} />
-      <Route path="/student/reports/success"  element={<ReportSuccess />} />
-      <Route path="/student/reports/:id"      element={<ReportDetail />} />
+      <Route path="/student/reports" element={<MyReports />} />
+      <Route path="/student/reports/submit" element={<SubmitReport />} />
+      <Route path="/student/reports/success" element={<ReportSuccess />} />
+      <Route path="/student/reports/:id" element={<ReportDetail />} />
 
       <Route path="/student/events" element={<StudentEvents />} />
       <Route path="/student/dashboard" element={<StudentDashboard />} />
@@ -133,7 +134,7 @@ const AppRoutes = () => (
       <Route path="/admin/reports/all" element={<AdminAllReports />} />
       <Route path="/admin/reports/responses" element={<AdminAllResponses />} />
       <Route path="/admin/reports/:id" element={<AdminReportDetail />} />
-      
+
       <Route path="/admin/support" element={<AdminSupportList />} />
       <Route path="/admin/support/create" element={<AdminCreateArticle />} />
       <Route path="/admin/support/:id/edit" element={<AdminEditArticle />} />
