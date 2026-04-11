@@ -1,4 +1,5 @@
 import * as eventService from "../services/eEventService.js";
+import EEvent from "../models/EEvent.js";
 
 // @desc    Create a new event
 // @route   POST /api/campaigns/:campaignId/events
@@ -70,6 +71,18 @@ export const deleteEvent = async (req, res) => {
       return res.status(404).json({ success: false, message: "Event not found" });
     }
     res.status(200).json({ success: true, message: "Event deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const fixAllEventStatus = async (req, res) => {
+  try {
+    const result = await EEvent.updateMany(
+      { status: { $ne: "Published" } },
+      { $set: { status: "Published" } }
+    );
+    res.json({ success: true, message: `Updated ${result.modifiedCount} events to Published` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

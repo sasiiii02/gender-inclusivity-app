@@ -10,7 +10,10 @@ const FeedbackModal = ({ eventId, eventTitle, onClose, onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await campaignEventsApi.submitFeedback(eventId, { rating, comment });
+      await campaignEventsApi.submitFeedback(eventId, { 
+        rating, 
+        comments: comment   // ✅ change 'comment' to 'comments'
+      });
       alert("Thank you! Your feedback has been submitted.");
       onSuccess();
       onClose();

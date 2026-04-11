@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { campaignEventsApi } from '../../api/campaignEventsApi';
+import FeedbackModal from "../../components/Events/FeedbackModal";
 
 const MyRegistrations = () => {
+  const navigate = useNavigate();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cancelLoading, setCancelLoading] = useState(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [selectedEventForFeedback, setSelectedEventForFeedback] = useState(null);
 
   useEffect(() => {
     fetchMyRegistrations();
@@ -15,7 +20,6 @@ const MyRegistrations = () => {
     try {
       setLoading(true);
       const res = await campaignEventsApi.getMyRegistrations();
-      // Adjust based on your backend response structure (e.g., res.data or just res)
       setRegistrations(res.data || res);
       setError("");
     } catch (err) {
@@ -28,12 +32,9 @@ const MyRegistrations = () => {
 
   const handleCancel = async (registrationId) => {
     if (!window.confirm("Are you sure you want to cancel your registration? This cannot be undone.")) return;
-    
     try {
       setCancelLoading(registrationId);
       await campaignEventsApi.cancelRegistration(registrationId);
-      
-      // Update UI immediately by filtering out the canceled event
       setRegistrations(registrations.filter(reg => reg._id !== registrationId));
       alert("Registration canceled successfully.");
     } catch (err) {
@@ -42,6 +43,15 @@ const MyRegistrations = () => {
     } finally {
       setCancelLoading(null);
     }
+  };
+
+  const handleOpenFeedback = (event) => {
+    setSelectedEventForFeedback(event);
+    setShowFeedbackModal(true);
+  };
+
+  const handleFeedbackSuccess = () => {
+    fetchMyRegistrations();
   };
 
   if (loading) {
@@ -71,7 +81,7 @@ const MyRegistrations = () => {
           <h2 className="text-xl font-bold text-gray-700 mb-2">No Upcoming Events</h2>
           <p className="text-gray-500 mb-6">You haven't registered for any events yet.</p>
           <button 
-            onClick={() => window.location.href = '/events'} 
+            onClick={() => navigate('/student/events')}
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
           >
             Browse Events
@@ -81,19 +91,16 @@ const MyRegistrations = () => {
         <div className="space-y-4">
           {registrations.map((reg) => (
             <div key={reg._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-shadow">
-              
               <div className="mb-4 md:mb-0">
-                {/* Assuming your backend populates the 'eventId' with the actual Event details */}
                 <h3 className="text-xl font-bold text-gray-800">{reg.eventId?.title || "Event Details Unavailable"}</h3>
                 <div className="text-sm text-gray-500 mt-2 space-y-1">
-                  <p>📅 {reg.eventId?.date ? new Date(reg.eventId.date).toLocaleDateString() : "Date TBD"}</p>
+                  <p>📅 {reg.eventId?.eventDate ? new Date(reg.eventId.eventDate).toLocaleDateString() : "Date TBD"}</p>
                   <p>📍 {reg.eventId?.location || "Location TBD"}</p>
                   <p>Status: <span className="font-semibold text-blue-600">{reg.attendanceStatus || "Registered"}</span></p>
                 </div>
               </div>
 
               <div className="flex gap-3 w-full md:w-auto">
-                {/* If the teacher already marked them as attended, they shouldn't be able to cancel! */}
                 {reg.attendanceStatus !== 'Attended' && (
                   <button 
                     onClick={() => handleCancel(reg._id)}
@@ -104,17 +111,28 @@ const MyRegistrations = () => {
                   </button>
                 )}
                 
-                {/* Prepare for the final slice: Feedback! */}
                 {reg.attendanceStatus === 'Attended' && (
-                  <button className="w-full md:w-auto px-4 py-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 border border-yellow-200 rounded-lg font-semibold transition-colors">
+                  <button 
+                    onClick={() => handleOpenFeedback(reg.eventId)}
+                    className="w-full md:w-auto px-4 py-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 border border-yellow-200 rounded-lg font-semibold transition-colors"
+                  >
                     ⭐ Leave Feedback
                   </button>
                 )}
               </div>
-
             </div>
           ))}
         </div>
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && selectedEventForFeedback && (
+        <FeedbackModal
+          eventId={selectedEventForFeedback._id}
+          eventTitle={selectedEventForFeedback.title}
+          onClose={() => setShowFeedbackModal(false)}
+          onSuccess={handleFeedbackSuccess}
+        />
       )}
     </div>
   );
