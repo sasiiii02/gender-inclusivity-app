@@ -22,12 +22,22 @@ const CourseForm = ({
     []
   );
 
-  const [form, setForm] = useState({ ...empty, ...(initialData || {}) });
+  const mergeInitial = (raw) => {
+    const base = raw || {};
+    return {
+      ...empty,
+      ...base,
+      // API returns image metadata as an object; only keep File/Blob for upload state
+      image: base.image instanceof Blob ? base.image : null,
+    };
+  };
+
+  const [form, setForm] = useState(() => mergeInitial(initialData));
   const [errors, setErrors] = useState({});
   const [selectedPreviewUrl, setSelectedPreviewUrl] = useState("");
 
   useEffect(() => {
-    setForm({ ...empty, ...(initialData || {}) });
+    setForm(mergeInitial(initialData));
     setErrors({});
     setSelectedPreviewUrl("");
   }, [empty, initialData]);
@@ -38,7 +48,7 @@ const CourseForm = ({
   };
 
   useEffect(() => {
-    if (!form.image) {
+    if (!(form.image instanceof Blob)) {
       setSelectedPreviewUrl("");
       return;
     }
@@ -77,7 +87,7 @@ const CourseForm = ({
     formData.append("level", form.level);
     formData.append("duration", Number(form.duration));
     
-    if (form.image) {
+    if (form.image instanceof File) {
       formData.append("image", form.image);
     }
 
@@ -215,11 +225,11 @@ const CourseForm = ({
           onChange={(e) => setField("image", e.target.files?.[0] || null)}
           className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
         />
-        {form.image && (
+        {form.image instanceof File ? (
           <p className="text-xs text-stone-500 mt-1">
             Selected: {form.image.name}
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex">
