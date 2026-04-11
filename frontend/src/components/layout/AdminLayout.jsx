@@ -6,7 +6,7 @@ import NotificationBell from "./NotificationBell";
 
 const adminNav = [
   { label: "Dashboard",  icon: "🏠", path: "/admin" },
-  { label: "Users",      icon: "👥", path: "/admin/users" },
+ 
   { label: "Reports",    icon: "🚨", path: "/admin/reports" },
   { label: "Support",    icon: "🛟", path: "/admin/support" },
   { label: "Events",     icon: "📅", path: "/admin/events" },
