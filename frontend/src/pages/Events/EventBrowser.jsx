@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { campaignEventsApi } from '../../api/campaignEventsApi';
 import EventCard from '../../components/Events/EventCard';
+import EventDetailsModal from '../../components/Events/EventDetailsModal';
+import QuoteWidget from '../../components/Events/QuoteWidget';
+import QRCodeModal from '../../components/Events/QRCodeModal';
 
 const EventBrowser = () => {
   const [events, setEvents] = useState([]);
@@ -8,14 +11,18 @@ const EventBrowser = () => {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  // New state for enhanced features
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(6);
-  const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [viewMode, setViewMode] = useState("grid");
   const [weatherData, setWeatherData] = useState(null);
   const [showWeather, setShowWeather] = useState(false);
+  
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [registrationResult, setRegistrationResult] = useState(null);
 
   const userRole = 'student';
 
@@ -23,15 +30,19 @@ const EventBrowser = () => {
     fetchEvents();
   }, []);
 
+  const extractEvents = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.events)) return payload.events;
+    if (Array.isArray(payload?.data?.events)) return payload.data.events;
+    if (Array.isArray(payload?.data)) return payload.data;
+    return [];
+  };
+
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const res = await campaignEventsApi.getAllEvents();
-      let events = [];
-      if (res?.data?.events) events = res.data.events;
-      else if (res?.data && Array.isArray(res.data)) events = res.data;
-      else if (Array.isArray(res)) events = res;
-      else if (res?.events) events = res.events;
+      const res = await campaignEventsApi.getAllEvents({ page: 1, limit: 1000 });
+      const events = extractEvents(res);
       setEvents(Array.isArray(events) ? events : []);
       setError("");
     } catch (err) {
@@ -42,12 +53,17 @@ const EventBrowser = () => {
     }
   };
 
-  const handleCardAction = async (actionType, eventId) => {
+  const handleCardAction = async (actionType, eventIdOrEvent) => {
     if (actionType === 'register') {
       try {
         setActionLoading(true);
-        await campaignEventsApi.registerForEvent(eventId, "None");
-        alert("Registration Successful! Please check your email for confirmation.");
+        const res = await campaignEventsApi.registerForEvent(eventIdOrEvent, "None");
+        const registeredEvent = events.find(e => e._id === eventIdOrEvent);
+        setRegistrationResult({
+          event: registeredEvent,
+          registrationId: res.data?._id || res._id || 'REG-' + Date.now(),
+        });
+        setShowQRModal(true);
         fetchEvents();
       } catch (err) {
         console.error("Registration error:", err);
@@ -55,15 +71,20 @@ const EventBrowser = () => {
       } finally {
         setActionLoading(false);
       }
+    } else if (actionType === 'details') {
+      setSelectedEvent(eventIdOrEvent);
+      setShowDetailsModal(true);
     }
   };
 
-  // Fetch weather for the first upcoming event (third‑party API demo)
   const fetchWeatherForEvent = async (event) => {
     if (!event?.location) return;
     try {
-      // Using OpenWeatherMap free API – replace with your own key in .env
-      const apiKey = import.meta.env.VITE_WEATHER_API_KEY || "YOUR_API_KEY";
+      const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+      if (!apiKey) {
+        alert("Weather API key not configured.");
+        return;
+      }
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(event.location)}&appid=${apiKey}&units=metric`
       );
@@ -72,14 +93,13 @@ const EventBrowser = () => {
         setWeatherData({ event, weather: data });
         setShowWeather(true);
       } else {
-        alert("Weather data not available for this location.");
+        alert("Weather data not available.");
       }
     } catch (err) {
       console.error("Weather fetch error:", err);
     }
   };
 
-  // Filter and search logic
   const filteredEvents = useMemo(() => {
     let filtered = events;
     if (searchTerm) {
@@ -95,19 +115,16 @@ const EventBrowser = () => {
     return filtered;
   }, [events, searchTerm, selectedType]);
 
-  // Pagination
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-  // Get unique event types for filter dropdown
   const eventTypes = useMemo(() => {
     const types = [...new Set(events.map(e => e.eventType).filter(Boolean))];
     return ["All", ...types.sort()];
   }, [events]);
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedType]);
@@ -137,7 +154,7 @@ const EventBrowser = () => {
           <div className="h-1 w-20 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mt-4"></div>
         </div>
 
-        {/* Search, Filter, and View Controls */}
+        {/* Search & Filter Controls */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <div className="relative w-full sm:w-80">
             <input
@@ -182,7 +199,7 @@ const EventBrowser = () => {
           </div>
         </div>
 
-        {/* Weather Widget (third‑party API demo) */}
+        {/* Weather Widget */}
         {events.length > 0 && (
           <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "150ms" }}>
             <button
@@ -193,6 +210,11 @@ const EventBrowser = () => {
             </button>
           </div>
         )}
+
+        {/* Quote Widget */}
+        <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          <QuoteWidget />
+        </div>
 
         {error && (
           <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-700 rounded-r-xl shadow-sm animate-shake">
@@ -232,7 +254,6 @@ const EventBrowser = () => {
               ))}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-10 flex justify-center items-center gap-2 animate-fade-in-up">
                 <button
@@ -298,7 +319,6 @@ const EventBrowser = () => {
         </div>
       )}
 
-      {/* Loading overlay for registration */}
       {actionLoading && (
         <div className="fixed inset-0 bg-black/20 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-2xl shadow-lg flex items-center gap-3">
@@ -306,6 +326,26 @@ const EventBrowser = () => {
             <p className="font-semibold text-gray-700">Processing Registration...</p>
           </div>
         </div>
+      )}
+
+      {showDetailsModal && selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          onClose={() => setShowDetailsModal(false)}
+          onRegister={(eventId) => handleCardAction('register', eventId)}
+        />
+      )}
+
+      {showQRModal && registrationResult && (
+        <QRCodeModal
+          event={registrationResult.event}
+          registrationId={registrationResult.registrationId}
+          studentName={JSON.parse(localStorage.getItem('user'))?.name || 'Attendee'}
+          onClose={() => {
+            setShowQRModal(false);
+            setRegistrationResult(null);
+          }}
+        />
       )}
 
       <style>{`
