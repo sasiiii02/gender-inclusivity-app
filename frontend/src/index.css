@@ -1,1 +1,59 @@
 @import "tailwindcss";
+
+@layer base {
+  @media print {
+    /* Hide navigation sidebars, headers, and interaction buttons */
+    nav, 
+    aside, 
+    header,
+    button,
+    footer,
+    .no-print {
+      display: none !important;
+    }
+
+    /* Reset margins and backgrounds for printing */
+    body {
+      background: white !important;
+      color: black !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Expand the main content to full width */
+    main, 
+    .container,
+    .max-w-\[1400px\],
+    .max-w-7xl,
+    .lg\:col-span-2 {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: block !important;
+      column-gap: 0 !important;
+    }
+
+    /* Force background colors to print */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* Avoid breaking sections across pages */
+    .bg-white {
+      border: 1px solid #e5e7eb !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+
+    /* High contrast for text */
+    .text-stone-500, .text-gray-500 {
+      color: #4b5563 !important;
+    }
+    
+    .text-stone-900, .text-gray-900 {
+      color: #000000 !important;
+    }
+  }
+}

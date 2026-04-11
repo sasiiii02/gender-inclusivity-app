@@ -1,10 +1,64 @@
-import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService} from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService, getReportCategoriesService, getCaseStatusesService, createReportCategoryService, deleteReportCategoryService} from "../services/reportService.js";
 
 // Controller for managing user reports and admin responses
+
+// Get all report statuses
+export const getReportStatuses = async (req, res) => {
+    try {
+        const statuses = await getCaseStatusesService();
+        res.status(200).json({
+            success: true,
+            statuses
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// Create a new report category
+export const createReportCategory = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const category = await createReportCategoryService(name);
+        res.status(201).json({
+            success: true,
+            category
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// Delete a report category
+export const deleteReportCategory = async (req, res) => {
+    try {
+        await deleteReportCategoryService(req.params.id);
+        res.status(200).json({
+            success: true,
+            message: "Category deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 
 // Create a new report
 export const createReport = async (req,res) =>{
     try {
+        // If files are uploaded via multer, they will be in req.files
+        if (req.files && req.files.length > 0) {
+            req.body.evidence = req.files.map(file => `/uploads/evidence/${file.filename}`);
+        }
+        
         const report = await createReportService(req);
         res.status(201).json({
             success:true,
@@ -20,6 +74,23 @@ export const createReport = async (req,res) =>{
         
     }
 }
+
+// Get all report categories
+export const getReportCategories = async (req, res) => {
+    try {
+        const categories = await getReportCategoriesService();
+        res.status(200).json({
+            success: true,
+            categories
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 // Admin - view all reports
 export const getAllReports = async(req,res)=>{
     try {
@@ -123,7 +194,8 @@ export const getMyReportResponses = async (req, res) => {
   try {
     const responses = await getResponsesByReportService(
       req.params.id,
-      req.user._id
+      req.user._id,
+      req.user.role === "admin"
     );
 
     res.status(200).json({

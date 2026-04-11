@@ -32,6 +32,14 @@ const courseSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
     },
+    image: {
+      url: String,
+      publicId: String,
+      originalFilename: String,
+      resourceType: String,
+      format: String,
+      bytes: Number,
+    },
   },
   {
     timestamps: true,

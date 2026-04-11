@@ -5,7 +5,7 @@ const StudentList = ({ students }) => {
 
   if (!students || students.length === 0) {
     return (
-      <div className="text-center py-8 text-stone-400">
+      <div className="text-center py-12 text-zinc-400">
         No students have joined yet
       </div>
     );
@@ -15,77 +15,85 @@ const StudentList = ({ students }) => {
     s.studentId?.name?.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "completed":
-        return "✅";
-      case "active":
-        return "🟢";
-      case "disconnected":
-        return "🔴";
-      default:
-        return "⏳";
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
-        return "text-green-600 bg-green-50";
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "active":
-        return "text-blue-600 bg-blue-50";
+        return "bg-blue-100 text-blue-700 border-blue-200";
       case "disconnected":
-        return "text-rose-600 bg-rose-50";
+        return "bg-rose-100 text-rose-700 border-rose-200";
       default:
-        return "text-amber-600 bg-amber-50";
+        return "bg-amber-100 text-amber-700 border-amber-200";
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Search */}
+    <div className="space-y-5">
+      {/* Search Bar */}
       <div className="relative">
         <input
           type="text"
           placeholder="Search students..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input-field pl-10"
+          className="w-full pl-11 py-3 border border-zinc-300 rounded-2xl focus:outline-none focus:border-blue-500 transition-colors text-zinc-900 placeholder:text-zinc-400"
         />
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
-          🔍
-        </span>
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
       </div>
 
       {/* Student List */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
         {filtered.map((student, idx) => (
           <div
             key={student.studentId?._id || idx}
-            className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-100"
+            className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-2xl hover:border-zinc-300 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center font-medium text-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-9 h-9 rounded-2xl bg-zinc-100 text-zinc-700 flex items-center justify-center font-semibold text-base">
                 {student.studentId?.name?.charAt(0) || "?"}
               </div>
               <div>
-                <p className="font-medium text-stone-800 text-sm">
-                  {student.studentId?.name || "Anonymous"}
+                <p className="font-medium text-zinc-900">
+                  {student.studentId?.name || "Anonymous Student"}
                 </p>
-                <p className="text-xs text-stone-400">
-                  Joined: {new Date(student.joinedAt).toLocaleTimeString()}
+                <p className="text-xs text-zinc-500">
+                  Joined{" "}
+                  {new Date(student.joinedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
               </div>
             </div>
-            <span className={`badge text-xs ${getStatusColor(student.status)}`}>
-              {getStatusIcon(student.status)} {student.status}
-            </span>
+
+            <div
+              className={`px-4 py-1.5 text-xs font-medium rounded-2xl border capitalize ${getStatusColor(student.status)}`}
+            >
+              {student.status}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="text-xs text-stone-400 text-center pt-2">
-        {filtered.length} of {students.length} students
+      {/* Footer Count */}
+      <div className="text-center text-xs text-zinc-500 pt-2">
+        Showing {filtered.length} of {students.length} students
       </div>
     </div>
   );

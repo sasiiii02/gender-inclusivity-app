@@ -11,6 +11,7 @@ import {
   getAIExplanation,
   getAllAIExplanations,
   getAIExplanationsForQuiz,
+  submitExplanationFeedback as submitExplanationFeedbackApi,
 } from "../api/quizApi";
 
 export const useStudentQuiz = () => {
@@ -233,6 +234,15 @@ export const useStudentQuiz = () => {
     }
   };
 
+  // Submit explanation feedback
+  const submitExplanationFeedback = async (explanationId, helpful) => {
+    try {
+      await submitExplanationFeedbackApi(explanationId, helpful);
+    } catch (err) {
+      console.error("Failed to submit explanation feedback:", err);
+    }
+  };
+
   // Reset quiz state
   const resetQuiz = () => {
     setCurrentQuiz(null);
@@ -270,6 +280,7 @@ export const useStudentQuiz = () => {
     fetchQuizHistory,
     fetchAIExplanation,
     fetchAllAIExplanations,
+    submitExplanationFeedback,
     setCurrentQuestionIndex,
     resetQuiz,
   };
