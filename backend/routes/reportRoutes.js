@@ -21,7 +21,7 @@ router.post("/create", protect, incidentUpload.array('evidence', 5), createRepor
 // User - view my reports
 router.get("/my-reports",protect,getMyReports);
 // Admin - view all reports
-router.get("/all-reports",getAllReports);
+router.get("/all-reports", protect, getAllReports);
 // Admin - update report status
 router.patch("/:id/status", protect, updateReportStatus);
 // Admin - add response to a report

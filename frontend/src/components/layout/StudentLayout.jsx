@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
+import { LogOut } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
 const navLinks = [
@@ -36,15 +37,15 @@ const StudentNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
-              <span className="text-white text-xl">✨</span>
+          <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200 group-hover:scale-105 transition-transform duration-300">
+              <span className="text-white text-xl">🌈</span>
             </div>
             <div>
-              <span className="font-serif font-bold text-xl text-stone-900 leading-none block">
+              <span className="font-serif font-black text-lg text-stone-900 tracking-tight leading-none block">
                 InclusiveSpace
               </span>
-              <span className="text-[10px] text-stone-500 font-semibold tracking-widest uppercase">
+              <span className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mt-0.5 block">
                 Student
               </span>
             </div>
@@ -73,26 +74,24 @@ const StudentNavbar = () => {
           <div className="flex items-center gap-4">
             <NotificationBell />
             {user && (
-              <div className="flex items-center gap-3 pl-3 border-l border-stone-200">
+              <div className="flex items-center gap-3 pl-4 border-l border-stone-100">
                 <div className="hidden sm:block text-right">
-                  <div className="text-sm font-bold text-stone-800 leading-none">
+                  <div className="text-xs font-black text-stone-900 leading-none">
                     {user.name}
                   </div>
-                  <div className="text-[11px] text-stone-500 font-medium mt-1 uppercase">
-                    {user.role}
+                  <div className="text-[10px] text-stone-400 font-bold mt-1.5 uppercase tracking-tighter">
+                    {user.role} Account
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-stone-800 to-stone-600 flex items-center justify-center text-white font-bold text-sm shadow-md cursor-pointer hover:shadow-lg transition-all">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-stone-100 to-white border border-stone-200 flex items-center justify-center text-stone-600 font-black text-xs shadow-sm cursor-pointer hover:border-stone-300 transition-all">
                   {user.name?.charAt(0) || "S"}
                 </div>
                 <button
                   onClick={logout}
-                  className="ml-2 text-stone-400 hover:text-rose-500 transition-colors"
-                  title="Logout"
+                  className="w-9 h-9 rounded-xl bg-stone-50 hover:bg-rose-50 text-stone-400 hover:text-rose-600 transition-all duration-300 flex items-center justify-center group"
+                  title="Secure Logout"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                  </svg>
+                  <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                 </button>
               </div>
             )}

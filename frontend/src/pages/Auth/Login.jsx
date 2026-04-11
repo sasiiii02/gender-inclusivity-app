@@ -44,187 +44,125 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-
-      {/* ── Left panel: decorative ── */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-violet-700 overflow-hidden flex-col justify-between p-14">
-        {/* Background blobs */}
-        <div className="absolute top-[-80px] left-[-80px] w-[360px] h-[360px] bg-violet-500 rounded-full opacity-30 blur-3xl" />
-        <div className="absolute bottom-[-60px] right-[-60px] w-[300px] h-[300px] bg-fuchsia-500 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-[200px] h-[200px] bg-amber-400 rounded-full opacity-10 blur-2xl" />
-
-        {/* Logo */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-white text-xl">
-              🌈
-            </div>
-            <span className="text-white font-serif text-xl font-semibold">
-              InclusiveSpace
-            </span>
+    <div className="min-h-screen flex items-center justify-center bg-stone-100/50 p-6 animate-fade-in">
+      <div className="w-full max-w-lg bg-white rounded-[2.5rem] p-10 lg:p-14 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/50 animate-slide-up">
+        
+        {/* Brand Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-3xl shadow-xl shadow-violet-200 mb-6">
+            🌈
           </div>
-        </div>
-
-        {/* Centre text */}
-        <div className="relative z-10">
-          <h1 className="text-white font-serif text-5xl font-bold leading-tight mb-6">
-            Every voice
-            <br />
-            <span className="text-amber-300">belongs here.</span>
+          <h1 className="text-3xl font-serif font-black text-stone-900 tracking-tight mb-2">
+            InclusiveSpace
           </h1>
-          <p className="text-violet-200 text-lg leading-relaxed max-w-sm">
-            A safe, inclusive platform to learn, report, connect, and grow — for
-            everyone, without exception.
+          <p className="text-stone-400 font-medium">
+            Empowering every voice, everywhere.
           </p>
-
-          {/* Stats row */}
-          <div className="mt-10 flex gap-8">
-            {[
-              { value: "2.4k+", label: "Members" },
-              { value: "80+", label: "Resources" },
-              { value: "100%", label: "Safe Space" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p className="text-white text-2xl font-serif font-bold">{s.value}</p>
-                <p className="text-violet-300 text-sm">{s.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Decorative tags */}
-        <div className="relative z-10 flex flex-wrap gap-2">
-          {["Inclusive", "Safe", "Empowering", "Supportive", "Equal"].map((tag) => (
-            <span
-              key={tag}
-              className="px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs backdrop-blur border border-white/20"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 px-5 py-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3 animate-fade-in">
+            <span className="text-lg">⚠️</span> {error}
+          </div>
+        )}
 
-      {/* ── Right panel: form ── */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-14 bg-stone-50">
-        <div className="w-full max-w-md animate-slide-up">
-
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <span className="text-2xl">🌈</span>
-            <span className="font-serif text-xl font-semibold text-violet-700">
-              InclusiveSpace
-            </span>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email */}
+          <div>
+            <label className="block text-xs font-black text-stone-400 uppercase tracking-widest mb-2 ml-1">
+              Work Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="name@company.com"
+              required
+              className="input-field"
+            />
           </div>
 
-          <h2 className="font-serif text-3xl font-bold text-stone-900 mb-1">
-            Welcome back
-          </h2>
-          <p className="text-stone-500 text-sm mb-8">
-            Sign in to your account to continue
-          </p>
-
-          {/* Error */}
-          {error && (
-            <div className="mb-5 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm flex items-center gap-2">
-              <span>⚠️</span> {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                Email address
+          {/* Password */}
+          <div>
+            <div className="flex justify-between items-center mb-2 ml-1">
+              <label className="block text-xs font-black text-stone-400 uppercase tracking-widest">
+                Password
               </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors"
+              >
+                Reset?
+              </Link>
+            </div>
+            <div className="relative">
               <input
-                type="email"
-                name="email"
-                value={form.email}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
                 onChange={handleChange}
-                placeholder="you@example.com"
+                placeholder="••••••••"
                 required
-                className="input-field"
+                className="input-field pr-14"
               />
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-medium text-stone-700">
-                  Password
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-violet-600 hover:text-violet-700"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="input-field pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-sm"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 transition-colors"
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.046m4.533-4.533A9.01 9.01 0 0112 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-1.313 0-2.557-.313-3.655-.87m-4.533-4.533L3 3m18 18l-9-9m1.5 1.5l.504-.504" />
                   </svg>
-                  Signing in…
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-xs text-stone-400">or</span>
-            <div className="flex-1 h-px bg-stone-200" />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Register link */}
-          <p className="text-center text-sm text-stone-500">
-            Don't have an account?{" "}
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full shadow-violet-200/50"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Authenticating...
+              </span>
+            ) : (
+              "Sign In"
+            )}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-12 text-center space-y-4">
+          <p className="text-sm text-stone-500">
+            New to the space?{" "}
             <Link
               to="/register"
-              className="text-violet-600 hover:text-violet-700 font-medium"
+              className="text-violet-600 font-bold hover:underline"
             >
-              Create one — it's free
+              Request Access
             </Link>
           </p>
-
-          {/* Footer note */}
-          <p className="mt-10 text-center text-xs text-stone-400 leading-relaxed">
-            By signing in, you agree to our{" "}
-            <span className="underline cursor-pointer">Terms of Service</span> and{" "}
-            <span className="underline cursor-pointer">Privacy Policy</span>.
-          </p>
+          <div className="pt-8 border-t border-stone-100">
+            <p className="text-[10px] text-stone-300 font-bold uppercase tracking-widest leading-loose">
+              By entering, you agree to our <br />
+              <span className="text-stone-400 hover:text-violet-500 cursor-pointer transition-colors">Safety Guidelines</span> & <span className="text-stone-400 hover:text-violet-500 cursor-pointer transition-colors">Privacy Standards</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
