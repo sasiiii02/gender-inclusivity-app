@@ -47,6 +47,7 @@ import EventBrowser from "../pages/Events/EventBrowser";
 import MyRegistrations from "../pages/Events/MyRegistrations";
 import AttendanceManager from "../pages/Events/AttendanceManager";
 import EventAnalytics from "../pages/Events/EventAnalytics";
+import { useAuth } from "../context/AuthContext";
 
 // Placeholders
 const Placeholder = ({ label }) => (
@@ -55,10 +56,21 @@ const Placeholder = ({ label }) => (
   </div>
 );
 
+const HomeRedirect = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  switch (user.role) {
+    case "admin": return <Navigate to="/admin" replace />;
+    case "teacher": return <Navigate to="/teacher/dashboard" replace />;
+    case "student": return <Navigate to="/student/home" replace />;
+    default: return <Navigate to="/dashboard" replace />;
+  }
+};
+
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
-    <Route path="/" element={<Navigate to="/login" replace />} />
+    <Route path="/" element={<HomeRedirect />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/quiz/join/:quizLink" element={<QuizJoin />} />
