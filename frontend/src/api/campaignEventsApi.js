@@ -25,8 +25,8 @@ export const campaignEventsApi = {
   // ==========================================
   // EVENT ENDPOINTS
   // ==========================================
-  getAllEvents: async () => {
-    const response = await axiosInstance.get(EVENT_URL);
+  getAllEvents: async (params = {}) => {
+    const response = await axiosInstance.get(EVENT_URL, { params });
     return response.data;
   },
 

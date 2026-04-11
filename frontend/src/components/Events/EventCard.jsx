@@ -53,6 +53,7 @@ const EventCard = ({ event, userRole, onAction }) => {
       {/* Role-Based Conditional Rendering */}
       <div className="mt-auto">
         {userRole === 'student' && (
+        <div className="space-y-2">
           <button 
             onClick={() => onAction('register', event._id)}
             disabled={event.currentRegistrations >= event.capacity}
@@ -64,7 +65,14 @@ const EventCard = ({ event, userRole, onAction }) => {
           >
             {event.currentRegistrations >= event.capacity ? 'Event Full' : 'Register Now'}
           </button>
-        )}
+          <button 
+            onClick={() => onAction('details', event)}
+            className="w-full py-2 rounded-lg font-semibold border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors"
+          >
+            View Details
+          </button>
+        </div>
+      )}
 
         {userRole === 'teacher' && (
           <button 

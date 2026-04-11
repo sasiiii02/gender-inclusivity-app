@@ -21,11 +21,18 @@ const EventAnalytics = () => {
     }
   }, [selectedEventId]);
 
+  const extractEvents = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.events)) return payload.events;
+    if (Array.isArray(payload?.data?.events)) return payload.data.events;
+    if (Array.isArray(payload?.data)) return payload.data;
+    return [];
+  };
+
   const fetchEvents = async () => {
     try {
-      const res = await campaignEventsApi.getAllEvents();
-      // Handle nested response: { success, data: { events: [...] } } or { data: [...] }
-      const eventsData = res?.data?.events || res?.data || [];
+      const res = await campaignEventsApi.getAllEvents({ page: 1, limit: 1000 });
+      const eventsData = extractEvents(res);
       setEvents(Array.isArray(eventsData) ? eventsData : []);
     } catch (err) {
       console.error("API Error fetching events:", err);
@@ -78,6 +85,9 @@ const EventAnalytics = () => {
             <option key={event._id} value={event._id}>{event.title}</option>
           ))}
         </select>
+        {events.length === 0 && (
+          <p className="mt-2 text-sm text-gray-500">No events found. Create an event first from the Admin Events page.</p>
+        )}
       </div>
 
       {/* Stats Display */}
