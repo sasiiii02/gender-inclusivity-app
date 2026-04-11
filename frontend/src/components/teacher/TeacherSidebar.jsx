@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+// --- WE ADDED YOUR ATTENDANCE ROUTE HERE ---
 const teacherNavItems = [
   {
     label: "Dashboard",
@@ -26,6 +27,19 @@ const teacherNavItems = [
       },
     ],
   },
+
+  {
+  label: "Events",
+  path: "/teacher/events",
+  description: "View all events",
+  },
+
+  {
+    label: "Attendance",
+    path: "/teacher/attendance",
+    description: "Mark event attendance", // <-- Your new Teacher feature!
+  },
+
   {
     label: "Create Quiz",
     path: "/teacher/quiz/new",

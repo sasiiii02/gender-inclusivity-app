@@ -24,7 +24,9 @@ const EventAnalytics = () => {
   const fetchEvents = async () => {
     try {
       const res = await campaignEventsApi.getAllEvents();
-      setEvents(res.data || res);
+      // Handle nested response: { success, data: { events: [...] } } or { data: [...] }
+      const eventsData = res?.data?.events || res?.data || [];
+      setEvents(Array.isArray(eventsData) ? eventsData : []);
     } catch (err) {
       console.error("API Error fetching events:", err);
     } finally {
@@ -36,19 +38,24 @@ const EventAnalytics = () => {
     try {
       setStatsLoading(true);
       const res = await campaignEventsApi.getEventStats(eventId);
-      // Backend returns aggregated stats, usually an array with 1 object
-      const statsData = res.data || res;
+      // Backend returns { success, data: statsObject } or directly statsObject
+      const statsData = res?.data || res;
+      // If it's an array (e.g., aggregation result), take first element
       setStats(Array.isArray(statsData) ? statsData[0] : statsData);
     } catch (err) {
       console.error("API Error fetching stats:", err);
-      setStats(null); // No reviews yet
+      setStats(null);
     } finally {
       setStatsLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div></div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
   }
 
   return (
@@ -80,8 +87,7 @@ const EventAnalytics = () => {
             <div className="text-center text-gray-500 py-8">Calculating aggregations...</div>
           ) : stats ? (
             <div className="flex flex-col md:flex-row items-center justify-around text-center gap-8">
-              
-              {/* Aggregation Output 1: Average Rating */}
+              {/* Average Rating */}
               <div className="bg-green-50 p-8 rounded-full w-48 h-48 flex flex-col justify-center border-4 border-green-100 shadow-inner">
                 <span className="text-5xl font-bold text-green-700 mb-1">
                   {stats.averageRating ? stats.averageRating.toFixed(1) : 0}
@@ -90,7 +96,7 @@ const EventAnalytics = () => {
                 <span className="text-yellow-500 text-xl mt-1">★★★★★</span>
               </div>
 
-              {/* Aggregation Output 2: Total Reviews */}
+              {/* Total Reviews */}
               <div className="flex flex-col">
                 <span className="text-6xl font-black text-gray-800 mb-2">{stats.totalReviews || 0}</span>
                 <span className="text-gray-500 font-semibold text-lg uppercase tracking-wider">Total Reviews Submitted</span>
@@ -98,7 +104,6 @@ const EventAnalytics = () => {
                   *These metrics are dynamically calculated using MongoDB's $match and $group aggregation pipelines.
                 </p>
               </div>
-
             </div>
           ) : (
             <div className="text-center py-12">

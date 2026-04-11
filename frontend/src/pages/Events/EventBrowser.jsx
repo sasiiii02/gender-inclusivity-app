@@ -16,18 +16,31 @@ const EventBrowser = () => {
   }, []);
 
   const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const res = await campaignEventsApi.getAllEvents();
-      setEvents(res.data || res);
-      setError("");
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError("Failed to load events. Please try again later.");
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    const res = await campaignEventsApi.getAllEvents();
+    
+    // Handle different response shapes
+    let events = [];
+    if (res?.data?.events) {
+      events = res.data.events;
+    } else if (res?.data && Array.isArray(res.data)) {
+      events = res.data;
+    } else if (Array.isArray(res)) {
+      events = res;
+    } else if (res?.events) {
+      events = res.events;
     }
-  };
+    
+    setEvents(Array.isArray(events) ? events : []);
+    setError("");
+  } catch (err) {
+    console.error("Fetch error:", err);
+    setError("Failed to load events.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCardAction = async (actionType, eventId) => {
     if (actionType === 'register') {

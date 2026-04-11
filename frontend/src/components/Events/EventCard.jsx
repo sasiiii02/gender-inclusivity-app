@@ -1,40 +1,56 @@
 import React from 'react';
 
 const EventCard = ({ event, userRole, onAction }) => {
-  // Determine the status badge color
+  // Determine the status badge color based on event type or computed status
   const getStatusColor = (status) => {
     switch(status) {
-      case 'Upcoming': return 'bg-blue-100 text-blue-800';
-      case 'Ongoing': return 'bg-green-100 text-green-800';
-      case 'Completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-yellow-100 text-yellow-800';
+      case 'Workshop': return 'bg-purple-100 text-purple-800';
+      case 'Seminar': return 'bg-blue-100 text-blue-800';
+      case 'Webinar': return 'bg-indigo-100 text-indigo-800';
+      case 'Training': return 'bg-green-100 text-green-800';
+      case 'Meetup': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // Use eventType as the status display, or derive a status from dates
+  const displayStatus = event.status || event.eventType || 'Upcoming';
+  
+  // Use eventDate (backend field) and fallback to date
+  const eventDate = event.eventDate || event.date;
+  
+  // Display text for the description area (since description is not allowed, use eventType or speaker)
+  const descriptionText = event.description || event.eventType || 'Event details';
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-xl font-bold text-gray-800">{event.title}</h3>
-        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(event.status)}`}>
-          {event.status || 'Upcoming'}
+        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(displayStatus)}`}>
+          {displayStatus}
         </span>
       </div>
       
-      <p className="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">{event.description}</p>
+      <p className="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">{descriptionText}</p>
       
       <div className="space-y-2 text-sm text-gray-500 mb-6 border-t pt-4">
         <div className="flex items-center">
-          <span className="mr-2">📅</span> {new Date(event.date).toLocaleDateString()}
+          <span className="mr-2">📅</span> {eventDate ? new Date(eventDate).toLocaleDateString() : 'Date TBA'}
         </div>
         <div className="flex items-center">
-          <span className="mr-2">📍</span> {event.location}
+          <span className="mr-2">📍</span> {event.location || 'Location TBA'}
         </div>
+        {event.speaker && (
+          <div className="flex items-center">
+            <span className="mr-2">🎤</span> {event.speaker}
+          </div>
+        )}
         <div className="flex items-center">
-          <span className="mr-2">👥</span> {event.currentRegistrations || 0} / {event.capacity} registered
+          <span className="mr-2">👥</span> {event.currentRegistrations || 0} / {event.capacity || '∞'} registered
         </div>
       </div>
 
-      {/* RUBRIC FLEX: Role-Based Conditional Rendering */}
+      {/* Role-Based Conditional Rendering */}
       <div className="mt-auto">
         {userRole === 'student' && (
           <button 

@@ -6,8 +6,9 @@ const navLinks = [
   { name: "Home", path: "/student/home" },
   { name: "Courses", path: "/student/courses" },
   { name: "Support", path: "/student/support" },
-  { name: "Quiz", path: "/student/dashboard" }, // Quiz links to existing /student/dashboard
+  { name: "Quiz", path: "/student/dashboard" }, 
   { name: "Events", path: "/student/events" },
+  { name: "My Registrations", path: "/my-registrations" }, // <-- Your custom route added here!
 ];
 
 const StudentNavbar = () => {
