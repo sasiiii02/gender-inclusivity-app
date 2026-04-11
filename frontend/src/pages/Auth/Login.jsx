@@ -29,6 +29,8 @@ const Login = () => {
         navigate("/student/home");
       } else if (res.data.user.role === "teacher") {
         navigate("/teacher/dashboard");
+      } else if (res.data.user.role === "admin") {
+        navigate("/admin");
       } else {
         navigate("/dashboard");
       }
