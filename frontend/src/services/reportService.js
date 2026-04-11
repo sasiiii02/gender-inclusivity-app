@@ -6,7 +6,12 @@ export const getMyReports = async () => {
 };
 
 export const submitReport = async (payload) => {
-    const response = await axiosInstance.post("/reports/create", payload);
+    const isFormData = payload instanceof FormData;
+    const response = await axiosInstance.post("/reports/create", payload, {
+        headers: {
+            "Content-Type": isFormData ? "multipart/form-data" : "application/json"
+        }
+    });
     return response.data;
 };
 

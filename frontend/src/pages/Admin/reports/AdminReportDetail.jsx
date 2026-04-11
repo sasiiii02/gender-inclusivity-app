@@ -101,7 +101,13 @@ const AdminReportDetail = () => {
                     Back to inventory
                 </button>
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Case ID:</span>
+                    <button 
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 px-5 py-2 bg-stone-900 text-white rounded-xl text-xs font-bold shadow-lg hover:shadow-purple-200/50 transition-all active:scale-95"
+                    >
+                        <Download className="w-4 h-4" /> Print Case File
+                    </button>
+                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-4">Case ID:</span>
                     <span className="text-xs font-mono font-bold text-stone-900 bg-stone-100 px-3 py-1 rounded-lg border border-stone-200">{report._id.slice(-8)}</span>
                 </div>
             </div>
@@ -181,15 +187,65 @@ const AdminReportDetail = () => {
                         </div>
 
                         {/* Description */}
-                        <div>
+                        <div className="mb-8">
                             <h3 className="text-sm font-bold text-stone-900 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-purple-600" />
                                 Detailed Narrative
                             </h3>
-                            <p className="text-stone-700 leading-relaxed whitespace-pre-wrap font-medium">
+                            <p className="text-stone-700 leading-relaxed whitespace-pre-wrap font-medium bg-stone-50 p-6 rounded-2xl border border-stone-100">
                                 {report.description}
                             </p>
                         </div>
+
+                        {/* Evidence section */}
+                        {report.evidence && report.evidence.length > 0 && (
+                            <div className="animate-in slide-in-from-bottom-2">
+                                <h3 className="text-sm font-bold text-stone-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <ShieldAlert className="w-4 h-4 text-rose-500" />
+                                    Evidence Attachments ({report.evidence.length})
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {report.evidence.map((file, index) => {
+                                        const backendOrigin = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api")
+                                            .replace('/api', '');
+                                        const fileUrl = `${backendOrigin}${file}`;
+                                        const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file);
+                                        
+                                        return (
+                                            <div key={index} className="group relative bg-stone-50 border border-stone-100 rounded-2xl overflow-hidden hover:border-purple-200 transition-all">
+                                                {isImage ? (
+                                                    <div className="aspect-video w-full bg-stone-200 overflow-hidden">
+                                                        <img 
+                                                            src={fileUrl} 
+                                                            alt={`Evidence ${index + 1}`} 
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="aspect-video w-full bg-stone-100 flex items-center justify-center">
+                                                        <FileText className="w-12 h-12 text-stone-300" />
+                                                    </div>
+                                                )}
+                                                <div className="p-3 flex items-center justify-between bg-white border-t border-stone-100">
+                                                    <span className="text-[10px] font-bold text-stone-400 truncate max-w-[150px]">
+                                                        {file.split('/').pop()}
+                                                    </span>
+                                                    <a 
+                                                        href={fileUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-all shadow-sm"
+                                                        title="Open in new tab"
+                                                    >
+                                                        <Download className="w-3.5 h-3.5" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Timeline & Progress */}

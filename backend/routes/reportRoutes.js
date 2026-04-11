@@ -2,6 +2,7 @@ import express from "express";
 import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
   getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory} from "../controllers/reportController.js";
 import protect from "../middleware/authMiddleware.js";
+import { incidentUpload } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.delete("/categories/:id", protect, deleteReportCategory);
 router.get("/statuses", protect, getReportStatuses);
 
 // User - create a report
-router.post("/create",protect,createReport);
+router.post("/create", protect, incidentUpload.array('evidence', 5), createReport);
 // User - view my reports
 router.get("/my-reports",protect,getMyReports);
 // Admin - view all reports
