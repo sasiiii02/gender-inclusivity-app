@@ -7,13 +7,22 @@ import AdminLayout from "../components/layout/AdminLayout";
 import StudentLayout from "../components/layout/StudentLayout";
 
 // Admin pages
+// Admin Reports
+import AdminReportsDashboard from "../pages/Admin/reports/AdminReportsDashboard";
+import AdminAllReports from "../pages/Admin/reports/AdminAllReports";
+import AdminReportDetail from "../pages/Admin/reports/AdminReportDetail";
+import AdminAllResponses from "../pages/Admin/reports/AdminAllResponses";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
+
+// Admin Support
+import AdminSupportList from "../pages/Admin/support/AdminSupportList";
+import AdminCreateArticle from "../pages/Admin/support/AdminCreateArticle";
+import AdminEditArticle from "../pages/Admin/support/AdminEditArticle";
+
 import AdminUsers from "../pages/Admin/AdminUsers";
-import AdminReports from "../pages/Admin/AdminReports";
 import AdminLearning from "../pages/Admin/AdminLearning";
 import AdminQuiz from "../pages/Admin/AdminQuiz";
 import AdminEvents from "../pages/Admin/AdminEvents";
-import AdminSupport from "../pages/Admin/AdminSupport";
 
 // Teacher pages
 import TeacherLayout from "../components/teacher/TeacherLayout";
@@ -34,13 +43,24 @@ import QuizTaking from "../pages/Student/QuizTaking";
 import QuizResult from "../pages/Student/QuizResult";
 import QuizHistory from "../pages/Student/QuizHistory";
 import QuizJoin from "../pages/Student/QuizJoin";
+import QuizExplanations from "../pages/Student/QuizExplanations";
+
+// New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
 import StudentCourses from "../pages/Student/StudentCourses";
 import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
 import StudentSupport from "../pages/Student/StudentSupport";
 
+// Incident Reporting & Support Integration
+import MyReports from "../pages/Report/MyReports";
+import SubmitReport from "../pages/Report/SubmitReport";
+import ReportSuccess from "../pages/Report/ReportSuccess";
+import ReportDetail from "../pages/Report/ReportDetail";
+import SupportHome from "../pages/Support/SupportHome";
+import ArticleDetail from "../pages/Support/ArticleDetail";
+
 // ==========================================
-// KALANA'S COMPONENT IMPORTS
+// EVENT COMPONENT IMPORTS
 // ==========================================
 // Note: Assuming your EventBrowser replaces their generic StudentEvents
 import EventBrowser from "../pages/Events/EventBrowser"; 
@@ -81,6 +101,8 @@ const AppRoutes = () => (
       <Route path="/learning" element={<Placeholder label="📚 Learning" />} />
       <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
       <Route path="/support" element={<Placeholder label="🛟 Support" />} />
+      <Route path="/quiz" element={<Placeholder label="📝 Quiz" />} />
+      <Route path="/events" element={<Placeholder label="📅 Events" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
     </Route>
 
@@ -92,9 +114,23 @@ const AppRoutes = () => (
       <Route path="/student/dashboard" element={<StudentDashboard />} />
       <Route path="/student/courses" element={<StudentCourses />} />
       <Route path="/student/courses/:courseId" element={<CourseDetailsPage />} />
-      <Route path="/student/support" element={<StudentSupport />} />
+
+      {/* Support System (Student) */}
+      <Route path="/student/support" element={<SupportHome />} />
+      <Route path="/student/support/:id" element={<ArticleDetail />} />
+
+      {/* Legacy/Alternative Student Support */}
+      <Route path="/student/student-support" element={<StudentSupport />} />
+
+      {/* Reports System (Student) */}
+      <Route path="/student/reports" element={<MyReports />} />
+      <Route path="/student/reports/submit" element={<SubmitReport />} />
+      <Route path="/student/reports/success" element={<ReportSuccess />} />
+      <Route path="/student/reports/:id" element={<ReportDetail />} />
+
       <Route path="/student/quiz/take/:studentQuizId" element={<QuizTaking />} />
       <Route path="/student/quiz/result/:studentQuizId" element={<QuizResult />} />
+      <Route path="/student/quiz/:studentQuizId/explanations" element={<QuizExplanations />} />
       <Route path="/student/quiz/history" element={<QuizHistory />} />
       
       {/* Kalana's Student Routes */}
@@ -107,13 +143,18 @@ const AppRoutes = () => (
     {/* ========================================== */}
     <Route element={<ProtectedRoute allowedRoles={["admin"]}><AdminLayout /></ProtectedRoute>}>
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/reports" element={<AdminReportsDashboard />} />
+      <Route path="/admin/reports/all" element={<AdminAllReports />} />
+      <Route path="/admin/reports/responses" element={<AdminAllResponses />} />
+      <Route path="/admin/reports/:id" element={<AdminReportDetail />} />
+
+      <Route path="/admin/support" element={<AdminSupportList />} />
+      <Route path="/admin/support/create" element={<AdminCreateArticle />} />
+      <Route path="/admin/support/:id/edit" element={<AdminEditArticle />} />
+
       <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/reports" element={<AdminReports />} />
       <Route path="/admin/learning" element={<AdminLearning />} />
       <Route path="/admin/quiz" element={<AdminQuiz />} />
-      <Route path="/admin/support" element={<AdminSupport />} />
-      
-      {/* Kalana's Admin Routes */}
       <Route path="/admin/events" element={<AdminEvents />} />
       <Route path="/admin/attendance" element={<AttendanceManager />} />
       <Route path="/admin/analytics" element={<EventAnalytics />} />
@@ -144,3 +185,5 @@ const AppRoutes = () => (
 );
 
 export default AppRoutes;
+
+//feat test commend

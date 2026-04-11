@@ -26,21 +26,26 @@ const QuestionDisplay = ({ question, onSubmit, isAnswered, loading }) => {
     }
   };
 
-  const handleSubmit = () => {
-    if (question.questionType === "multiple-answer") {
-      if (selectedOptions.length === 0) {
-        alert("Please select at least one answer");
-        return;
+  const handleSubmit = async () => {
+    try {
+      if (question.questionType === "multiple-answer") {
+        if (selectedOptions.length === 0) {
+          alert("Please select at least one answer");
+          return;
+        }
+        await onSubmit({ selectedOptions, timeSpent: 0 });
+      } else {
+        if (!selectedOption) {
+          alert("Please select an answer");
+          return;
+        }
+        await onSubmit({ selectedOption, timeSpent: 0 });
       }
-      onSubmit({ selectedOptions, timeSpent: 0 });
-    } else {
-      if (!selectedOption) {
-        alert("Please select an answer");
-        return;
-      }
-      onSubmit({ selectedOption, timeSpent: 0 });
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Failed to save answer:", error);
+      alert("Failed to save answer. Please try again.");
     }
-    setSubmitted(true);
   };
 
   const isSelected = (optionText) => {

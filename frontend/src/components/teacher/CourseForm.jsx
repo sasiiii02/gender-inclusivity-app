@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 
 const levelOptions = ["Beginner", "Intermediate", "Advanced"];
 
-const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
+const CourseForm = ({
+  initialData,
+  onSubmit,
+  submitLabel = "Save",
+  loading = false,
+  error = "",
+  success = "",
+}) => {
   const empty = useMemo(
     () => ({
       title: "",
@@ -17,16 +24,29 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
 
   const [form, setForm] = useState({ ...empty, ...(initialData || {}) });
   const [errors, setErrors] = useState({});
+  const [selectedPreviewUrl, setSelectedPreviewUrl] = useState("");
 
   useEffect(() => {
     setForm({ ...empty, ...(initialData || {}) });
     setErrors({});
+    setSelectedPreviewUrl("");
   }, [empty, initialData]);
 
   const setField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
+
+  useEffect(() => {
+    if (!form.image) {
+      setSelectedPreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(form.image);
+    setSelectedPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [form.image]);
 
   const validate = () => {
     const next = {};
@@ -64,8 +84,23 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
     onSubmit?.(formData);
   };
 
+  const currentImageUrl =
+    initialData?.image?.url || initialData?.imageUrl || initialData?.image?.secure_url || "";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error ? (
+        <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm">
+          {error}
+        </div>
+      ) : null}
+
+      {success ? (
+        <div className="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+          {success}
+        </div>
+      ) : null}
+
       <div>
         <label className="block text-sm font-semibold text-stone-700 mb-1">
           Title
@@ -155,10 +190,29 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
         <label className="block text-sm font-semibold text-stone-700 mb-1">
           Course Image (Optional)
         </label>
+        {selectedPreviewUrl ? (
+          <div className="mb-3">
+            <div className="text-xs text-stone-500 mb-1">New image preview</div>
+            <img
+              src={selectedPreviewUrl}
+              alt="Selected course"
+              className="h-32 w-full object-cover rounded-xl border border-stone-200 bg-stone-50"
+            />
+          </div>
+        ) : currentImageUrl ? (
+          <div className="mb-3">
+            <div className="text-xs text-stone-500 mb-1">Current image</div>
+            <img
+              src={currentImageUrl}
+              alt="Current course"
+              className="h-32 w-full object-cover rounded-xl border border-stone-200 bg-stone-50"
+            />
+          </div>
+        ) : null}
         <input
           type="file"
-          accept="image/*"
-          onChange={(e) => setField("image", e.target.files[0])}
+          accept="image/jpeg,image/png,image/webp"
+          onChange={(e) => setField("image", e.target.files?.[0] || null)}
           className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-violet-200"
         />
         {form.image && (
@@ -171,6 +225,7 @@ const CourseForm = ({ initialData, onSubmit, submitLabel = "Save" }) => {
       <div className="flex">
         <button
           type="submit"
+          disabled={loading}
           className="w-full rounded-xl px-3 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-colors"
         >
           {submitLabel}

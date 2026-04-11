@@ -10,19 +10,17 @@ const CourseDetailsCard = ({ course, onEnroll, isEnrolled }) => {
       ? `${course.duration} min`
       : "—";
   const status = course?.status;
+  const image =
+    course?.image?.url ||
+    course?.imageUrl ||
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
 
   return (
     <div className="border border-stone-200 bg-white rounded-2xl p-5 shadow-sm overflow-hidden">
-      {course?.imageUrl && (
-        <div className="-mx-5 -mt-5 mb-5 relative">
-          <img
-            src={course.imageUrl}
-            alt={title}
-            className="w-full h-48 md:h-64 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        </div>
-      )}
+      <div className="-mx-5 -mt-5 mb-5 relative">
+        <img src={image} alt={title} className="w-full h-48 md:h-64 object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      </div>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-serif text-2xl font-bold text-stone-900 truncate">

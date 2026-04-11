@@ -340,6 +340,9 @@ const ManageLessonsPage = () => {
                 }
                 onSubmit={saving ? undefined : handleSubmit}
                 disabled={saving}
+                loading={saving}
+                error={error}
+                success={success}
               />
               <button
                 type="button"
