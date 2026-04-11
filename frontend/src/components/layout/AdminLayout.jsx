@@ -9,6 +9,8 @@ const adminNav = [
   { label: "Learning",   icon: "📚", path: "/admin/learning" },
   { label: "Quiz",       icon: "📝", path: "/admin/quiz" },
   { label: "Events",     icon: "📅", path: "/admin/events" },
+  { label: "Attendance", icon: "✅", path: "/admin/attendance" }, // <-- Added your feature
+  { label: "Analytics",  icon: "📊", path: "/admin/analytics" },  // <-- Added your feature
   { label: "Support",    icon: "🛟", path: "/admin/support" },
 ];
 
@@ -19,6 +21,8 @@ const pageTitles = {
   "/admin/learning": "Learning Materials",
   "/admin/quiz":     "Quiz Management",
   "/admin/events":   "Events & Campaigns",
+  "/admin/attendance": "Attendance Management", // <-- Added
+  "/admin/analytics":  "Event Analytics",       // <-- Added
   "/admin/support":  "Support Articles",
 };
 
@@ -53,7 +57,7 @@ const AdminLayout = () => {
           <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-base">🌈</div>
           <div>
             <p className="font-serif font-bold text-white text-sm leading-tight">InclusiveSpace</p>
-            <p className="text-[10px] text-stone-400 uppercase tracking-wider">Admin Panel</p>
+            
           </div>
           <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden text-stone-400 hover:text-white text-xl">×</button>
         </div>

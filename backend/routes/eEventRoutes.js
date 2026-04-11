@@ -34,4 +34,7 @@ router.delete(
   eventController.deleteEvent
 );
 
+// Add this route temporarily (place it after other routes)
+router.post("/fix-status", protect, authorize("admin"), eventController.fixAllEventStatus);
+
 export default router;

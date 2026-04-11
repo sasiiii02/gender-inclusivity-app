@@ -37,108 +37,84 @@ import QuizLiveSession from "../pages/Teacher/QuizLiveSession";
 import QuizResults from "../pages/Teacher/QuizResults";
 import QuizAnalytics from "../pages/Teacher/QuizAnalytics";
 
-// Student Quiz Routes
+// Student Quiz & Main Routes
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import QuizTaking from "../pages/Student/QuizTaking";
 import QuizResult from "../pages/Student/QuizResult";
 import QuizHistory from "../pages/Student/QuizHistory";
 import QuizJoin from "../pages/Student/QuizJoin";
-import QuizExplanations from "../pages/Student/QuizExplanations";
-
-// New Student Pages
 import StudentHome from "../pages/Student/StudentHome";
 import StudentCourses from "../pages/Student/StudentCourses";
 import CourseDetailsPage from "../pages/Student/CourseDetailsPage";
 import StudentSupport from "../pages/Student/StudentSupport";
-import StudentEvents from "../pages/Student/StudentEvents";
 
-// Incident Reporting & Support Integration
-import MyReports from "../pages/Report/MyReports";
-import SubmitReport from "../pages/Report/SubmitReport";
-import ReportSuccess from "../pages/Report/ReportSuccess";
-import ReportDetail from "../pages/Report/ReportDetail";
-import SupportHome from "../pages/Support/SupportHome";
-import ArticleDetail from "../pages/Support/ArticleDetail";
+// ==========================================
+// KALANA'S COMPONENT IMPORTS
+// ==========================================
+// Note: Assuming your EventBrowser replaces their generic StudentEvents
+import EventBrowser from "../pages/Events/EventBrowser";
+import MyRegistrations from "../pages/Events/MyRegistrations";
+import AttendanceManager from "../pages/Events/AttendanceManager";
+import EventAnalytics from "../pages/Events/EventAnalytics";
+import { useAuth } from "../context/AuthContext";
 
-// Placeholders for student/teacher pages (replace as you build them)
+// Placeholders
 const Placeholder = ({ label }) => (
   <div className="flex items-center justify-center h-64">
     <p className="font-serif text-2xl text-violet-700">{label} — coming soon</p>
   </div>
 );
 
-//merger dasunDev and reporting system dev branch
+const HomeRedirect = () => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  switch (user.role) {
+    case "admin": return <Navigate to="/admin" replace />;
+    case "teacher": return <Navigate to="/teacher/dashboard" replace />;
+    case "student": return <Navigate to="/student/home" replace />;
+    default: return <Navigate to="/dashboard" replace />;
+  }
+};
+
 const AppRoutes = () => (
   <Routes>
     {/* Public */}
-    <Route path="/" element={<Navigate to="/login" replace />} />
+    <Route path="/" element={<HomeRedirect />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/quiz/join/:quizLink" element={<QuizJoin />} />
 
-    {/* Student / Teacher pages — TopNav layout (MainLayout) */}
-    <Route
-      element={
-        <ProtectedRoute>
-          <MainLayout />
-        </ProtectedRoute>
-      }
-    >
-      <Route path="/quiz" element={<Placeholder label="📝 Quiz" />} />
-      <Route path="/events" element={<Placeholder label="📅 Events" />} />
+    {/* General Protected Routes (MainLayout) */}
+    <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+      <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
+      <Route path="/learning" element={<Placeholder label="📚 Learning" />} />
+      <Route path="/reports" element={<Placeholder label="🚨 Reports" />} />
+      <Route path="/support" element={<Placeholder label="🛟 Support" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
     </Route>
 
-    {/* Student pages — No Sidebar layout (StudentLayout) */}
-    <Route
-      element={
-        <ProtectedRoute allowedRoles={["student"]}>
-          <StudentLayout />
-        </ProtectedRoute>
-      }
-    >
+    {/* ========================================== */}
+    {/* 🎓 STUDENT ROUTES (StudentLayout)          */}
+    {/* ========================================== */}
+    <Route element={<ProtectedRoute allowedRoles={["student"]}><StudentLayout /></ProtectedRoute>}>
       <Route path="/student/home" element={<StudentHome />} />
+      <Route path="/student/dashboard" element={<StudentDashboard />} />
       <Route path="/student/courses" element={<StudentCourses />} />
       <Route path="/student/courses/:courseId" element={<CourseDetailsPage />} />
-
-      {/* Support System (Student) */}
-      <Route path="/student/support" element={<SupportHome />} />
-      <Route path="/student/support/:id" element={<ArticleDetail />} />
-
-      {/* Legacy/Alternative Student Support */}
-      <Route path="/student/student-support" element={<StudentSupport />} />
-
-      {/* Reports System (Student) */}
-      <Route path="/student/reports" element={<MyReports />} />
-      <Route path="/student/reports/submit" element={<SubmitReport />} />
-      <Route path="/student/reports/success" element={<ReportSuccess />} />
-      <Route path="/student/reports/:id" element={<ReportDetail />} />
-
-      <Route path="/student/events" element={<StudentEvents />} />
-      <Route path="/student/dashboard" element={<StudentDashboard />} />
-      <Route
-        path="/student/quiz/take/:studentQuizId"
-        element={<QuizTaking />}
-      />
-      <Route
-        path="/student/quiz/result/:studentQuizId"
-        element={<QuizResult />}
-      />
-      <Route
-        path="/student/quiz/:studentQuizId/explanations"
-        element={<QuizExplanations />}
-      />
+      <Route path="/student/support" element={<StudentSupport />} />
+      <Route path="/student/quiz/take/:studentQuizId" element={<QuizTaking />} />
+      <Route path="/student/quiz/result/:studentQuizId" element={<QuizResult />} />
       <Route path="/student/quiz/history" element={<QuizHistory />} />
+
+      {/* Kalana's Student Routes */}
+      <Route path="/student/events" element={<EventBrowser />} />
+      <Route path="/my-registrations" element={<MyRegistrations />} />
     </Route>
 
-    {/* Admin pages — Sidebar layout (AdminLayout) */}
-    <Route
-      element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <AdminLayout />
-        </ProtectedRoute>
-      }
-    >
+    {/* ========================================== */}
+    {/* 🛡️ ADMIN ROUTES (AdminLayout)              */}
+    {/* ========================================== */}
+    <Route element={<ProtectedRoute allowedRoles={["admin"]}><AdminLayout /></ProtectedRoute>}>
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/reports" element={<AdminReportsDashboard />} />
       <Route path="/admin/reports/all" element={<AdminAllReports />} />
@@ -152,17 +128,18 @@ const AppRoutes = () => (
       <Route path="/admin/users" element={<AdminUsers />} />
       <Route path="/admin/learning" element={<AdminLearning />} />
       <Route path="/admin/quiz" element={<AdminQuiz />} />
+      <Route path="/admin/support" element={<AdminSupport />} />
+
+      {/* Kalana's Admin Routes */}
       <Route path="/admin/events" element={<AdminEvents />} />
+      <Route path="/admin/attendance" element={<AttendanceManager />} />
+      <Route path="/admin/analytics" element={<EventAnalytics />} />
     </Route>
 
-    {/* Admin pages — Sidebar layout (AdminLayout) */}
-    <Route
-      element={
-        <ProtectedRoute allowedRoles={["teacher", "admin"]}>
-          <TeacherLayout />
-        </ProtectedRoute>
-      }
-    >
+    {/* ========================================== */}
+    {/* 👔 TEACHER ROUTES (TeacherLayout)          */}
+    {/* ========================================== */}
+    <Route element={<ProtectedRoute allowedRoles={["teacher", "admin"]}><TeacherLayout /></ProtectedRoute>}>
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
       <Route path="/teacher/manage-courses" element={<ManageCoursesPage />} />
       <Route path="/teacher/lessons" element={<ManageLessonsHubPage />} />
@@ -173,10 +150,10 @@ const AppRoutes = () => (
       <Route path="/teacher/quiz/:id/questions" element={<QuizQuestions />} />
       <Route path="/teacher/quiz/:quizId/live" element={<QuizLiveSession />} />
       <Route path="/teacher/quiz/:quizId/results" element={<QuizResults />} />
-      <Route
-        path="/teacher/quiz/:quizId/analytics"
-        element={<QuizAnalytics />}
-      />
+      <Route path="/teacher/quiz/:quizId/analytics" element={<QuizAnalytics />} />
+
+      {/* Give Teachers access to attendance too! */}
+      <Route path="/teacher/attendance" element={<AttendanceManager />} />
     </Route>
 
     <Route path="*" element={<Placeholder label="404 Not Found" />} />

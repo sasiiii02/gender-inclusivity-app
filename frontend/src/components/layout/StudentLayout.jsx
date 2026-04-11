@@ -6,9 +6,9 @@ const navLinks = [
   { name: "Home", path: "/student/home" },
   { name: "Courses", path: "/student/courses" },
   { name: "Support", path: "/student/support" },
-  { name: "Reports", path: "/student/reports" },
-  { name: "Quiz", path: "/student/dashboard" }, // Quiz links to existing /student/dashboard
+  { name: "Quiz", path: "/student/dashboard" },
   { name: "Events", path: "/student/events" },
+  { name: "My Registrations", path: "/my-registrations" }, // <-- Your custom route added here!
 ];
 
 const StudentNavbar = () => {
@@ -25,11 +25,10 @@ const StudentNavbar = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled
           ? "bg-white/80 backdrop-blur-md shadow-sm border-b border-stone-200"
           : "bg-white border-b border-stone-100"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -55,10 +54,9 @@ const StudentNavbar = () => {
                 key={link.name}
                 to={link.path}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-violet-100 text-violet-700 shadow-sm"
-                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                  `px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActive
+                    ? "bg-violet-100 text-violet-700 shadow-sm"
+                    : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
                   }`
                 }
               >
@@ -100,7 +98,7 @@ const StudentNavbar = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Navigation (Bottom Bar or Hamburger can be added here if needed) */}
       <div className="md:hidden flex overflow-x-auto border-t border-stone-100 bg-stone-50/50 px-2 py-2 hide-scrollbar">
         {navLinks.map((link) => (
@@ -108,10 +106,9 @@ const StudentNavbar = () => {
             key={link.name}
             to={link.path}
             className={({ isActive }) =>
-              `flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium mx-1 transition-colors ${
-                isActive
-                  ? "bg-violet-100 text-violet-700"
-                  : "text-stone-600"
+              `flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium mx-1 transition-colors ${isActive
+                ? "bg-violet-100 text-violet-700"
+                : "text-stone-600"
               }`
             }
           >
