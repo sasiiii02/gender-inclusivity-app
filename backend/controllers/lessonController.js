@@ -1,25 +1,24 @@
 import * as lessonService from "../services/lessonService.js";
-import { uploadPdfToCloudinary, deleteFromCloudinary } from "../utils/cloudinaryUtils.js";
 import Lesson from "../models/Lesson.js";
+import { uploadLessonPdf } from "../utils/cloudinary/lessonPdf.js";
+import { deleteCloudinaryAsset } from "../utils/cloudinary/deleteAsset.js";
 
 // @desc    Add a lesson to a course
 // @route   POST /api/courses/:courseId/lessons
 // @access  Private (Admin/Teacher)
 export const addLessonToCourse = async (req, res) => {
+  let uploadedPdf = null;
   try {
     let pdfData = undefined;
     if (req.file) {
-      if (req.file.mimetype !== "application/pdf") {
-        return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
-      }
-      const uploadData = await uploadPdfToCloudinary(req.file.buffer, req.file.originalname);
+      uploadedPdf = await uploadLessonPdf(req.file.buffer, req.file.originalname);
       pdfData = {
-        url: uploadData.secure_url,
-        publicId: uploadData.public_id,
-        originalFilename: uploadData.original_filename,
-        resourceType: uploadData.resource_type,
-        format: uploadData.format,
-        bytes: uploadData.bytes,
+        url: uploadedPdf.secure_url,
+        publicId: uploadedPdf.public_id,
+        originalFilename: uploadedPdf.original_filename,
+        resourceType: uploadedPdf.resource_type,
+        format: uploadedPdf.format,
+        bytes: uploadedPdf.bytes,
       };
     }
 
@@ -38,12 +37,17 @@ export const addLessonToCourse = async (req, res) => {
       });
     } catch (serviceErr) {
       // Cleanup Cloudinary if DB failed
-      if (pdfData && pdfData.publicId) {
-        await deleteFromCloudinary(pdfData.publicId, pdfData.resourceType).catch((e) => console.error("Cloudinary cleanup failed:", e));
+      if (uploadedPdf?.public_id) {
+        await deleteCloudinaryAsset(uploadedPdf.public_id, uploadedPdf.resource_type).catch(
+          () => {}
+        );
       }
       throw serviceErr;
     }
   } catch (error) {
+    if (error.message === "Invalid PDF file content.") {
+      return res.status(400).json({ success: false, message: "Only valid PDF files are allowed." });
+    }
     if (error.message === "Course not found") {
       return res.status(404).json({ success: false, message: error.message });
     }
@@ -82,6 +86,7 @@ export const getLessonsByCourse = async (req, res) => {
 // @route   PUT /api/lessons/:id
 // @access  Private (Admin/Teacher)
 export const updateLesson = async (req, res) => {
+  let uploadedPdf = null;
   try {
     const oldLesson = await Lesson.findById(req.params.id);
     if (!oldLesson) {
@@ -90,17 +95,14 @@ export const updateLesson = async (req, res) => {
 
     let newPdfData = undefined;
     if (req.file) {
-      if (req.file.mimetype !== "application/pdf") {
-        return res.status(400).json({ success: false, message: "Only PDF files are allowed" });
-      }
-      const uploadData = await uploadPdfToCloudinary(req.file.buffer, req.file.originalname);
+      uploadedPdf = await uploadLessonPdf(req.file.buffer, req.file.originalname);
       newPdfData = {
-        url: uploadData.secure_url,
-        publicId: uploadData.public_id,
-        originalFilename: uploadData.original_filename,
-        resourceType: uploadData.resource_type,
-        format: uploadData.format,
-        bytes: uploadData.bytes,
+        url: uploadedPdf.secure_url,
+        publicId: uploadedPdf.public_id,
+        originalFilename: uploadedPdf.original_filename,
+        resourceType: uploadedPdf.resource_type,
+        format: uploadedPdf.format,
+        bytes: uploadedPdf.bytes,
       };
     }
 
@@ -112,7 +114,9 @@ export const updateLesson = async (req, res) => {
       
       // Cleanup old PDF if new PDF was properly saved
       if (newPdfData && oldLesson.pdf && oldLesson.pdf.publicId) {
-        await deleteFromCloudinary(oldLesson.pdf.publicId, oldLesson.pdf.resourceType).catch(console.error);
+        await deleteCloudinaryAsset(oldLesson.pdf.publicId, oldLesson.pdf.resourceType).catch(
+          () => {}
+        );
       }
 
       res.status(200).json({ 
@@ -122,12 +126,17 @@ export const updateLesson = async (req, res) => {
       });
     } catch (serviceErr) {
       // Cleanup new PDF if saving to DB failed
-      if (newPdfData && newPdfData.publicId) {
-        await deleteFromCloudinary(newPdfData.publicId, newPdfData.resourceType).catch(console.error);
+      if (uploadedPdf?.public_id) {
+        await deleteCloudinaryAsset(uploadedPdf.public_id, uploadedPdf.resource_type).catch(
+          () => {}
+        );
       }
       throw serviceErr;
     }
   } catch (error) {
+    if (error.message === "Invalid PDF file content.") {
+      return res.status(400).json({ success: false, message: "Only valid PDF files are allowed." });
+    }
     if (error.message === "Course not found") {
       return res.status(404).json({ success: false, message: error.message });
     }
@@ -171,19 +180,19 @@ export const deleteLesson = async (req, res) => {
   try {
     const lesson = await Lesson.findById(req.params.id);
     if (!lesson) {
-      return res.status(404).json({ message: "Lesson not found" });
+      return res.status(404).json({ success: false, message: "Lesson not found" });
     }
 
     if (lesson.pdf && lesson.pdf.publicId) {
-      await deleteFromCloudinary(lesson.pdf.publicId, lesson.pdf.resourceType).catch(e => console.error("Failed to delete Cloudinary PDF:", e));
+      await deleteCloudinaryAsset(lesson.pdf.publicId, lesson.pdf.resourceType).catch(() => {});
     }
 
     await lessonService.deleteLesson(req.params.id);
-    res.status(200).json({ message: "Lesson deleted successfully" });
+    res.status(200).json({ success: true, message: "Lesson deleted successfully" });
   } catch (error) {
     if (error.name === "CastError") {
-      return res.status(400).json({ message: "Invalid lesson ID format" });
+      return res.status(400).json({ success: false, message: "Invalid lesson ID format" });
     }
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

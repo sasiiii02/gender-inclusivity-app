@@ -1,28 +1,50 @@
 import * as courseService from "../services/courseService.js";
-import { uploadImageToCloudinary } from "../utils/cloudinaryUtils.js";
+import Course from "../models/Course.js";
+import Lesson from "../models/Lesson.js";
+import { uploadCourseImage } from "../utils/cloudinary/courseImage.js";
+import { deleteCloudinaryAsset } from "../utils/cloudinary/deleteAsset.js";
 
 // @desc    Create a new course
 // @route   POST /api/courses
 // @access  Private (Admin/Teacher)
 export const createCourse = async (req, res) => {
+  let uploadedImage = null;
   try {
-    let imageUrl = null;
     if (req.file) {
-      const uploadResult = await uploadImageToCloudinary(
-        req.file.buffer,
-        req.file.originalname
-      );
-      imageUrl = uploadResult.secure_url;
+      uploadedImage = await uploadCourseImage(req.file.buffer, req.file.originalname);
     }
 
     // Attach the logged-in user's ID as the creator
     const courseData = {
       ...req.body,
       createdBy: req.user.id,
-      ...(imageUrl && { imageUrl }),
+      ...(uploadedImage
+        ? {
+            imageUrl: uploadedImage.secure_url, // keep backward compatibility
+            image: {
+              url: uploadedImage.secure_url,
+              publicId: uploadedImage.public_id,
+              originalFilename: uploadedImage.original_filename,
+              resourceType: uploadedImage.resource_type,
+              format: uploadedImage.format,
+              bytes: uploadedImage.bytes,
+            },
+          }
+        : {}),
     };
 
-    const newCourse = await courseService.createCourse(courseData);
+    let newCourse;
+    try {
+      newCourse = await courseService.createCourse(courseData);
+    } catch (serviceErr) {
+      if (uploadedImage?.public_id) {
+        await deleteCloudinaryAsset(uploadedImage.public_id, uploadedImage.resource_type).catch(
+          () => {}
+        );
+      }
+      throw serviceErr;
+    }
+
     res.status(201).json({ 
       success: true, 
       data: newCourse, 
@@ -91,24 +113,50 @@ export const getCourseById = async (req, res) => {
 // @route   PUT /api/courses/:id
 // @access  Private (Admin/Teacher)
 export const updateCourse = async (req, res) => {
+  let uploadedImage = null;
   try {
+    const existingCourse = await Course.findById(req.params.id);
+    if (!existingCourse) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
     let courseDataToUpdate = { ...req.body };
 
     if (req.file) {
-      const uploadResult = await uploadImageToCloudinary(
-        req.file.buffer,
-        req.file.originalname
-      );
-      courseDataToUpdate.imageUrl = uploadResult.secure_url;
+      uploadedImage = await uploadCourseImage(req.file.buffer, req.file.originalname);
+
+      courseDataToUpdate.imageUrl = uploadedImage.secure_url; // backward compatibility
+      courseDataToUpdate.image = {
+        url: uploadedImage.secure_url,
+        publicId: uploadedImage.public_id,
+        originalFilename: uploadedImage.original_filename,
+        resourceType: uploadedImage.resource_type,
+        format: uploadedImage.format,
+        bytes: uploadedImage.bytes,
+      };
     }
 
-    const updatedCourse = await courseService.updateCourse(req.params.id, courseDataToUpdate);
-    if (!updatedCourse) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Course not found" 
-      });
+    let updatedCourse;
+    try {
+      updatedCourse = await courseService.updateCourse(req.params.id, courseDataToUpdate);
+    } catch (serviceErr) {
+      if (uploadedImage?.public_id) {
+        await deleteCloudinaryAsset(uploadedImage.public_id, uploadedImage.resource_type).catch(
+          () => {}
+        );
+      }
+      throw serviceErr;
     }
+
+    if (uploadedImage?.public_id && existingCourse.image?.publicId) {
+      await deleteCloudinaryAsset(existingCourse.image.publicId, existingCourse.image.resourceType).catch(
+        () => {}
+      );
+    }
+
     res.status(200).json({ 
       success: true, 
       data: updatedCourse, 
@@ -141,6 +189,31 @@ export const updateCourse = async (req, res) => {
 // @access  Private (Admin/Teacher)
 export const deleteCourse = async (req, res) => {
   try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // Best-effort: delete course image from Cloudinary (do not fail deletion if Cloudinary fails)
+    if (course.image?.publicId) {
+      await deleteCloudinaryAsset(course.image.publicId, course.image.resourceType).catch(
+        () => {}
+      );
+    }
+
+    // Best-effort: delete lesson PDFs under this course (they'll be removed from DB by service)
+    const lessons = await Lesson.find({ courseId: course._id }).select("pdf.publicId pdf.resourceType");
+    await Promise.all(
+      lessons.map((l) => {
+        const publicId = l?.pdf?.publicId;
+        if (!publicId) return Promise.resolve();
+        return deleteCloudinaryAsset(publicId, l.pdf.resourceType).catch(() => {});
+      })
+    );
+
     const deletedCourse = await courseService.deleteCourse(req.params.id);
     if (!deletedCourse) {
       return res.status(404).json({ 

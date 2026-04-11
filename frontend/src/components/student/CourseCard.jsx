@@ -1,12 +1,15 @@
 import React from "react";
 
-const resolveCourseImage = (course) =>
-  course?.imageUrl ||
-  course?.image ||
-  course?.coverImage ||
-  course?.thumbnail ||
-  course?.courseImage?.url ||
-  "";
+const resolveCourseImage = (course) => {
+  if (!course) return "";
+  if (typeof course.imageUrl === "string") return course.imageUrl;
+  if (course.image && typeof course.image === "object" && typeof course.image.url === "string")
+    return course.image.url;
+  if (typeof course.coverImage === "string") return course.coverImage;
+  if (typeof course.thumbnail === "string") return course.thumbnail;
+  if (typeof course?.courseImage?.url === "string") return course.courseImage.url;
+  return "";
+};
 
 const CourseCard = ({ course, onViewDetails }) => {
   if (!course) return null;

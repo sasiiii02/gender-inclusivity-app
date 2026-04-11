@@ -2,6 +2,79 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import * as trainingApi from "../../api/trainingApi";
 
+const getVideoEmbedConfig = (rawUrl) => {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return { embedUrl: "", openUrl: "" };
+  }
+
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return { embedUrl: "", openUrl: "" };
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname;
+
+    // YouTube normal links and short links
+    if (host.includes("youtube.com") || host.includes("youtu.be")) {
+      if (host.includes("youtu.be")) {
+        const videoId = path.split("/").filter(Boolean)[0];
+        if (videoId) {
+          return { embedUrl: `https://www.youtube.com/embed/${videoId}`, openUrl: trimmed };
+        }
+      }
+
+      const videoId = parsed.searchParams.get("v");
+      if (videoId) {
+        return { embedUrl: `https://www.youtube.com/embed/${videoId}`, openUrl: trimmed };
+      }
+
+      if (path.includes("/embed/")) {
+        return { embedUrl: trimmed, openUrl: trimmed };
+      }
+    }
+
+    // Google Drive share links
+    if (host.includes("drive.google.com")) {
+      const filePathMatch = path.match(/\/file\/d\/([^/]+)/);
+      const fileIdFromPath = filePathMatch?.[1];
+      const fileIdFromQuery = parsed.searchParams.get("id");
+      const fileId = fileIdFromPath || fileIdFromQuery;
+
+      if (fileId) {
+        return { embedUrl: `https://drive.google.com/file/d/${fileId}/preview`, openUrl: trimmed };
+      }
+    }
+
+    // OneDrive links
+    if (host.includes("onedrive.live.com") || host.includes("1drv.ms")) {
+      if (path.includes("/embed")) {
+        return { embedUrl: trimmed, openUrl: trimmed };
+      }
+
+      if (host.includes("onedrive.live.com")) {
+        const resid = parsed.searchParams.get("resid");
+        if (resid) {
+          const authKey = parsed.searchParams.get("authkey");
+          const embed = new URL("https://onedrive.live.com/embed");
+          embed.searchParams.set("resid", resid);
+          if (authKey) embed.searchParams.set("authkey", authKey);
+          return { embedUrl: embed.toString(), openUrl: trimmed };
+        }
+      }
+
+      return { embedUrl: "", openUrl: trimmed };
+    }
+
+    // Generic URL fallback
+    return { embedUrl: trimmed, openUrl: trimmed };
+  } catch {
+    return { embedUrl: "", openUrl: "" };
+  }
+};
+
 const CourseDetailsPage = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
@@ -120,7 +193,11 @@ const CourseDetailsPage = () => {
   const canComplete = isEnrolled && progress >= 100;
   const isCompleted = String(enrollment?.completionStatus).toLowerCase() === "completed" || canComplete;
 
-  const image = course.imageUrl || "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
+  const image =
+    course?.image?.url ||
+    course?.imageUrl ||
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1000&auto=format&fit=crop";
+  const videoConfig = getVideoEmbedConfig(selectedLesson?.videoUrl || "");
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -281,15 +358,31 @@ const CourseDetailsPage = () => {
               </div>
               
               {selectedLesson.videoUrl ? (
-                <div className="w-full aspect-video bg-stone-900 rounded-2xl overflow-hidden mb-8 shadow-lg ring-1 ring-stone-900/5">
-                  <iframe 
-                    className="w-full h-full" 
-                    src={selectedLesson.videoUrl.replace("watch?v=", "embed/")} 
-                    title={selectedLesson.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  />
-                </div>
+                videoConfig.embedUrl ? (
+                  <div className="w-full aspect-video bg-stone-900 rounded-2xl overflow-hidden mb-8 shadow-lg ring-1 ring-stone-900/5">
+                    <iframe
+                      className="w-full h-full"
+                      src={videoConfig.embedUrl}
+                      title={selectedLesson.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full bg-stone-50 rounded-2xl p-5 mb-8 border border-stone-200">
+                    <p className="text-sm text-stone-600 mb-3">
+                      This video provider does not support in-page embed for this link format.
+                    </p>
+                    <a
+                      href={videoConfig.openUrl || selectedLesson.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors"
+                    >
+                      Open Video
+                    </a>
+                  </div>
+                )
               ) : (
                 <div className="w-full h-48 bg-stone-100 rounded-2xl flex items-center justify-center mb-8 border border-stone-200">
                   <span className="text-stone-400 font-medium">No video provided for this lesson.</span>
@@ -312,7 +405,9 @@ const CourseDetailsPage = () => {
                    >
                      <span className="text-2xl text-rose-500">📄</span>
                      <div>
-                       <p className="font-bold text-sm">{selectedLesson.pdf.originalName || "Lesson Reference PDF"}</p>
+                      <p className="font-bold text-sm">
+                        {selectedLesson.pdf.originalFilename || "Lesson Reference PDF"}
+                      </p>
                        <p className="text-xs text-rose-600 opacity-80">Click to View/Download</p>
                      </div>
                    </a>
