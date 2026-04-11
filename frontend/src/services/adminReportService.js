@@ -49,3 +49,9 @@ export const closeReport = (id) => axiosInstance.patch(`/reports/${id}/close`);
  * Fetch all admin responses across all reports.
  */
 export const getAllAdminResponses = () => axiosInstance.get("/reports/responses");
+
+/**
+ * Update the priority of a report.
+ */
+export const updateReportPriority = (id, priority) => axiosInstance.patch(`/reports/${id}/priority`, { priority });
+

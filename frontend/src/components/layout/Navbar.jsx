@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "./NotificationBell";
+import { Menu } from "lucide-react";
 
 const pageTitles = {
   "/dashboard": "Dashboard",
@@ -53,10 +55,7 @@ const Navbar = ({ onMenuClick }) => {
       {/* Right side */}
       <div className="flex items-center gap-3">
         {/* Notification bell */}
-        <button className="relative w-9 h-9 rounded-xl bg-stone-50 hover:bg-stone-100 flex items-center justify-center text-stone-500 transition-colors">
-          🔔
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-        </button>
+        <NotificationBell />
 
         {/* User avatar */}
         {user && (

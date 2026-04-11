@@ -3,6 +3,21 @@ import CaseStatus from "../models/CaseStatus.js";
 import ReportResponse from "../models/ReportResponse.js";
 import ReportStatusHistory from "../models/ReportStatusHistory.js";
 import ReportCategory from "../models/ReportCategory.js";
+import Notification from "../models/Notification.js";
+
+// Helper to create notifications
+const createNotification = async ({ recipient, message, type, reportId }) => {
+    try {
+        await Notification.create({
+            recipient,
+            message,
+            type,
+            relatedReport: reportId
+        });
+    } catch (error) {
+        console.error("Failed to create notification:", error);
+    }
+};
 
 export const getReportCategoriesService = async () => {
     return await ReportCategory.find();
@@ -18,6 +33,20 @@ export const createReportCategoryService = async (name) => {
 
 export const deleteReportCategoryService = async (id) => {
     return await ReportCategory.findByIdAndDelete(id);
+};
+
+// Helper to mask anonymous reports
+const maskReport = (report) => {
+    if (!report) return report;
+    const reportObj = report.toObject ? report.toObject() : report;
+    if (reportObj.isAnonymous) {
+        reportObj.reportedBy = { 
+            _id: "anonymous",
+            name: "Anonymous User", 
+            email: "Hidden" 
+        };
+    }
+    return reportObj;
 };
 
 // Create a new report
@@ -38,12 +67,15 @@ export const createReportService = async(req)=>{
     if(!pendingStatus){
         throw new Error("Default status not found");
     }
+
+    const isAnon = isAnonymous === 'true' || isAnonymous === true;
+
     const report = await Report.create({
         title,
         description,
         categoryId,
-        reportedBy: isAnonymous === 'true' || isAnonymous === true ? null : req.user._id,
-        isAnonymous: isAnonymous === 'true' || isAnonymous === true,
+        reportedBy: req.user._id, // Always store the reporter
+        isAnonymous: isAnon,
         location,
         incidentDate,
         priority,
@@ -62,7 +94,9 @@ export const getAllReportsService = async()=>{
     .populate("statusId","name")
     .populate("reportedBy", "name email")
     .sort({ createdAt: -1 });
-    return reports;
+
+    // Mask anonymous reports for admin listing
+    return reports.map(report => maskReport(report));
 }
 
 export const getMyReportsService = async(userId)=>{
@@ -94,7 +128,19 @@ const report = await Report.findById(reportId);
   });
 
 
-    return await report.populate("statusId", "name");
+    const updated = await report.populate("statusId", "name");
+    
+    // Create notification for the reporter
+    if (report.reportedBy) {
+        await createNotification({
+            recipient: report.reportedBy,
+            message: `The status of your report "${report.title}" has been updated to "${updated.statusId.name}".`,
+            type: 'status_update',
+            reportId: report._id
+        });
+    }
+
+    return maskReport(updated);
 };
 // Add response to a report 
 export const addReportResponseService = async (
@@ -116,6 +162,16 @@ export const addReportResponseService = async (
     respondedBy: adminId,
     message,
   });
+
+  // Create notification for the reporter
+  if (report.reportedBy) {
+      await createNotification({
+          recipient: report.reportedBy,
+          message: `Administrative staff has responded to your report: "${report.title}".`,
+          type: 'response',
+          reportId: report._id
+      });
+  }
 
   // Optionally update status automatically
   report.statusId = report.statusId; // or set to resolved status id
@@ -154,6 +210,38 @@ export const getResponsesByReportService = async (reportId, userId, isAdmin = fa
     .sort({ createdAt: 1 });
 };
 
+/**
+ * Fetch notifications for a specific user.
+ */
+export const getUserNotificationsService = async (userId) => {
+    return await Notification.find({ recipient: userId })
+        .sort({ createdAt: -1 })
+        .limit(20);
+};
+
+/**
+ * Mark a notification as read.
+ */
+export const markNotificationAsReadService = async (notificationId, userId) => {
+    return await Notification.findOneAndUpdate(
+        { _id: notificationId, recipient: userId },
+        { isRead: true },
+        { new: true }
+    );
+};
+
+/**
+ * Update the priority of a report (Admin only).
+ */
+export const updateReportPriorityService = async (reportId, priority) => {
+    const report = await Report.findById(reportId);
+    if (!report) throw new Error("Report not found");
+    
+    report.priority = priority;
+    await report.save();
+    return maskReport(report);
+};
+
 // Get report timeline (status changes + responses)
 export const getReportTimelineService = async (reportId, userId, isAdmin) => {
   const report = await Report.findById(reportId).populate(
@@ -166,15 +254,18 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
   }
 
   // If not admin, verify ownership
-  if (!isAdmin && report.reportedBy._id.toString() !== userId.toString()) {
+  if (!isAdmin && (!report.reportedBy || report.reportedBy._id.toString() !== userId.toString())) {
     throw new Error("Not authorized to view this report timeline");
   }
 
   // 1️⃣ Report creation event
+  // Use "Anonymous" if the report is flagged, regardless of who is viewing
+  const reporterName = report.isAnonymous ? "Anonymous" : (report.reportedBy?.name || "Anonymous User");
+
   const creationEvent = {
     type: "report_created",
     message: "Report submitted",
-    user: report.reportedBy.name,
+    user: reporterName,
     date: report.createdAt,
   };
 
@@ -186,8 +277,8 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
 
   const statusEvents = statusHistory.map((item) => ({
     type: "status_update",
-    status: item.statusId.name,
-    updatedBy: item.updatedBy.name,
+    status: item.statusId?.name || "Unknown Status",
+    updatedBy: item.updatedBy?.name || "System",
     date: item.createdAt,
   }));
 
@@ -199,7 +290,7 @@ export const getReportTimelineService = async (reportId, userId, isAdmin) => {
   const responseEvents = responses.map((item) => ({
     type: "response",
     message: item.message,
-    respondedBy: item.respondedBy.name,
+    respondedBy: item.respondedBy?.name || "Admin",
     date: item.createdAt,
   }));
 
@@ -226,7 +317,7 @@ export const closeReportService = async (reportId, adminId) => {
 
   await report.save();
 
-  return report;
+  return maskReport(report);
 };
 
 // Admin - reopen a report

@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
+import NotificationBell from "./NotificationBell";
 
 const navLinks = [
   { name: "Home", path: "/student/home" },
@@ -70,10 +71,7 @@ const StudentNavbar = () => {
 
           {/* User & Actions */}
           <div className="flex items-center gap-4">
-            <button className="relative w-10 h-10 rounded-full hover:bg-stone-100 flex items-center justify-center transition-colors text-stone-500">
-              🔔
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-            </button>
+            <NotificationBell />
             {user && (
               <div className="flex items-center gap-3 pl-3 border-l border-stone-200">
                 <div className="hidden sm:block text-right">

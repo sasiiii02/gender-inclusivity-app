@@ -1,6 +1,6 @@
 import express from "express";
 import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
-  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory} from "../controllers/reportController.js";
+  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory, updateReportPriority, getMyNotifications, markNotificationAsRead} from "../controllers/reportController.js";
 import protect from "../middleware/authMiddleware.js";
 import { incidentUpload } from "../middleware/upload.js";
 
@@ -36,6 +36,13 @@ router.get("/:id/timeline", protect, getReportTimeline);
 router.patch("/:id/close", protect, closeReport);
 // Admin - get report statistics
 router.get("/stats",protect, getReportStats);
+
+// Priority update (Admin)
+router.patch("/:id/priority", protect, updateReportPriority);
+
+// Notifications (User)
+router.get("/user/notifications", protect, getMyNotifications);
+router.patch("/user/notifications/:id/read", protect, markNotificationAsRead);
 
 export default router
 

@@ -18,6 +18,7 @@ const SubmitReport = () => {
     incidentType: "",
     categoryId: "",
     location: "",
+    priority: "Low",
     isAnonymous: false,
     confirmed: false
   });
@@ -72,7 +73,7 @@ const SubmitReport = () => {
       formDataToSend.append("location", formData.location);
       formDataToSend.append("isAnonymous", formData.isAnonymous);
       formDataToSend.append("categoryId", formData.categoryId);
-      formDataToSend.append("priority", "Medium");
+      formDataToSend.append("priority", formData.priority);
 
       // Append files if any
       if (files && files.length > 0) {
@@ -124,10 +125,31 @@ const SubmitReport = () => {
                 <input 
                   type="date" 
                   value={formData.incidentDate}
+                  max={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setFormData({...formData, incidentDate: e.target.value})}
                   className={`w-full p-2.5 rounded-lg border ${errors.incidentDate ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-purple-500'} focus:outline-none focus:ring-2 focus:border-transparent`}
                 />
                 {errors.incidentDate && <p className="mt-1 text-xs text-red-500">{errors.incidentDate}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Impact Priority <span className="text-stone-400 font-normal text-[10px] uppercase ml-2 tracking-widest">(Self-Assessed)</span></label>
+                <div className="grid grid-cols-3 gap-3">
+                  {['Low', 'Medium', 'High'].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setFormData({...formData, priority: p})}
+                      className={`py-2 text-xs font-bold rounded-lg border-2 transition-all ${
+                        formData.priority === p 
+                          ? 'bg-purple-50 border-purple-600 text-purple-700 shadow-sm' 
+                          : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 const adminNav = [
   { label: "Dashboard",  icon: "🏠", path: "/admin" },
@@ -132,6 +133,7 @@ const AdminLayout = () => {
             🛡️ Admin
           </span>
           <div className="flex-1" />
+          <NotificationBell />
           <p className="text-sm text-stone-400 hidden sm:block">
             Logged in as <span className="font-semibold text-stone-700">{user?.name}</span>
           </p>

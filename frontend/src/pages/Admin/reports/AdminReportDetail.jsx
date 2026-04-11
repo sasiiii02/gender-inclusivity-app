@@ -10,6 +10,7 @@ import {
 import axiosInstance from '../../../api/axiosInstance'; // Assuming access to basic status fetch if needed
 
 import ReportStatusUpdater from '../../../components/admin/reports/ReportStatusUpdater';
+import ReportPriorityUpdater from '../../../components/admin/reports/ReportPriorityUpdater';
 import ReportResponsePanel from '../../../components/admin/reports/ReportResponsePanel';
 import ReportTimeline from '../../../components/admin/reports/ReportTimeline';
 import CloseReportCard from '../../../components/admin/reports/CloseReportCard';
@@ -127,13 +128,11 @@ const AdminReportDetail = () => {
                                 }`}>
                                     {report.statusId?.name || 'Pending'}
                                 </span>
-                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border-2 ${
-                                    report.priority === 'High' ? 'border-red-100 bg-red-50 text-red-700' : 
-                                    report.priority === 'Medium' ? 'border-amber-100 bg-amber-50 text-amber-700' : 
-                                    'border-green-100 bg-green-50 text-green-700'
-                                }`}>
-                                    {report.priority} Priority
-                                </span>
+                                <ReportPriorityUpdater 
+                                    reportId={report._id} 
+                                    currentPriority={report.priority}
+                                    onUpdate={handleUpdate}
+                                />
                                 {report.isClosed && (
                                     <span className="bg-stone-900 text-white px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
                                         <Lock className="w-3.5 h-3.5" /> Closed
@@ -151,7 +150,7 @@ const AdminReportDetail = () => {
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-stone-400 font-black uppercase tracking-widest leading-none">Reported By</p>
-                                        <p className="text-sm font-bold text-stone-800">{report.isAnonymous ? 'Anonymous Member' : (report.reportedBy?.name || 'Unknown')}</p>
+                                        <p className="text-sm font-bold text-stone-800">{report.isAnonymous ? 'Anonymous' : (report.reportedBy?.name || 'Unknown')}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
