@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { NavLink, useNavigate, Outlet } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { NavLink, Link, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Settings, LogOut } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
 const adminNav = [
@@ -68,10 +69,17 @@ const AdminLayout = () => {
             <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-bold uppercase">
               {user.name?.charAt(0)}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white truncate">{user.name}</p>
               <p className="text-[10px] text-rose-400 font-semibold uppercase tracking-wide">Administrator</p>
             </div>
+            <Link
+              to="/admin/profile"
+              className="w-7 h-7 rounded-lg bg-stone-700 hover:bg-violet-600 flex items-center justify-center text-stone-400 hover:text-white transition-all flex-shrink-0"
+              title="Edit Profile"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </Link>
           </div>
         )}
 
@@ -128,7 +136,10 @@ const AdminLayout = () => {
           <div className="flex-1" />
           <NotificationBell />
           <p className="text-sm text-stone-400 hidden sm:block">
-            Logged in as <span className="font-semibold text-stone-700">{user?.name}</span>
+            Logged in as{" "}
+            <Link to="/profile" className="font-semibold text-stone-700 hover:text-violet-600 transition-colors">
+              {user?.name}
+            </Link>
           </p>
         </header>
 

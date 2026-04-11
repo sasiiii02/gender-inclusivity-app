@@ -1,7 +1,7 @@
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useState, useEffect } from "react";
-import { LogOut } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { LogOut, User, Settings } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
 const navLinks = [
@@ -17,6 +17,19 @@ const navLinks = [
 const StudentNavbar = () => {
   const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,25 +87,63 @@ const StudentNavbar = () => {
           <div className="flex items-center gap-4">
             <NotificationBell />
             {user && (
-              <div className="flex items-center gap-3 pl-4 border-l border-stone-100">
-                <div className="hidden sm:block text-right">
-                  <div className="text-xs font-black text-stone-900 leading-none">
-                    {user.name}
-                  </div>
-                  <div className="text-[10px] text-stone-400 font-bold mt-1.5 uppercase tracking-tighter">
-                    {user.role} Account
-                  </div>
-                </div>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-stone-100 to-white border border-stone-200 flex items-center justify-center text-stone-600 font-black text-xs shadow-sm cursor-pointer hover:border-stone-300 transition-all">
-                  {user.name?.charAt(0) || "S"}
-                </div>
+              <div className="relative pl-4 border-l border-stone-100" ref={dropdownRef}>
+                {/* Avatar button */}
                 <button
-                  onClick={logout}
-                  className="w-9 h-9 rounded-xl bg-stone-50 hover:bg-rose-50 text-stone-400 hover:text-rose-600 transition-all duration-300 flex items-center justify-center group"
-                  title="Secure Logout"
+                  onClick={() => setDropdownOpen(v => !v)}
+                  className="flex items-center gap-2.5 group"
                 >
-                  <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  <div className="hidden sm:block text-right">
+                    <div className="text-xs font-black text-stone-900 leading-none group-hover:text-violet-600 transition-colors">
+                      {user.name}
+                    </div>
+                    <div className="text-[10px] text-stone-400 font-bold mt-1 uppercase tracking-tighter">
+                      {user.role}
+                    </div>
+                  </div>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-100 to-indigo-50 border border-violet-200 flex items-center justify-center text-violet-700 font-black text-xs shadow-sm group-hover:scale-105 transition-transform">
+                    {user.name?.charAt(0)?.toUpperCase() || "S"}
+                  </div>
                 </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-2xl border border-stone-100 z-50 overflow-hidden animate-fade-in">
+                    {/* Identity card */}
+                    <div className="p-4 bg-stone-50 border-b border-stone-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                          {user.name?.charAt(0)?.toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black text-stone-900 truncate">{user.name}</p>
+                          <p className="text-[10px] text-stone-400 truncate">{user.email}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[9px] font-black uppercase tracking-widest">
+                            {user.role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div className="p-2">
+                      <Link
+                        to="/student/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-violet-50 text-stone-600 hover:text-violet-700 transition-colors group"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Edit Profile</span>
+                      </Link>
+                      <button
+                        onClick={() => { setDropdownOpen(false); logout(); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-stone-500 hover:text-rose-600 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
