@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { campaignEventsApi } from "../../api/campaignEventsApi";
+import { validateNormalEventDay } from "../../utils/holidayChecker";
 
 const emptyCampaign = { title: "", description: "", startDate: "", endDate: "" };
 const emptyEvent = {
@@ -25,6 +26,7 @@ const AdminEvents = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [eventForm, setEventForm]           = useState(emptyEvent);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
+  const eventSubmitLockRef = useRef(false);
 
   const [saving, setSaving]     = useState(false);
   const navigate = useNavigate();
@@ -95,6 +97,10 @@ const AdminEvents = () => {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    if (eventSubmitLockRef.current) {
+      return;
+    }
+
     if (!selectedCampaignId) {
       alert("Please select a campaign before creating an event.");
       return;
@@ -106,6 +112,13 @@ const AdminEvents = () => {
       return;
     }
 
+    const dayCheck = await validateNormalEventDay(eventForm.eventDate);
+    if (!dayCheck.isValid) {
+      alert(dayCheck.message);
+      return;
+    }
+
+    eventSubmitLockRef.current = true;
     setSaving(true);
     try {
       const createResponse = await campaignEventsApi.createEvent(selectedCampaignId, {
@@ -131,6 +144,7 @@ const AdminEvents = () => {
       alert(`Failed to create event: ${error.response?.data?.message || error.message}`);
     } finally {
       setSaving(false);
+      eventSubmitLockRef.current = false;
     }
   };
 
