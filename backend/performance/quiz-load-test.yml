@@ -1,0 +1,48 @@
+# Quiz load test
+#
+# Default target: http://127.0.0.1:5000  → override: npx artillery run --target "http://host:port" ...
+#
+# Prerequisite: TEACHER_JWT for a user who owns at least one published quiz with questions.
+# First quiz in GET /api/quizzes?page=1&limit=20 is captured for start-session (newest first in API).
+# To use a fixed quiz id only: remove the capture block and set post url to /api/quizzes/YOUR_ID/start-session
+#
+# Required env:
+#   TEACHER_JWT
+#
+config:
+  target: "http://127.0.0.1:5000"
+  processor: "./processors/perf-check-env.cjs"
+  phases:
+    - duration: 20
+      arrivalRate: 1
+      rampTo: 25
+    - duration: 45
+      arrivalRate: 25
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  variables:
+    teacherToken: "{{ $processEnvironment.TEACHER_JWT }}"
+  plugins:
+    expect: {}
+
+scenarios:
+  - name: list_then_start_session
+    flow:
+      - function: "validateQuizEnv"
+      - get:
+          url: "/api/quizzes?page=1&limit=20"
+          headers:
+            Authorization: "Bearer {{ teacherToken }}"
+          capture:
+            - json: "$.data.quizzes[0]._id"
+              as: quizId
+              strict: false
+          expect:
+            - statusCode: 200
+      - post:
+          url: "/api/quizzes/{{ quizId }}/start-session"
+          headers:
+            Authorization: "Bearer {{ teacherToken }}"
+          expect:
+            - statusCode: 200

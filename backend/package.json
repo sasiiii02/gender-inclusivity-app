@@ -7,7 +7,12 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "test": "node --test tests/*.test.js",
-    "test:integration": "node --test --test-force-exit --test-timeout=180000 tests/integration/suite.test.js"
+    "test:integration": "node --test --test-force-exit --test-timeout=180000 tests/integration/suite.test.js",
+    "perf:init": "node scripts/ensure-perf-env.mjs",
+    "perf:enrollment": "node scripts/ensure-perf-env.mjs && artillery run --dotenv ./performance/.env.performance --target http://127.0.0.1:5000 performance/enrollment-load-test.yml",
+    "perf:events": "node scripts/ensure-perf-env.mjs && artillery run --dotenv ./performance/.env.performance --target http://127.0.0.1:5000 performance/event-campaign-load-test.yml",
+    "perf:quiz": "node scripts/ensure-perf-env.mjs && artillery run --dotenv ./performance/.env.performance --target http://127.0.0.1:5000 performance/quiz-load-test.yml",
+    "perf:reports": "node scripts/ensure-perf-env.mjs && artillery run --dotenv ./performance/.env.performance --target http://127.0.0.1:5000 performance/report-load-test.yml"
   },
   "keywords": [],
   "author": "",
