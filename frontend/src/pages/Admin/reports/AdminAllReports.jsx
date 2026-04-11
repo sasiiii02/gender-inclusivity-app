@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Download, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { getAllReportsForAdmin } from '../../../services/adminReportService';
 import AdminReportTable from '../../../components/admin/reports/AdminReportTable';
 import AdminReportFilters from '../../../components/admin/reports/AdminReportFilters';
@@ -56,6 +57,40 @@ const AdminAllReports = () => {
         setShowClosed(true);
     };
 
+    const handleExportCSV = () => {
+        if (filteredReports.length === 0) {
+            toast.error("No reports to export");
+            return;
+        }
+
+        const headers = ["ID", "Title", "Category", "Status", "Priority", "Reported By", "Date", "Closed"];
+        const csvContent = [
+            headers.join(','),
+            ...filteredReports.map(r => [
+                `"${r._id}"`,
+                `"${r.title.replace(/"/g, '""')}"`,
+                `"${r.categoryId?.name || 'N/A'}"`,
+                `"${r.statusId?.name || 'Pending'}"`,
+                `"${r.priority}"`,
+                `"${r.isAnonymous ? 'Anonymous' : (r.reportedBy?.name || 'Unknown')}"`,
+                `"${new Date(r.createdAt).toLocaleDateString()}"`,
+                `"${r.isClosed ? 'Yes' : 'No'}"`
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `reports-export-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast.success(`Exported ${filteredReports.length} reports to CSV`);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Breadcrumbs / Back */}
@@ -68,7 +103,10 @@ const AdminAllReports = () => {
                     Back to Dashboard
                 </button>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-bold transition-all">
+                    <button 
+                        onClick={handleExportCSV}
+                        className="flex items-center gap-2 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-bold transition-all"
+                    >
                         <Download className="w-4 h-4" /> Export CSV
                     </button>
                 </div>

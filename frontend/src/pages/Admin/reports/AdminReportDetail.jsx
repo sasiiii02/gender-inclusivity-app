@@ -101,7 +101,13 @@ const AdminReportDetail = () => {
                     Back to inventory
                 </button>
                 <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Case ID:</span>
+                    <button 
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 px-5 py-2 bg-stone-900 text-white rounded-xl text-xs font-bold shadow-lg hover:shadow-purple-200/50 transition-all active:scale-95"
+                    >
+                        <Download className="w-4 h-4" /> Print Case File
+                    </button>
+                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-4">Case ID:</span>
                     <span className="text-xs font-mono font-bold text-stone-900 bg-stone-100 px-3 py-1 rounded-lg border border-stone-200">{report._id.slice(-8)}</span>
                 </div>
             </div>
