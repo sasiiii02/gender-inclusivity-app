@@ -54,6 +54,9 @@ const reportSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
+        evidence: [{
+            type: String, // Store file paths or URLs
+        }],
     },
     {
         timestamps:true,

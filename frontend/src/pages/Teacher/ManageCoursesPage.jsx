@@ -269,6 +269,7 @@ const ManageCoursesPage = () => {
                 <CourseForm
                   initialData={editing || emptyInitialValues}
                   submitLabel={saving ? "Saving..." : editing ? "Update course" : "Create course"}
+                  loading={saving}
                   onSubmit={saving ? null : handleSubmit}
                 />
                 <button

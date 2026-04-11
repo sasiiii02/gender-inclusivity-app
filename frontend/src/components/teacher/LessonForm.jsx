@@ -30,6 +30,9 @@ const LessonForm = ({
   onSubmit,
   submitLabel = "Save Lesson",
   disabled = false,
+  loading = false,
+  error = "",
+  success = "",
 }) => {
   const empty = useMemo(
     () => ({
@@ -141,6 +144,18 @@ const LessonForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error ? (
+        <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm">
+          {error}
+        </div>
+      ) : null}
+
+      {success ? (
+        <div className="px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+          {success}
+        </div>
+      ) : null}
+
       <div>
         <label className="block text-sm font-semibold text-stone-700 mb-1">
           Lesson title
@@ -204,6 +219,11 @@ const LessonForm = ({
           className={`${fieldClass} file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 cursor-pointer`}
           disabled={disabled}
         />
+        {pdfFile ? (
+          <p className="mt-1 text-xs text-stone-500">
+            Selected: <span className="font-semibold text-stone-700">{pdfFile.name}</span>
+          </p>
+        ) : null}
         {initialData?.pdf?.url && (
             <p className="mt-1 text-xs text-stone-500">Choosing a new file will securely replace the current one.</p>
         )}
@@ -221,9 +241,12 @@ const LessonForm = ({
           value={form.videoUrl}
           onChange={(e) => setField("videoUrl", e.target.value)}
           className={fieldClass}
-          placeholder="e.g. https://youtube.com/watch?v=..."
+          placeholder="e.g. YouTube / Google Drive / OneDrive link"
           disabled={disabled}
         />
+        <p className="mt-1 text-xs text-stone-500">
+          Supported links: YouTube, Google Drive, and OneDrive.
+        </p>
         {errors.videoUrl && (
           <div className="text-xs text-rose-600 mt-1">{errors.videoUrl}</div>
         )}
@@ -270,10 +293,10 @@ const LessonForm = ({
       <div className="flex pt-2">
         <button
           type="submit"
-          disabled={disabled}
+          disabled={disabled || loading}
           className="w-full flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-all disabled:opacity-60 disabled:pointer-events-none"
         >
-          {disabled ? (
+          {disabled || loading ? (
             <>
               <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

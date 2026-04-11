@@ -30,59 +30,93 @@ const QuizJoin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-6">
-            <div className="text-6xl mb-4">🎯</div>
-            <h1 className="font-serif text-2xl font-bold text-stone-900">
+        <div className="bg-white border border-zinc-200 rounded-3xl shadow-xl p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="mx-auto w-16 h-16 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mb-5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-9 h-9"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4v12M3 8l4 4m0 0l-4 4m4-4v12"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
               Join Quiz
             </h1>
-            <p className="text-stone-500 text-sm mt-1">
+            <p className="text-zinc-500 mt-2 text-[15px]">
               Enter the passcode to start your quiz
             </p>
           </div>
 
+          {/* Error Message */}
           {error && (
-            <div className="mb-4 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
-              ⚠️ {error}
+            <div className="mb-6 px-5 py-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex items-start gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 mt-0.5 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 01-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Quiz Link */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Quiz Link
               </label>
               <input
                 type="text"
                 value={quizLink}
                 disabled
-                className="input-field bg-stone-50"
+                className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-zinc-500 font-mono"
               />
             </div>
 
+            {/* Passcode */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 mb-2">
                 Passcode
               </label>
               <input
                 type="text"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value.toUpperCase())}
-                className="input-field font-mono text-center text-lg tracking-widest"
+                className="w-full px-5 py-3.5 border border-zinc-300 rounded-2xl font-mono text-center text-xl tracking-widest focus:outline-none focus:border-blue-500 transition-colors"
                 placeholder="Enter passcode"
                 required
                 autoFocus
               />
             </div>
 
+            {/* Join Button */}
             <button
               type="submit"
-              disabled={loading || !passcode}
-              className="w-full btn-primary py-3 disabled:opacity-60"
+              disabled={loading || !passcode.trim()}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 text-white font-medium rounded-2xl transition-all active:scale-[0.985]"
             >
-              {loading ? <LoadingSpinner size="sm" text="" /> : "Join Quiz →"}
+              {loading ? <LoadingSpinner size="sm" text="" /> : "Join Quiz"}
             </button>
           </form>
         </div>

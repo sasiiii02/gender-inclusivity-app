@@ -31,10 +31,16 @@ const EnrolledStudentsTable = ({ students = [] }) => {
         <tbody>
           {students.map((s) => {
             const isCompleted = s.completionStatus === "Completed";
+            const studentName = s.student?.name || "Unknown";
             return (
               <tr key={s._id} className="border-t border-stone-100 hover:bg-stone-50">
-                <td className="px-4 py-3 text-stone-900 font-semibold truncate max-w-[220px]">
-                  {s.student?.name || "Unknown"}
+                <td className="px-4 py-3 text-stone-900 font-semibold">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="h-8 w-8 rounded-full bg-violet-100 text-violet-700 text-xs font-bold inline-flex items-center justify-center shrink-0">
+                      {studentName.slice(0, 1).toUpperCase()}
+                    </span>
+                    <span className="truncate max-w-[220px]">{studentName}</span>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-stone-600">
                   {s.student?.email || "—"}
