@@ -9,7 +9,7 @@ import * as questionController from "../controllers/QM-questionController.js";
 
 const router = express.Router({ mergeParams: true });
 
-// All routes require authentication and teacher role
+// Required when router is mounted at /api/questions; harmless when nested under /api/quizzes
 router.use(protect);
 router.use(authorize("teacher", "admin"));
 

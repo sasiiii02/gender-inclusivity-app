@@ -10,12 +10,12 @@ import questionRoutes from "./QM-questionRoutes.js";
 
 const router = express.Router();
 
-// Re-route to question router
-router.use("/:quizId/questions", questionRoutes);
-
 // All routes require authentication and teacher role
 router.use(protect);
 router.use(authorize("teacher", "admin"));
+
+// Nested questions (must run after protect so params + auth match other quiz routes)
+router.use("/:quizId/questions", questionRoutes);
 
 // Quiz CRUD
 router
@@ -32,6 +32,7 @@ router
 // Quiz actions
 router.put("/:id/publish", quizController.publishQuiz);
 router.post("/:id/start", quizController.startQuiz);
+router.post("/:id/start-session", quizController.startQuiz);
 router.post("/:id/end", quizController.endQuiz);
 
 // Quiz stats and results

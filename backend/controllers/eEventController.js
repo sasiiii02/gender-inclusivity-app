@@ -1,6 +1,28 @@
 import * as eventService from "../services/eEventService.js";
 import EEvent from "../models/EEvent.js";
 
+// @desc    Create event — POST /api/events with campaignId in body
+// @access  Private (Admin/Teacher)
+export const createEventFromBody = async (req, res) => {
+  try {
+    const { campaignId, ...rest } = req.body;
+    const eventData = {
+      ...rest,
+      campaignId,
+      createdBy: req.user.id,
+    };
+
+    const newEvent = await eventService.createEvent(eventData);
+    res.status(201).json({
+      success: true,
+      data: newEvent,
+      message: "Event created successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc    Create a new event
 // @route   POST /api/campaigns/:campaignId/events
 // @access  Private (Admin/Teacher)
@@ -70,7 +92,11 @@ export const deleteEvent = async (req, res) => {
     if (!deletedEvent) {
       return res.status(404).json({ success: false, message: "Event not found" });
     }
-    res.status(200).json({ success: true, message: "Event deleted successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Event deleted successfully",
+      data: deletedEvent,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -2,12 +2,25 @@ import express from "express";
 import * as eventController from "../controllers/eEventController.js";
 import protect, { authorize } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validateMiddleware.js";
-import { createEventSchema, updateEventSchema } from "../validations/eEventValidator.js";
+import {
+  createEventSchema,
+  createEventWithCampaignSchema,
+  updateEventSchema,
+} from "../validations/eEventValidator.js";
 
 const router = express.Router();
 
 // Public routes
 router.get("/", eventController.getEvents);
+
+router.post(
+  "/",
+  protect,
+  authorize("admin", "teacher"),
+  validate(createEventWithCampaignSchema),
+  eventController.createEventFromBody
+);
+
 router.get("/:id", eventController.getEventById);
 
 // Protected routes (Admins and Teachers)

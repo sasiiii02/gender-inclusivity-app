@@ -4,6 +4,19 @@ import protect, { authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.post(
+  "/",
+  protect,
+  authorize("student"),
+  enrollmentController.enrollWithBody
+);
+
+router.get(
+  "/student/:studentId",
+  protect,
+  enrollmentController.getStudentEnrollments
+);
+
 // Protected routes - Student only
 router.get(
   "/my",
@@ -28,6 +41,13 @@ router.patch(
 );
 
 router.put(
+  "/:id/progress",
+  protect,
+  authorize("student"),
+  enrollmentController.updateProgress
+);
+
+router.patch(
   "/:id/progress",
   protect,
   authorize("student"),
