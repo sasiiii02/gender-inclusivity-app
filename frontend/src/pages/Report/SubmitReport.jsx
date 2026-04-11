@@ -65,20 +65,23 @@ const SubmitReport = () => {
     try {
       setIsSubmitting(true);
       
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        incidentDate: formData.incidentDate,
-        location: formData.location,
-        isAnonymous: formData.isAnonymous,
-        categoryId: formData.categoryId,
-        priority: "Medium"
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("incidentDate", formData.incidentDate);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("isAnonymous", formData.isAnonymous);
+      formDataToSend.append("categoryId", formData.categoryId);
+      formDataToSend.append("priority", "Medium");
 
-      // Note: The backend currently does not support processing media evidence. 
-      // Uploaded files are kept locally in the state but omitted from the payload for now.
+      // Append files if any
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          formDataToSend.append("evidence", file);
+        });
+      }
 
-      const response = await submitReport(payload);
+      const response = await submitReport(formDataToSend);
       
       navigate("/student/reports/success", { state: { reportId: response.report._id } });
       toast.success("Report submitted successfully!");

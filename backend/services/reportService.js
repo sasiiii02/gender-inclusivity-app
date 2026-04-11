@@ -30,7 +30,8 @@ export const createReportService = async(req)=>{
         location,
         incidentDate,
         priority,
-    } = await req.body;
+        evidence, // Array of file paths
+    } = req.body;
     // find the default status
     const pendingStatus = await CaseStatus.findOne({name:"Pending"});
 
@@ -41,12 +42,13 @@ export const createReportService = async(req)=>{
         title,
         description,
         categoryId,
-        reportedBy: isAnonymous ? null : req.user._id,
-        isAnonymous,
+        reportedBy: isAnonymous === 'true' || isAnonymous === true ? null : req.user._id,
+        isAnonymous: isAnonymous === 'true' || isAnonymous === true,
         location,
         incidentDate,
         priority,
         statusId:pendingStatus._id,
+        evidence: evidence || [], // Store evidence paths
     }) 
 
     return report;

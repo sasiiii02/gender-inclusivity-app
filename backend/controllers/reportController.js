@@ -54,6 +54,11 @@ export const deleteReportCategory = async (req, res) => {
 // Create a new report
 export const createReport = async (req,res) =>{
     try {
+        // If files are uploaded via multer, they will be in req.files
+        if (req.files && req.files.length > 0) {
+            req.body.evidence = req.files.map(file => `/uploads/evidence/${file.filename}`);
+        }
+        
         const report = await createReportService(req);
         res.status(201).json({
             success:true,
