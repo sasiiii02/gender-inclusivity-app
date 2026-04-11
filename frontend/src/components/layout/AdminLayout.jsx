@@ -7,12 +7,11 @@ const adminNav = [
   { label: "Dashboard",  icon: "🏠", path: "/admin" },
   { label: "Users",      icon: "👥", path: "/admin/users" },
   { label: "Reports",    icon: "🚨", path: "/admin/reports" },
-  { label: "Learning",   icon: "📚", path: "/admin/learning" },
-  { label: "Quiz",       icon: "📝", path: "/admin/quiz" },
+  { label: "Support",    icon: "🛟", path: "/admin/support" },
   { label: "Events",     icon: "📅", path: "/admin/events" },
   { label: "Attendance", icon: "✅", path: "/admin/attendance" }, // <-- Added your feature
-  { label: "Analytics",  icon: "📊", path: "/admin/analytics" },  // <-- Added your feature
-  { label: "Support",    icon: "🛟", path: "/admin/support" },
+  { label: "Analytics",  icon: "📊", path: "/admin/analytics" }  // <-- Added your feature
+  
 ];
 
 const pageTitles = {
@@ -101,12 +100,6 @@ const AdminLayout = () => {
 
         {/* Back to site + logout */}
         <div className="px-3 py-4 border-t border-stone-700 space-y-1">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-stone-800 hover:text-white transition-all"
-          >
-            <span>🌐</span><span>Back to Site</span>
-          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-rose-900/40 hover:text-rose-400 transition-all"
