@@ -29,25 +29,41 @@ const AttendanceManager = () => {
   }, [selectedEventId]);
 
   const fetchEvents = async () => {
-    try {
-      const res = await campaignEventsApi.getAllEvents();
-      setEvents(res.data || res);
-    } catch (err) {
-      console.error("API Error fetching events:", err); // <-- ESLint fixed!
-      setError("Failed to load events.");
-    } finally {
-      setLoading(false);
+  try {
+    const res = await campaignEventsApi.getAllEvents();
+    
+    let events = [];
+    if (res?.data?.events) {
+      events = res.data.events;
+    } else if (res?.data && Array.isArray(res.data)) {
+      events = res.data;
+    } else if (Array.isArray(res)) {
+      events = res;
+    } else if (res?.events) {
+      events = res.events;
     }
-  };
+    
+    setEvents(events);
+  } catch (err) {
+    console.error("API Error fetching events:", err);
+    setError("Failed to load events.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchAttendees = async (eventId) => {
     try {
       setTableLoading(true);
-      setSelectedIds([]); // Reset selections when switching events
+      setSelectedIds([]); 
       const res = await campaignEventsApi.getEventAttendees(eventId);
-      setAttendees(res.data || res);
+      
+      // CRASH-PROOFING
+      let data = res.data?.data || res.data || res;
+      setAttendees(Array.isArray(data) ? data : []);
+
     } catch (err) {
-      console.error("API Error fetching attendees:", err); // <-- ESLint fixed!
+      console.error("API Error fetching attendees:", err);
       setError("Failed to load attendees for this event.");
     } finally {
       setTableLoading(false);
@@ -119,7 +135,7 @@ const AttendanceManager = () => {
           <option value="">-- Choose an Event --</option>
           {events.map(event => (
             <option key={event._id} value={event._id}>
-              {event.title} ({event.date ? new Date(event.date).toLocaleDateString() : 'No Date'})
+              {event.title} ({event.eventDate ? new Date(event.eventDate).toLocaleDateString() : 'No Date'})
             </option>
           ))}
         </select>

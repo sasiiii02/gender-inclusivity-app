@@ -1,6 +1,5 @@
 import axiosInstance from './axiosInstance';
 
-// Base routes matching your backend
 const CAMPAIGN_URL = '/campaigns';
 const EVENT_URL = '/events';
 
@@ -8,7 +7,6 @@ export const campaignEventsApi = {
   // ==========================================
   // CAMPAIGN ENDPOINTS
   // ==========================================
-  
   getAllCampaigns: async () => {
     const response = await axiosInstance.get(CAMPAIGN_URL);
     return response.data;
@@ -27,14 +25,13 @@ export const campaignEventsApi = {
   // ==========================================
   // EVENT ENDPOINTS
   // ==========================================
-
   getAllEvents: async () => {
     const response = await axiosInstance.get(EVENT_URL);
     return response.data;
   },
 
-  createEvent: async (eventData) => {
-    const response = await axiosInstance.post(EVENT_URL, eventData);
+  createEvent: async (campaignId, eventData) => {
+    const response = await axiosInstance.post(`${EVENT_URL}/campaigns/${campaignId}`, eventData);
     return response.data;
   },
 
@@ -48,7 +45,14 @@ export const campaignEventsApi = {
     return response.data;
   },
 
-  // Add these under your existing Event Endpoints
+  // ==========================================
+  // REGISTRATION ENDPOINTS
+  // ==========================================
+  registerForEvent: async (eventId, accessibilityNeeds = 'None') => {
+    const response = await axiosInstance.post(`/registrations/events/${eventId}/register`, { accessibilityNeeds });
+    return response.data;
+  },
+
   getMyRegistrations: async () => {
     const response = await axiosInstance.get('/registrations/my-registrations');
     return response.data;
@@ -59,6 +63,19 @@ export const campaignEventsApi = {
     return response.data;
   },
 
+  getEventAttendees: async (eventId) => {
+    const response = await axiosInstance.get(`/registrations/events/${eventId}/attendees`);
+    return response.data;
+  },
+
+  bulkMarkAttendance: async (registrationIds, status) => {
+    const response = await axiosInstance.patch('/registrations/bulk-attend', { registrationIds, status });
+    return response.data;
+  },
+
+  // ==========================================
+  // FEEDBACK ENDPOINTS
+  // ==========================================
   submitFeedback: async (eventId, feedbackData) => {
     const response = await axiosInstance.post(`/feedbacks/events/${eventId}`, feedbackData);
     return response.data;
@@ -68,5 +85,4 @@ export const campaignEventsApi = {
     const response = await axiosInstance.get(`/feedbacks/events/${eventId}/stats`);
     return response.data;
   }
-
 };
