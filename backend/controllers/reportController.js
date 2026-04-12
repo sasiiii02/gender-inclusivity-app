@@ -1,4 +1,4 @@
-import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService, getReportCategoriesService, getCaseStatusesService, createReportCategoryService, deleteReportCategoryService} from "../services/reportService.js";
+import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService, getReportCategoriesService, getCaseStatusesService, createReportCategoryService, deleteReportCategoryService, updateReportPriorityService, getUserNotificationsService, markNotificationAsReadService} from "../services/reportService.js";
 
 // Controller for managing user reports and admin responses
 
@@ -256,4 +256,53 @@ export const getReportStats = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+// Admin - update report priority
+export const updateReportPriority = async (req, res) => {
+    try {
+        const { priority } = req.body;
+        const report = await updateReportPriorityService(req.params.id, priority);
+        res.status(200).json({
+            success: true,
+            report
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// User - get notifications
+export const getMyNotifications = async (req, res) => {
+    try {
+        const notifications = await getUserNotificationsService(req.user._id);
+        res.status(200).json({
+            success: true,
+            notifications
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// User - mark notification as read
+export const markNotificationAsRead = async (req, res) => {
+    try {
+        const notification = await markNotificationAsReadService(req.params.id, req.user._id);
+        res.status(200).json({
+            success: true,
+            notification
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };

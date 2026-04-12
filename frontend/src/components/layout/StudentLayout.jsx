@@ -1,6 +1,8 @@
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { LogOut, User, Settings } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 const navLinks = [
   { name: "Home", path: "/student/home" },
@@ -15,6 +17,19 @@ const navLinks = [
 const StudentNavbar = () => {
   const { user, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,15 +50,15 @@ const StudentNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
-              <span className="text-white text-xl">✨</span>
+          <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200 group-hover:scale-105 transition-transform duration-300">
+              <span className="text-white text-xl">🌈</span>
             </div>
             <div>
-              <span className="font-serif font-bold text-xl text-stone-900 leading-none block">
+              <span className="font-serif font-black text-lg text-stone-900 tracking-tight leading-none block">
                 InclusiveSpace
               </span>
-              <span className="text-[10px] text-stone-500 font-semibold tracking-widest uppercase">
+              <span className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mt-0.5 block">
                 Student
               </span>
             </div>
@@ -70,32 +85,65 @@ const StudentNavbar = () => {
 
           {/* User & Actions */}
           <div className="flex items-center gap-4">
-            <button className="relative w-10 h-10 rounded-full hover:bg-stone-100 flex items-center justify-center transition-colors text-stone-500">
-              🔔
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-            </button>
+            <NotificationBell />
             {user && (
-              <div className="flex items-center gap-3 pl-3 border-l border-stone-200">
-                <div className="hidden sm:block text-right">
-                  <div className="text-sm font-bold text-stone-800 leading-none">
-                    {user.name}
-                  </div>
-                  <div className="text-[11px] text-stone-500 font-medium mt-1 uppercase">
-                    {user.role}
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-stone-800 to-stone-600 flex items-center justify-center text-white font-bold text-sm shadow-md cursor-pointer hover:shadow-lg transition-all">
-                  {user.name?.charAt(0) || "S"}
-                </div>
+              <div className="relative pl-4 border-l border-stone-100" ref={dropdownRef}>
+                {/* Avatar button */}
                 <button
-                  onClick={logout}
-                  className="ml-2 text-stone-400 hover:text-rose-500 transition-colors"
-                  title="Logout"
+                  onClick={() => setDropdownOpen(v => !v)}
+                  className="flex items-center gap-2.5 group"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                  </svg>
+                  <div className="hidden sm:block text-right">
+                    <div className="text-xs font-black text-stone-900 leading-none group-hover:text-violet-600 transition-colors">
+                      {user.name}
+                    </div>
+                    <div className="text-[10px] text-stone-400 font-bold mt-1 uppercase tracking-tighter">
+                      {user.role}
+                    </div>
+                  </div>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-100 to-indigo-50 border border-violet-200 flex items-center justify-center text-violet-700 font-black text-xs shadow-sm group-hover:scale-105 transition-transform">
+                    {user.name?.charAt(0)?.toUpperCase() || "S"}
+                  </div>
                 </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-2xl border border-stone-100 z-50 overflow-hidden animate-fade-in">
+                    {/* Identity card */}
+                    <div className="p-4 bg-stone-50 border-b border-stone-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                          {user.name?.charAt(0)?.toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black text-stone-900 truncate">{user.name}</p>
+                          <p className="text-[10px] text-stone-400 truncate">{user.email}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[9px] font-black uppercase tracking-widest">
+                            {user.role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div className="p-2">
+                      <Link
+                        to="/student/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-violet-50 text-stone-600 hover:text-violet-700 transition-colors group"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Edit Profile</span>
+                      </Link>
+                      <button
+                        onClick={() => { setDropdownOpen(false); logout(); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-stone-500 hover:text-rose-600 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span className="text-sm font-semibold">Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

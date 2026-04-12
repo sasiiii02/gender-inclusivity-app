@@ -1,17 +1,18 @@
-import { useState } from "react";
-import { NavLink, useNavigate, Outlet } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { NavLink, Link, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Settings, LogOut } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 const adminNav = [
   { label: "Dashboard",  icon: "🏠", path: "/admin" },
-  { label: "Users",      icon: "👥", path: "/admin/users" },
+ 
   { label: "Reports",    icon: "🚨", path: "/admin/reports" },
-  { label: "Learning",   icon: "📚", path: "/admin/learning" },
-  { label: "Quiz",       icon: "📝", path: "/admin/quiz" },
+  { label: "Support",    icon: "🛟", path: "/admin/support" },
   { label: "Events",     icon: "📅", path: "/admin/events" },
   { label: "Attendance", icon: "✅", path: "/admin/attendance" }, // <-- Added your feature
-  { label: "Analytics",  icon: "📊", path: "/admin/analytics" },  // <-- Added your feature
-  { label: "Support",    icon: "🛟", path: "/admin/support" },
+  { label: "Analytics",  icon: "📊", path: "/admin/analytics" }  // <-- Added your feature
+  
 ];
 
 const pageTitles = {
@@ -68,10 +69,17 @@ const AdminLayout = () => {
             <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-bold uppercase">
               {user.name?.charAt(0)}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white truncate">{user.name}</p>
               <p className="text-[10px] text-rose-400 font-semibold uppercase tracking-wide">Administrator</p>
             </div>
+            <Link
+              to="/admin/profile"
+              className="w-7 h-7 rounded-lg bg-stone-700 hover:bg-violet-600 flex items-center justify-center text-stone-400 hover:text-white transition-all flex-shrink-0"
+              title="Edit Profile"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </Link>
           </div>
         )}
 
@@ -101,12 +109,6 @@ const AdminLayout = () => {
         {/* Back to site + logout */}
         <div className="px-3 py-4 border-t border-stone-700 space-y-1">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-stone-800 hover:text-white transition-all"
-          >
-            <span>🌐</span><span>Back to Site</span>
-          </button>
-          <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-stone-400 hover:bg-rose-900/40 hover:text-rose-400 transition-all"
           >
@@ -132,8 +134,12 @@ const AdminLayout = () => {
             🛡️ Admin
           </span>
           <div className="flex-1" />
+          <NotificationBell />
           <p className="text-sm text-stone-400 hidden sm:block">
-            Logged in as <span className="font-semibold text-stone-700">{user?.name}</span>
+            Logged in as{" "}
+            <Link to="/profile" className="font-semibold text-stone-700 hover:text-violet-600 transition-colors">
+              {user?.name}
+            </Link>
           </p>
         </header>
 

@@ -68,6 +68,7 @@ import MyRegistrations from "../pages/Events/MyRegistrations";
 import AttendanceManager from "../pages/Events/AttendanceManager";
 import EventAnalytics from "../pages/Events/EventAnalytics";
 import { useAuth } from "../context/AuthContext";
+import Profile from "../pages/Auth/Profile";
 
 // Placeholders
 const Placeholder = ({ label }) => (
@@ -95,7 +96,7 @@ const AppRoutes = () => (
     <Route path="/register" element={<Register />} />
     <Route path="/quiz/join/:quizLink" element={<QuizJoin />} />
 
-    {/* General Protected Routes (MainLayout) */}
+    {/* General Protected Routes (MainLayout) — accessible to all roles */}
     <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Placeholder label="🏠 Dashboard" />} />
       <Route path="/learning" element={<Placeholder label="📚 Learning" />} />
@@ -104,6 +105,7 @@ const AppRoutes = () => (
       <Route path="/quiz" element={<Placeholder label="📝 Quiz" />} />
       <Route path="/events" element={<Placeholder label="📅 Events" />} />
       <Route path="/chat" element={<Placeholder label="🤖 Chatbot" />} />
+      <Route path="/profile" element={<Profile />} />
     </Route>
 
     {/* ========================================== */}
@@ -136,6 +138,7 @@ const AppRoutes = () => (
       {/* Kalana's Student Routes */}
       <Route path="/student/events" element={<EventBrowser />} /> 
       <Route path="/my-registrations" element={<MyRegistrations />} />
+      <Route path="/student/profile" element={<Profile />} />
     </Route>
 
     {/* ========================================== */}
@@ -158,6 +161,7 @@ const AppRoutes = () => (
       <Route path="/admin/events" element={<AdminEvents />} />
       <Route path="/admin/attendance" element={<AttendanceManager />} />
       <Route path="/admin/analytics" element={<EventAnalytics />} />
+      <Route path="/admin/profile" element={<Profile />} />
     </Route>
 
     {/* ========================================== */}

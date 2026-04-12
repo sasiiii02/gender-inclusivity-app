@@ -32,7 +32,7 @@ export const updateEvent = (id, data) => axiosInstance.put(`/events/${id}`, data
 export const deleteEvent = (id) => axiosInstance.delete(`/events/${id}`);
 
 // ── Support Articles ───────────────────────────
-export const getAllSupport = () => axiosInstance.get("/support");
+export const getAllSupport = () => axiosInstance.get("/support/articles");
 export const getSingleSupport = (id) => axiosInstance.get(`/support/${id}`);
 export const createSupport = (data) => axiosInstance.post("/support", data);
 export const updateSupport = (id, data) => axiosInstance.put(`/support/${id}`, data);

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { PlusCircle, FileWarning } from "lucide-react";
+import { PlusCircle, FileWarning, Search, Filter } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getMyReports } from "../../services/reportService";
 import ReportCard from "../../components/report/ReportCard";
@@ -8,6 +8,18 @@ import ReportCard from "../../components/report/ReportCard";
 const MyReports = () => {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const filteredReports = useMemo(() => {
+    return reports.filter(report => {
+        const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === "All" || report.statusId?.name === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+  }, [reports, searchQuery, statusFilter]);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -40,6 +52,35 @@ const MyReports = () => {
         </Link>
       </div>
 
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="Search by title..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 py-1.5 outline-none cursor-pointer"
+          >
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Under Review">Under Review</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
@@ -68,7 +109,7 @@ const MyReports = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reports.map((report) => (
+          {filteredReports.map((report) => (
             <ReportCard key={report._id} report={report} />
           ))}
         </div>
