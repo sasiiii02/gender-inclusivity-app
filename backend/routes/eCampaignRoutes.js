@@ -27,6 +27,13 @@ router.put(
   campaignController.updateCampaign
 );
 
+router.patch(
+  "/:id/archive",
+  protect,
+  authorize("admin"),
+  campaignController.archiveCampaign
+);
+
 router.delete(
   "/:id",
   protect,

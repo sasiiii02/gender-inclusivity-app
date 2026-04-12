@@ -1,0 +1,52 @@
+# Enrollment load test — Artillery
+#
+# 1) Copy env.performance.example → .env.performance and fill real COURSE_ID, STUDENT_ID, STUDENT_JWT
+# 2) Start API: npm run dev
+# 3) Run: npm run perf:enrollment
+#
+# Or without a file, set env vars in the shell, then:
+#   npx artillery run --target "http://127.0.0.1:5000" performance/enrollment-load-test.yml
+#
+# POST may return 400 if the student is already enrolled (load re-runs); GET should still be 200.
+#
+config:
+  target: "http://127.0.0.1:5000"
+  # Resolved relative to this YAML file (the performance/ folder)
+  processor: "./processors/enrollment-check-env.cjs"
+  phases:
+    - duration: 20
+      arrivalRate: 1
+      rampTo: 30
+    - duration: 60
+      arrivalRate: 30
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  variables:
+    courseId: "{{ $processEnvironment.COURSE_ID }}"
+    studentToken: "{{ $processEnvironment.STUDENT_JWT }}"
+    studentId: "{{ $processEnvironment.STUDENT_ID }}"
+  plugins:
+    expect: {}
+
+scenarios:
+  - name: enroll_then_list
+    flow:
+      - function: "validateEnrollmentEnv"
+      - post:
+          url: "/api/enrollments"
+          headers:
+            Authorization: "Bearer {{ studentToken }}"
+          json:
+            courseId: "{{ courseId }}"
+          expect:
+            - statusCode:
+                - 201
+                - 400
+      - think: "{{ $randomNumber(2, 5) }}"
+      - get:
+          url: "/api/enrollments/student/{{ studentId }}"
+          headers:
+            Authorization: "Bearer {{ studentToken }}"
+          expect:
+            - statusCode: 200

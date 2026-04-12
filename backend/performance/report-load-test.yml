@@ -1,0 +1,50 @@
+# Report & support articles load test
+#
+# Default target: http://127.0.0.1:5000  → override: npx artillery run --target "http://host:port" ...
+#
+# Prerequisite: CaseStatus with name "Pending" in DB; ReportCategory id for CATEGORY_ID.
+# POST /api/reports requires a logged-in user JWT (any role). Anonymous reports set isAnonymous: true
+# but the route still uses protect — token is required.
+#
+# Required env:
+#   REPORT_USER_JWT  — Bearer token for an existing user
+#   CATEGORY_ID      — 24-char hex ReportCategory _id
+#
+config:
+  target: "http://127.0.0.1:5000"
+  processor: "./processors/perf-check-env.cjs"
+  phases:
+    - duration: 10
+      arrivalRate: 1
+      rampTo: 15
+    - duration: 30
+      arrivalRate: 15
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  variables:
+    userToken: "{{ $processEnvironment.REPORT_USER_JWT }}"
+    categoryId: "{{ $processEnvironment.CATEGORY_ID }}"
+  plugins:
+    expect: {}
+
+scenarios:
+  - name: report_then_articles
+    flow:
+      - function: "validateReportEnv"
+      - post:
+          url: "/api/reports"
+          headers:
+            Authorization: "Bearer {{ userToken }}"
+          json:
+            title: "Perf {{ $randomString(12) }}"
+            description: "Anonymous load-test report description with enough text for validation."
+            categoryId: "{{ categoryId }}"
+            isAnonymous: true
+            priority: "Low"
+          expect:
+            - statusCode: 201
+      - get:
+          url: "/api/support-articles"
+          expect:
+            - statusCode: 200

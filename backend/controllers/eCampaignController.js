@@ -69,7 +69,11 @@ export const archiveCampaign = async (req, res) => {
     if (!archivedCampaign) {
       return res.status(404).json({ success: false, message: "Campaign not found" });
     }
-    res.status(200).json({ success: true, message: "Campaign archived successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Campaign archived successfully",
+      data: archivedCampaign,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

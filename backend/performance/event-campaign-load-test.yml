@@ -1,0 +1,56 @@
+# Event & campaign load test
+#
+# Default target: http://127.0.0.1:5000  → override: npx artillery run --target "http://host:port" ...
+#
+# Prerequisite: FIXED_CAMPAIGN_ID exists in DB.
+# TEACHER_OR_ADMIN_JWT — Bearer token (role teacher or admin) for POST /api/events.
+#
+# Required env:
+#   FIXED_CAMPAIGN_ID
+#   TEACHER_OR_ADMIN_JWT
+#
+config:
+  target: "http://127.0.0.1:5000"
+  processor: "./processors/perf-check-env.cjs"
+  phases:
+    - duration: 15
+      arrivalRate: 1
+      rampTo: 20
+    - duration: 60
+      arrivalRate: 20
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  variables:
+    campaignId: "{{ $processEnvironment.FIXED_CAMPAIGN_ID }}"
+    authToken: "{{ $processEnvironment.TEACHER_OR_ADMIN_JWT }}"
+    eventDate: "2030-06-15T10:00:00.000Z"
+  plugins:
+    expect: {}
+
+scenarios:
+  - name: events_and_campaigns
+    flow:
+      - function: "validateEventsEnv"
+      - get:
+          url: "/api/events?campaignId={{ campaignId }}&page=1&limit=10"
+          expect:
+            - statusCode: 200
+      - post:
+          url: "/api/events"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            campaignId: "{{ campaignId }}"
+            title: "LoadTest {{ $randomString(16) }}"
+            eventType: "Workshop"
+            eventDate: "{{ eventDate }}"
+            location: "Auditorium A"
+            capacity: 50
+            speaker: "Artillery Bot"
+          expect:
+            - statusCode: 201
+      - get:
+          url: "/api/campaigns?search=test&page=1&limit=10"
+          expect:
+            - statusCode: 200

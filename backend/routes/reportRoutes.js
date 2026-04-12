@@ -1,7 +1,11 @@
 import express from "express";
-import { createReport,getMyReports,getAllReports,updateReportStatus,addReportResponse, getAllResponses,
-  getMyReportResponses,getReportTimeline,closeReport , getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory, updateReportPriority, getMyNotifications, markNotificationAsRead} from "../controllers/reportController.js";
-import protect from "../middleware/authMiddleware.js";
+
+import {
+  createReport, createReportJson, getMyReports, getAllReports, updateReportStatus, addReportResponse, getAllResponses,
+  getMyReportResponses, getReportTimeline, closeReport, getReportStats, getReportCategories, getReportStatuses, createReportCategory, deleteReportCategory
+} from "../controllers/reportController.js";
+import protect, { authorize } from "../middleware/authMiddleware.js";
+
 import { incidentUpload } from "../middleware/upload.js";
 
 const router = express.Router();
@@ -16,14 +20,17 @@ router.delete("/categories/:id", protect, deleteReportCategory);
 // Get report statuses
 router.get("/statuses", protect, getReportStatuses);
 
-// User - create a report
+// User - create a report (JSON body)
+router.post("/", protect, createReportJson);
+
+// User - create a report (multipart)
 router.post("/create", protect, incidentUpload.array('evidence', 5), createReport);
 // User - view my reports
-router.get("/my-reports",protect,getMyReports);
+router.get("/my-reports", protect, getMyReports);
 // Admin - view all reports
 router.get("/all-reports", protect, getAllReports);
 // Admin - update report status
-router.patch("/:id/status", protect, updateReportStatus);
+router.patch("/:id/status", protect, authorize("admin"), updateReportStatus);
 // Admin - add response to a report
 router.post("/:id/respond", protect, addReportResponse);
 // Admin - view all report responses
@@ -35,7 +42,7 @@ router.get("/:id/timeline", protect, getReportTimeline);
 // Admin - close a report
 router.patch("/:id/close", protect, closeReport);
 // Admin - get report statistics
-router.get("/stats",protect, getReportStats);
+router.get("/stats", protect, getReportStats);
 
 // Priority update (Admin)
 router.patch("/:id/priority", protect, updateReportPriority);

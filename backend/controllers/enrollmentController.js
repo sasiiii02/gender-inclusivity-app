@@ -4,6 +4,20 @@ import {
   sendCompletionEmail,
 } from "../services/brevoEmailService.js";
 
+// @desc    Enroll using JSON body { courseId } — POST /api/enrollments
+// @access  Private (Student)
+export const enrollWithBody = async (req, res) => {
+  const { courseId } = req.body || {};
+  if (!courseId) {
+    return res.status(400).json({
+      success: false,
+      message: "courseId is required",
+    });
+  }
+  req.params = { ...req.params, courseId };
+  return enrollInCourse(req, res);
+};
+
 // @desc    Enroll a student in a course
 // @route   POST /api/courses/:courseId/enroll
 // @access  Private (Student)
@@ -62,14 +76,14 @@ export const enrollInCourse = async (req, res) => {
     }
     // Handle duplicate enrollment
     if (error.message === "Student is already enrolled in this course") {
-      return res.status(409).json({
+      return res.status(400).json({
         success: false,
         message: error.message
       });
     }
     // Handle MongoDB duplicate key error (backup check)
     if (error.code === 11000) {
-      return res.status(409).json({
+      return res.status(400).json({
         success: false,
         message: "Student is already enrolled in this course"
       });
@@ -156,6 +170,53 @@ export const getMyEnrollments = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: error.message
+    });
+  }
+};
+
+// @desc    List enrollments for a student (self or staff)
+// @route   GET /api/enrollments/student/:studentId
+// @access  Private
+export const getStudentEnrollments = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const role = req.user.role?.toLowerCase();
+
+    if (role === "student" && req.user.id !== studentId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own enrollments",
+      });
+    }
+
+    const enrollments = await enrollmentService.getMyEnrollments(studentId);
+
+    const response = enrollments.map((enrollment) => ({
+      _id: enrollment._id,
+      course: enrollment.courseId
+        ? {
+            _id: enrollment.courseId._id,
+            title: enrollment.courseId.title,
+            category: enrollment.courseId.category,
+            level: enrollment.courseId.level,
+            duration: enrollment.courseId.duration,
+            status: enrollment.courseId.status,
+            imageUrl: enrollment.courseId.imageUrl,
+            instructor: enrollment.courseId.createdBy
+              ? {
+                  name: enrollment.courseId.createdBy.name,
+                }
+              : null,
+          }
+        : null,
+      progress: enrollment.progressPercentage,
+      completionStatus: enrollment.completionStatus,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };

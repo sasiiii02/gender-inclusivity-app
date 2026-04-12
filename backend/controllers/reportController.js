@@ -1,5 +1,25 @@
 import { createReportService, getAllReportsService, getMyReportsService, updateReportStatusService,addReportResponseService,getAllReportResponsesService, getResponsesByReportService, getReportTimelineService,closeReportService, getReportStatsService, getReportCategoriesService, getCaseStatusesService, createReportCategoryService, deleteReportCategoryService, updateReportPriorityService, getUserNotificationsService, markNotificationAsReadService} from "../services/reportService.js";
 
+// JSON body — POST /api/reports (integration / API clients without multipart)
+export const createReportJson = async (req, res) => {
+  try {
+    if (!req.body.evidence) {
+      req.body.evidence = [];
+    }
+    const report = await createReportService(req);
+    res.status(201).json({
+      success: true,
+      message: "Report created successfully",
+      report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // Controller for managing user reports and admin responses
 
 // Get all report statuses
@@ -146,6 +166,18 @@ export const updateReportStatus = async (req, res) => {
         report: updatedReport,
     });
     } catch (error) {
+    if (error.message === "Report not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    if (error.message === "Cannot modify a closed report") {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
     res.status(500).json({
         success:false,
         message: error.message,
@@ -203,6 +235,12 @@ export const getMyReportResponses = async (req, res) => {
       responses,
     });
   } catch (error) {
+    if (error.message?.includes("Not authorized")) {
+      return res.status(403).json({
+        success: false,
+        message: error.message,
+      });
+    }
     res.status(500).json({
       message: error.message,
     });
